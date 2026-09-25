@@ -1,0 +1,41 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      target: dev
+    env_file: .env
+    environment:
+      DATABASE_PATH: ${DATABASE_PATH:-/data/app.db}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - db-data:/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  frontend:
+    build:
+      context: ./frontend
+      target: dev
+    env_file: .env
+    environment:
+      BACKEND_INTERNAL_URL: ${BACKEND_INTERNAL_URL:-http://backend:8000}
+      # next-auth v4 reads NEXTAUTH_URL; AUTH_URL stays the single value in .env.
+      NEXTAUTH_URL: ${AUTH_URL:-http://localhost:3000}
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      backend:
+        condition: service_healthy
+
+# SQLite lives here, mounted into the backend only. `docker compose down -v` deletes it.
+volumes:
+  db-data:

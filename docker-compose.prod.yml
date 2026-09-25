@@ -1,0 +1,34 @@
+# Production stack. Use together with the base file:
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up --build -d
+# Differences from dev: `prod` image targets, no source mounts, restart policy, and each service
+# only receives the variables it needs (the frontend never sees BACKEND_JWT_SECRET or LLM_API_KEY).
+services:
+  backend:
+    build:
+      target: prod
+    image: product-manager-backend:prod
+    env_file: !reset []
+    environment: !override
+      DATABASE_PATH: ${DATABASE_PATH:-/data/app.db}
+      BACKEND_JWT_SECRET: ${BACKEND_JWT_SECRET:?set BACKEND_JWT_SECRET in .env}
+      FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:-http://localhost:3000}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_MODEL: ${LLM_MODEL:-}
+      LLM_BASE_URL: ${LLM_BASE_URL:-}
+    volumes: !override
+      - db-data:/data
+    # Only the frontend server calls the backend (over the compose network): don't publish it.
+    ports: !reset []
+    restart: unless-stopped
+
+  frontend:
+    build:
+      target: prod
+    image: product-manager-frontend:prod
+    env_file: !reset []
+    environment: !override
+      AUTH_SECRET: ${AUTH_SECRET:?set AUTH_SECRET in .env}
+      NEXTAUTH_URL: ${AUTH_URL:-http://localhost:3000}
+      BACKEND_INTERNAL_URL: ${BACKEND_INTERNAL_URL:-http://backend:8000}
+    volumes: !reset []
+    restart: unless-stopped
