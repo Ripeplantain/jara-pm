@@ -1,6 +1,9 @@
-# AGENTS.md - Kobi (Kanban MVP)
+# AGENTS.md - Kobi (product management)
 
-You are working on a Kanban board MVP with built-in AI features. Users manage boards, columns, and cards by hand; an AI assistant can also create boards, edit them, and move cards on the user's behalf.
+You are working on a product-management app built around shared Kanban boards. Teams work in
+**workspaces**: many boards, real members with roles, rich cards, sprints, insights and
+notifications. Users do all of it by hand; an AI assistant can do most of it on their behalf,
+through the same service functions and the same permission checks.
 
 Inspect the existing code before changing it, implement directly, verify, and report what you did and what you could not verify.
 
@@ -13,25 +16,61 @@ The build plan is in [docs/plan.md](docs/plan.md). Read it before scope-sensitiv
 
 ## Product Scope
 
-- Boards contain **columns**; columns contain **cards**. Columns are user-editable: create, rename, reorder, delete.
-- Cards can be created, edited, reordered within a column, and moved across columns.
-- The AI assistant can **create boards** (with suggested columns and starter cards), **edit** boards/columns/cards, and **move** cards.
-- Users sign up and sign in with **email and password**. Each user sees and edits only their own boards.
-- Out of scope for the MVP unless the user says otherwise: board sharing or collaboration, real-time sync, roles, OAuth/social login, password reset and email verification, comments, attachments, notifications, integrations. Do not build them speculatively.
+- A **workspace** holds boards, labels and members. Everything is scoped to one.
+- Boards contain **columns**; columns contain **cards**. Columns are user-editable and carry an
+  optional WIP limit and a "done" flag.
+- Cards carry a title, description, assignee, priority, due date, estimate, labels, a checklist,
+  comments and an archive flag, and can belong to a **sprint**.
+- **Roles**, weakest to strongest: `viewer` < `member` < `admin` < `owner`. See the table below.
+- People are added by email; an address with no account yet gets an **invitation** it redeems by
+  registering.
+- Every change is written to an append-only **activity log**, and the people affected get an
+  in-app **notification**.
+- The AI assistant does through typed tools what a member can do by hand, including assigning,
+  prioritising, labelling, commenting and running sprints.
+- Still out of scope unless the user asks: real-time sync, OAuth/social login, file attachments,
+  third-party integrations, and unrestricted custom automation. Do not build
+  them speculatively.
+
+## Roles
+
+| | viewer | member | admin | owner |
+|---|---|---|---|---|
+| Read everything in the workspace | yes | yes | yes | yes |
+| Create and edit boards, columns, cards, sprints | | yes | yes | yes |
+| Create and attach labels | | yes | yes | yes |
+| Comment | | yes | yes | yes |
+| Invite, remove and re-role people | | | yes | yes |
+| Rename or delete labels, rename the workspace | | | yes | yes |
+| Delete the workspace, change another owner | | | | yes |
+
+Two guard rails the backend enforces and the UI mirrors: nobody grants a role above their own,
+and a workspace always keeps at least one owner.
 
 ## Repo Layout
 
 ```
 frontend/            Next.js app (has its own agents.md)
 backend/             FastAPI app (has its own agents.md)
-docs/plan.md         Build plan and phase status
+docs/PLAN.md         Build plan, phase status and the decisions behind them
+PROMPT.md            The Ralph loop prompt: one task per iteration
+scripts/verify.sh    The one command that says whether the tree is good
+scripts/ralph.sh     Runs the loop until the plan is done
+scripts/tick.sh      Marks a plan task done
 .env                 Local secrets (gitignored; never commit or print values)
 docker-compose.yml   Dev stack: frontend + backend, SQLite volume
 docker-compose.prod.yml  Production override (see README.md)
 README.md            Setup and run steps
 ```
 
-Phases 0-5 are in place: containers, health endpoint, data models, migrations, email/password auth end to end, the board/column/card API, the board UI, the AI assistant, and production images (see README.md). Copy `.env.example` to `.env` and fill the secrets (`openssl rand -base64 32`, a different value for each) before running.
+Phases 0-13 are in place; see [docs/PLAN.md](docs/PLAN.md) for exactly what each one delivered
+and the decisions made along the way. Copy `.env.example` to `.env` and fill the secrets
+(`openssl rand -base64 32`, a different value for each) before running.
+
+The plan file is also the memory of the **Ralph loop** ([PROMPT.md](PROMPT.md),
+[scripts/ralph.sh](scripts/ralph.sh)): one iteration takes the first unchecked task, implements
+it end to end, runs `./scripts/verify.sh`, and ticks it. If you are that loop, follow PROMPT.md
+rather than improvising scope.
 
 ## Stack
 
@@ -40,6 +79,7 @@ Phases 0-5 are in place: containers, health endpoint, data models, migrations, e
 - Database: SQLite via SQLAlchemy, accessed only by the backend
 - Auth: NextAuth (`next-auth`) Credentials provider, email + password; the backend owns users and password hashes
 - AI: LLM provider called from the backend only
+- Email: Resend transactional email called from the backend only
 - Runtime: Docker + Docker Compose
 
 ## Non-Negotiable Rules
@@ -49,11 +89,24 @@ Phases 0-5 are in place: containers, health endpoint, data models, migrations, e
 3. **LLM keys stay server-side.** The browser never calls the LLM or the database.
 4. **AI-proposed changes are validated against real state** (IDs exist and belong together) before being applied.
 5. **Destructive AI actions need user confirmation** (deleting a board, column, or cards).
-6. **Card order stays consistent.** Moves and reorders are atomic and leave every column with stable, gap-free ordering.
+   Archiving is reversible, so it runs immediately; deleting never does.
+6. **Card order stays consistent.** Moves and reorders are atomic and leave every column with
+   stable, gap-free ordering. Archived cards leave the ordering entirely.
+6b. **History is written with the change, not after it.** `services/activity.py` and
+   `services/notifications.py` are called inside the mutating service functions, before their
+   commit, so a rolled-back change leaves no trace and an AI edit is indistinguishable from a
+   human one except in `actor_id`.
 7. **Only the backend touches SQLite.** Never mount the DB volume into the frontend.
-8. **Every board, column, and card belongs to a user, and the backend enforces it.** Every endpoint and every AI tool derives the user from the verified auth token, never from a client-supplied user ID, and scopes all queries to that user. A resource owned by someone else looks like a 404.
+8. **Access comes from workspace membership, and the backend enforces it.** Every endpoint and
+   every AI tool derives the user from the verified auth token, never from a client-supplied user
+   id, and scopes every query through `workspace_members`. A workspace you are not in looks like
+   a 404; a role too weak for the action is a 403. `services/permissions.py` is the only place
+   that decides this, and the service layer - not the router - calls it, so the AI cannot route
+   around it.
 9. **Passwords are hashed and never exposed.** Store only a strong hash (argon2 or bcrypt), never log or return passwords or hashes, and never put them in AI context.
 10. **Auth secrets stay server-side.** `AUTH_SECRET` and the backend's token-signing secret come from `.env`, are different values, and never appear in client code or images.
+11. **Email secrets stay server-side.** `RESEND_API_KEY` is read only by the backend; sender and
+    reply-to addresses are configuration, never client-controlled credentials.
 
 ## Containers
 
@@ -81,10 +134,23 @@ Do not claim checks passed without stating which command you actually ran.
 - `docker compose down -v` deletes the SQLite volume and all board data; never run it unless the user asks.
 - Inside a container, `localhost` is that container. Server-side frontend code must call `http://backend:8000`.
 
+## Migrations
+
+- Alembic with SQLAlchemy 2.x, applied automatically when the backend container starts.
+- **Additive and backfilling.** Never drop a table or a column that holds data.
+- **SQLite has no ALTER for most changes**, so Alembic's batch mode rebuilds a table by dropping
+  it and renaming a copy into place. With `PRAGMA foreign_keys=ON` that DROP cascade-deletes
+  every child row - this silently wiped columns and cards the first time. `migrations/env.py`
+  therefore opens the engine with `enforce_foreign_keys=False`; the app still runs with
+  enforcement on. **Any migration that rebuilds a table needs a test that seeds child rows
+  first** (see `tests/test_workspaces.py`).
+
 ## Assumptions To Confirm
 
 - Migrations use Alembic with SQLAlchemy 2.x (decided in Phase 1; applied automatically when the backend container starts).
 - Auth flow (decided in Phase 1, as described): the browser never calls FastAPI; Next.js server code and server actions attach the Bearer token.
+- Public web routes include `/welcome`, `/invite`, `/verify-email`, `/forgot-password`,
+  `/reset-password`, `/privacy` and `/terms`; authenticated application routes remain protected.
 - Chosen in Phase 0: npm (Node 22) and pip with pinned `requirements*.txt` (Python 3.13); neither uv nor pnpm/Node is required on the host, everything runs in Docker.
 - AI: OpenRouter (OpenAI-compatible API) with a free tool-calling model by default (chosen in Phase 4).
 - Drag and drop: `@dnd-kit` (chosen in Phase 3).
@@ -93,3 +159,8 @@ Do not claim checks passed without stating which command you actually ran.
 ## DETAILED PLAN
 
 @docs/PLAN.md
+
+## AI workflow
+
+Project context, rules, and task workflows for AI agents live in `.agent/`.
+Start with `.agent/PROJECT.md`.

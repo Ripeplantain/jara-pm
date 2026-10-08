@@ -15,13 +15,16 @@ export interface AppliedChange {
 }
 
 export interface PendingAction {
-  tool: "delete_board" | "delete_column" | "delete_card";
+  tool: string;
   summary: string;
   board_id: number;
   column_id: number | null;
   card_id: number | null;
   move_cards_to: number | null;
   delete_cards: boolean;
+  proposal_token?: string | null;
+  rationale?: string | null;
+  operations?: string[];
 }
 
 export interface AiResponse {
@@ -29,4 +32,17 @@ export interface AiResponse {
   changes: AppliedChange[];
   pending: PendingAction[];
   board: Board;
+}
+
+export interface WorkspaceAiEvidence {
+  kind: string;
+  title: string;
+  board_id: number;
+  card_id: number | null;
+}
+
+export interface WorkspaceAiResponse {
+  answer: string;
+  next_actions: string[];
+  evidence: WorkspaceAiEvidence[];
 }

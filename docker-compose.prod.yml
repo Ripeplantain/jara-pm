@@ -6,15 +6,20 @@ services:
   backend:
     build:
       target: prod
-    image: product-manager-backend:prod
+    image: jara-pm-backend:prod
     env_file: !reset []
     environment: !override
       DATABASE_PATH: ${DATABASE_PATH:-/data/app.db}
       BACKEND_JWT_SECRET: ${BACKEND_JWT_SECRET:?set BACKEND_JWT_SECRET in .env}
       FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:-http://localhost:3000}
+      REQUIRE_EMAIL_VERIFICATION: ${REQUIRE_EMAIL_VERIFICATION:-true}
       LLM_API_KEY: ${LLM_API_KEY:-}
       LLM_MODEL: ${LLM_MODEL:-}
       LLM_BASE_URL: ${LLM_BASE_URL:-}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      RESEND_FROM_EMAIL: ${RESEND_FROM_EMAIL:-}
+      RESEND_REPLY_TO: ${RESEND_REPLY_TO:-}
+      AI_MONTHLY_ACTION_LIMIT: ${AI_MONTHLY_ACTION_LIMIT:-500}
     volumes: !override
       - db-data:/data
     # Only the frontend server calls the backend (over the compose network): don't publish it.
@@ -24,7 +29,7 @@ services:
   frontend:
     build:
       target: prod
-    image: product-manager-frontend:prod
+    image: jara-pm-frontend:prod
     env_file: !reset []
     environment: !override
       AUTH_SECRET: ${AUTH_SECRET:?set AUTH_SECRET in .env}

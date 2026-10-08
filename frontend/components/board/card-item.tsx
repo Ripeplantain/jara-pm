@@ -3,6 +3,7 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { BoardActions } from "@/components/board/actions";
+import { CardFace } from "@/components/board/card-face";
 import type { Card, Column } from "@/lib/types/board";
 
 interface Props {
@@ -12,9 +13,10 @@ interface Props {
   columns: Column[];
   actions: BoardActions;
   changed?: boolean;
+  canMove: boolean;
 }
 
-export function CardItem({ card, index, count, columns, actions, changed }: Props) {
+export function CardItem({ card, index, count, columns, actions, changed, canMove }: Props) {
   const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } = useSortable({ id: `card-${card.id}`, data: { type: "card" } });
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -28,7 +30,7 @@ export function CardItem({ card, index, count, columns, actions, changed }: Prop
       className={`card${isDragging ? " dragging" : ""}${changed ? " changed" : ""}`}
     >
       <div className="card-main">
-        <button
+        {actions.canWrite && canMove && <button
           type="button"
           ref={setActivatorNodeRef}
           className="handle"
@@ -37,18 +39,18 @@ export function CardItem({ card, index, count, columns, actions, changed }: Prop
           {...listeners}
         >
           ⠿
-        </button>
+        </button>}
         <button
           type="button"
           className="card-title"
-          aria-label={`Edit card ${card.title}`}
-          onClick={() => actions.editCard(card)}
+          aria-label={`Open card ${card.title}`}
+          onClick={() => actions.openCard(card)}
         >
           {card.title}
         </button>
       </div>
-      {card.description && <p className="card-desc">{card.description}</p>}
-      {(
+      <CardFace card={card} />
+      {actions.canWrite && canMove && (
         <div className="card-controls">
           <button
             type="button"

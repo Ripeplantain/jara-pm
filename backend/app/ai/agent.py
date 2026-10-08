@@ -23,6 +23,7 @@ class AgentResult:
     reply: str
     changes: list[AppliedChange] = field(default_factory=list)
     pending: list[PendingAction] = field(default_factory=list)
+    llm_calls: int = 0
 
 
 def run_assistant(
@@ -35,7 +36,7 @@ def run_assistant(
 ) -> AgentResult:
     board = svc.get_board(db, user, board_id)  # 404 unless the user owns it
     messages: list[dict[str, Any]] = [
-        {"role": "system", "content": build_context(board)},
+        {"role": "system", "content": build_context(board, db, user)},
         *({"role": m.role, "content": m.content} for m in history),
         {"role": "user", "content": message},
     ]
@@ -44,6 +45,7 @@ def run_assistant(
     result = AgentResult(reply="")
 
     for _ in range(AI_MAX_TOOL_ITERATIONS):
+        result.llm_calls += 1
         turn = llm.complete(messages, tools)
         if not turn.tool_calls:
             result.reply = (turn.content or "").strip()
@@ -82,7 +84,8 @@ def _run_tool(ctx: ToolContext, name: str, raw_args: str, result: AgentResult) -
     log.info("ai tool=%s ok args=%.200s", name, raw_args)
     if outcome.change:
         result.changes.append(outcome.change)
+    if outcome.changes:
+        result.changes.extend(outcome.changes)
     if outcome.pending:
         result.pending.append(outcome.pending)
     return outcome.data
-

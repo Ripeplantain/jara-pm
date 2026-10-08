@@ -9,9 +9,13 @@ export interface RegisterResult {
 }
 
 /** Runs on the server so the browser never calls the backend directly. */
-export async function registerAction(email: string, password: string): Promise<RegisterResult> {
+export async function registerAction(
+  email: string,
+  password: string,
+  inviteToken?: string,
+): Promise<RegisterResult> {
   try {
-    await register(email, password);
+    await register(email, password, inviteToken);
     return { ok: true };
   } catch (err) {
     if (err instanceof ApiError && err.status === 409) {
@@ -25,7 +29,11 @@ export async function registerAction(email: string, password: string): Promise<R
         if (field === "email") errors.email = "Enter a valid email address.";
         if (field === "password") errors.password = "Password must be 8 to 128 characters.";
       }
-      return { ok: false, errors: Object.keys(errors).length ? errors : { form: "Invalid input." } };
+      const detailText = (err.body as { detail?: string } | null)?.detail;
+      return {
+        ok: false,
+        errors: Object.keys(errors).length ? errors : { form: detailText ?? "Invalid input." },
+      };
     }
     return { ok: false, errors: { form: "Could not create the account. Please try again." } };
   }

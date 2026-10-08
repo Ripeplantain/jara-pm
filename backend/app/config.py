@@ -16,11 +16,35 @@ def jwt_secret() -> str:
 ACCESS_TOKEN_MINUTES = int(os.environ.get("ACCESS_TOKEN_MINUTES", "60"))
 
 
+def require_email_verification() -> bool:
+    return os.environ.get("REQUIRE_EMAIL_VERIFICATION", "false").lower() in {"1", "true", "yes"}
+
+
+def app_url() -> str:
+    return (os.environ.get("AUTH_URL") or os.environ.get("FRONTEND_ORIGIN") or "http://localhost:3000").rstrip("/")
+
+
+def resend_api_key() -> str | None:
+    return os.environ.get("RESEND_API_KEY") or None
+
+
+def resend_from_email() -> str | None:
+    return os.environ.get("RESEND_FROM_EMAIL") or None
+
+
+def resend_reply_to() -> str | None:
+    return os.environ.get("RESEND_REPLY_TO") or None
+
+
 # --- AI assistant (any OpenAI-compatible endpoint; OpenRouter by default) ---------------------
 
 DEFAULT_LLM_BASE_URL = "https://openrouter.ai/api/v1"
 DEFAULT_LLM_MODEL = "nvidia/nemotron-3-super-120b-a12b:free"
 AI_MAX_TOOL_ITERATIONS = 8
+
+
+def ai_monthly_action_limit() -> int:
+    return max(1, int(os.environ.get("AI_MONTHLY_ACTION_LIMIT", "500")))
 
 
 def llm_api_key() -> str | None:

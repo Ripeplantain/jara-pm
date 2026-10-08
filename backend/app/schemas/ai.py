@@ -27,13 +27,16 @@ class AppliedChange(BaseModel):
 class PendingAction(BaseModel):
     """A destructive change the model proposed. Nothing is deleted until the user confirms."""
 
-    tool: Literal["delete_board", "delete_column", "delete_card"]
+    tool: str
     summary: str
     board_id: int
     column_id: int | None = None
     card_id: int | None = None
     move_cards_to: int | None = None
     delete_cards: bool = False
+    proposal_token: str | None = None
+    rationale: str | None = None
+    operations: list[str] = Field(default_factory=list)
 
 
 class AiResponse(BaseModel):
@@ -41,3 +44,24 @@ class AiResponse(BaseModel):
     changes: list[AppliedChange]
     pending: list[PendingAction]
     board: BoardOut  # fresh state, so the UI reconciles from the server
+
+
+class AiConfirmRequest(BaseModel):
+    proposal_token: Annotated[str, StringConstraints(strip_whitespace=True, min_length=20, max_length=200)]
+
+
+class WorkspaceAiRequest(BaseModel):
+    question: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=500)]
+
+
+class WorkspaceAiEvidence(BaseModel):
+    kind: str
+    title: str
+    board_id: int
+    card_id: int | None = None
+
+
+class WorkspaceAiResponse(BaseModel):
+    answer: str
+    next_actions: list[str]
+    evidence: list[WorkspaceAiEvidence]

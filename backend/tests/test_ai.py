@@ -5,20 +5,10 @@ import pytest
 from app.ai.llm import AssistantTurn, LLMError, ToolCall, get_llm_client
 from app.config import AI_MAX_TOOL_ITERATIONS
 from app.main import app
+from app.models import AiUsage
 from app.services import boards as svc
+from tests.conftest import session_for
 from tests.test_boards import auth, db, other, user  # noqa: F401  (fixtures)
-
-
-class FakeLLM:
-    """Replays scripted turns and records what it was sent."""
-
-    def __init__(self, *turns: AssistantTurn):
-        self.turns = list(turns)
-        self.calls: list[list[dict]] = []
-
-    def complete(self, messages, tools):
-        self.calls.append([dict(m) for m in messages])
-        return self.turns.pop(0) if self.turns else AssistantTurn(content="(script ended)")
 
 
 def call(name, **args):
@@ -27,17 +17,6 @@ def call(name, **args):
 
 def say(text):
     return AssistantTurn(content=text)
-
-
-@pytest.fixture
-def use_llm():
-    def _use(*turns):
-        fake = FakeLLM(*turns)
-        app.dependency_overrides[get_llm_client] = lambda: fake
-        return fake
-
-    yield _use
-    app.dependency_overrides.pop(get_llm_client, None)
 
 
 @pytest.fixture
@@ -83,6 +62,20 @@ def test_provider_failure_returns_502_without_details(client, setup, use_llm):
     res = ask(client, h, board["id"])
     assert res.status_code == 502 and "key" not in res.text.lower()
     app.dependency_overrides.pop(get_llm_client)
+
+
+def test_ai_usage_is_recorded_and_monthly_limit_is_enforced(client, setup, use_llm, monkeypatch):
+    monkeypatch.setenv("AI_MONTHLY_ACTION_LIMIT", "1")
+    h, board, *_ = setup
+    use_llm(say("Done."))
+    assert ask(client, h, board["id"]).status_code == 200
+    with session_for() as session:
+        usage = session.query(AiUsage).one()
+        assert usage.actions == 1 and usage.provider_calls == 1 and usage.latency_ms_total >= 0
+
+    use_llm(say("This should not run."))
+    limited = ask(client, h, board["id"])
+    assert limited.status_code == 422 and "monthly AI action limit" in limited.json()["detail"]
 
 
 def test_plain_reply_and_context_contents(client, setup, use_llm):

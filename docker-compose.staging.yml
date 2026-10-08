@@ -1,0 +1,41 @@
+# Staging overlay. Keep staging data and secrets separate from production.
+#   docker compose -f docker-compose.yml -f docker-compose.staging.yml up --build -d
+services:
+  backend:
+    build:
+      target: prod
+    image: jara-pm-backend:staging
+    env_file: !reset []
+    environment: !override
+      DATABASE_PATH: ${DATABASE_PATH:-/data/staging.db}
+      BACKEND_JWT_SECRET: ${BACKEND_JWT_SECRET:?set BACKEND_JWT_SECRET in the staging .env}
+      FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:-http://localhost:3001}
+      REQUIRE_EMAIL_VERIFICATION: ${REQUIRE_EMAIL_VERIFICATION:-true}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_MODEL: ${LLM_MODEL:-}
+      LLM_BASE_URL: ${LLM_BASE_URL:-}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      RESEND_FROM_EMAIL: ${RESEND_FROM_EMAIL:-}
+      RESEND_REPLY_TO: ${RESEND_REPLY_TO:-}
+      AI_MONTHLY_ACTION_LIMIT: ${AI_MONTHLY_ACTION_LIMIT:-500}
+    volumes: !override
+      - db-staging:/data
+    ports: !reset []
+    restart: unless-stopped
+
+  frontend:
+    build:
+      target: prod
+    image: jara-pm-frontend:staging
+    env_file: !reset []
+    environment: !override
+      AUTH_SECRET: ${AUTH_SECRET:?set AUTH_SECRET in the staging .env}
+      NEXTAUTH_URL: ${AUTH_URL:-http://localhost:3001}
+      BACKEND_INTERNAL_URL: ${BACKEND_INTERNAL_URL:-http://backend:8000}
+    volumes: !reset []
+    ports: !override
+      - "${FRONTEND_PORT:-3001}:3000"
+    restart: unless-stopped
+
+volumes:
+  db-staging:

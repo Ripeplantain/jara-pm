@@ -91,3 +91,16 @@ export function removeColumn(board: Board, columnId: number, moveCardsTo?: numbe
     );
   return { ...board, columns: renumber(columns) };
 }
+
+/** Replace one card wholesale with the server's version of it (it may have changed column). */
+export function replaceCard(board: Board, card: Card): Board {
+  const removed = removeCard(board, card.id);
+  return {
+    ...removed,
+    columns: removed.columns.map((column) =>
+      column.id === card.column_id
+        ? { ...column, cards: renumber([...column.cards, card].sort((a, b) => a.position - b.position)) }
+        : column,
+    ),
+  };
+}

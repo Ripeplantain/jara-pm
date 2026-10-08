@@ -3,7 +3,12 @@ import { SignUpForm } from "@/components/auth/sign-up-form";
 
 export const metadata: Metadata = { title: "Sign up" };
 
-export default function SignUpPage() {
+export default async function SignUpPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ invite?: string }>;
+}) {
+  const { invite } = await searchParams;
   return (
     <main className="auth-page">
       <div className="auth-shell">
@@ -16,7 +21,7 @@ export default function SignUpPage() {
           <p>Organize the details, keep the priorities visible, and let your board do the talking.</p>
         </section>
         <section className="auth-form-wrap">
-          <SignUpForm />
+          <SignUpForm inviteToken={invite} />
         </section>
       </div>
     </main>

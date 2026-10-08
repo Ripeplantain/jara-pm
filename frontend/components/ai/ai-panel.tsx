@@ -27,9 +27,10 @@ interface Props {
 
 const HISTORY_LIMIT = 10;
 const SUGGESTIONS = [
-  "Plan a product launch",
-  "Add the next step",
-  "Summarize this board",
+  "What is blocked?",
+  "Plan next sprint from the backlog",
+  "Assign the overdue cards to me",
+  "Summarise this board",
 ];
 
 /** Failure here never touches the board: errors stay inside the panel. */
@@ -96,7 +97,7 @@ export function AiPanel({ boardId, onBoard, onChanges, onConfirm }: Props) {
         </div>
         <span className="ai-status"><span aria-hidden="true" /> This board</span>
       </header>
-      <div ref={logRef} className="ai-log" role="log" aria-live="polite">
+      <div ref={logRef} className="ai-log" role="log" aria-live="polite" tabIndex={0}>
         {entries.length === 0 && (
           <div className="ai-empty">
             <div className="ai-empty-icon" aria-hidden="true">✧</div>
@@ -133,11 +134,17 @@ export function AiPanel({ boardId, onBoard, onChanges, onConfirm }: Props) {
               </div>
             )}
             {entry.pending?.map((p, j) => (
-              <div key={j} className="ai-pending" role="group" aria-label={`Confirm: ${p.action.summary}`}>
-                <div className="ai-pending-copy">
-                  <span className="ai-pending-label">Confirmation needed</span>
-                  <span>{p.action.summary}?</span>
-                </div>
+                <div key={j} className="ai-pending" role="group" aria-label={`Confirm: ${p.action.summary}`}>
+                  <div className="ai-pending-copy">
+                    <span className="ai-pending-label">Confirmation needed</span>
+                    <span>{p.action.summary}?</span>
+                    {p.action.rationale && <small>{p.action.rationale}</small>}
+                    {p.action.operations && p.action.operations.length > 0 && (
+                      <ul className="ai-proposal-operations">
+                        {p.action.operations.map((operation) => <li key={operation}>{operation}</li>)}
+                      </ul>
+                    )}
+                  </div>
                 {p.state === "open" ? (
                   <div className="ai-pending-actions">
                     <button

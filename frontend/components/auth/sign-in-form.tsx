@@ -72,6 +72,9 @@ export function SignInForm({ callbackUrl }: { callbackUrl: string | null }) {
         {pending ? "Signing in…" : "Sign in"}
       </button>
       <p className="auth-switch">
+        Forgot your password? <Link href="/forgot-password">Reset it</Link>
+      </p>
+      <p className="auth-switch">
         No account? <Link href="/signup">Sign up</Link>
       </p>
     </form>
