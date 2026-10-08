@@ -7,7 +7,7 @@ cards, planning, insights, and an AI assistant that understands all of it.
 This file is the memory of the [Ralph loop](../PROMPT.md). One iteration = the first unchecked
 task. Tick it when `./scripts/verify.sh` prints `VERIFY: PASS`.
 
-**Status: phases 0-14 shipped; SaaS MVP tasks 15.1-15.6, 16.1-16.6, 17.1-17.6, 18.1-18.4, and 19.1-19.4 are complete. The first unchecked task is 18.5.**
+**Status: phases 0-14 shipped; SaaS MVP tasks 15.1-15.6, 16.1-16.6, 17.1-17.6, 18.1-18.4, and 19.1-19.4 are complete. The first unchecked task is 18.5. The visual redesign workstream is tracked separately in [docs/UI-REDESIGN-TODO.md](UI-REDESIGN-TODO.md).**
 
 ---
 

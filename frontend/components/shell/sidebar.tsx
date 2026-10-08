@@ -4,9 +4,20 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { GlobalSearch } from "@/components/shell/global-search";
 import { NavLinks } from "@/components/shell/nav-links";
-import type { Role } from "@/lib/types/workspace";
+import { WorkspaceSwitcher } from "@/components/shell/workspace-switcher";
+import type { Role, Workspace } from "@/lib/types/workspace";
 
-export function Sidebar({ workspaceId, role }: { workspaceId: number; role: Role }) {
+export function Sidebar({
+  workspaceId,
+  role,
+  workspaces,
+  active,
+}: {
+  workspaceId: number;
+  role: Role;
+  workspaces: Workspace[];
+  active: Workspace;
+}) {
   const [collapsed, setCollapsed] = useState(false);
 
   useEffect(() => {
@@ -27,18 +38,27 @@ export function Sidebar({ workspaceId, role }: { workspaceId: number; role: Role
   return (
     <aside className={`sidebar${collapsed ? " collapsed" : ""}`} aria-label="Workspace navigation">
       <div className="sidebar-heading">
-        {!collapsed && <span className="sidebar-label">Workspace</span>}
+        {!collapsed ? (
+          <WorkspaceSwitcher workspaces={workspaces} active={active} />
+        ) : (
+          <span className="sidebar-mark" aria-hidden="true">
+            K
+          </span>
+        )}
         <button type="button" className="sidebar-toggle" aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"} onClick={toggle}>
           {collapsed ? "→" : "←"}
         </button>
       </div>
       <GlobalSearch workspaceId={workspaceId} />
       <NavLinks role={role} />
-      <div className="sidebar-divider" />
-      <Link className="sidebar-ai-entry" href="/" title="Ask Kobi from a board">
-        <span aria-hidden="true">✦</span>{!collapsed && <span>Ask Kobi</span>}
-      </Link>
-      {!collapsed && <p className="sidebar-tip">Use ⌘K to find cards anywhere in this workspace.</p>}
+      <div className="sidebar-footer">
+        <div className="sidebar-divider" />
+        <Link className="sidebar-ai-entry" href="/" title="Ask Kobi from a board">
+          <span className="nav-icon" aria-hidden="true">✦</span>
+          {!collapsed && <span className="nav-label">Ask Kobi</span>}
+        </Link>
+        {!collapsed && <p className="sidebar-tip">Use ⌘K to find cards anywhere in this workspace.</p>}
+      </div>
     </aside>
   );
 }

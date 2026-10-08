@@ -8,15 +8,16 @@ import type { Role } from "@/lib/types/workspace";
 interface NavLink {
   href: string;
   label: string;
+  icon: string;
   /** "/" would otherwise prefix-match every page. */
   exact?: boolean;
 }
 
 const LINKS: NavLink[] = [
-  { href: "/", label: "Boards", exact: true },
-  { href: "/my-work", label: "My work" },
-  { href: "/activity", label: "Activity" },
-  { href: "/members", label: "Members" },
+  { href: "/", label: "Boards", icon: "▦", exact: true },
+  { href: "/my-work", label: "My work", icon: "✓" },
+  { href: "/activity", label: "Activity", icon: "◷" },
+  { href: "/members", label: "Members", icon: "◎" },
 ];
 
 /** Primary navigation. Members is shown to everyone but only admins can change anything there. */
@@ -29,7 +30,8 @@ export function NavLinks({ role }: { role: Role }) {
         return (
           <li key={link.href}>
             <Link href={link.href} aria-current={current ? "page" : undefined}>
-              {link.label}
+              <span className="nav-icon" aria-hidden="true">{link.icon}</span>
+              <span className="nav-label">{link.label}</span>
               {link.href === "/members" && canAdminister(role) && (
                 <span className="nav-hint" aria-hidden="true">
                   •

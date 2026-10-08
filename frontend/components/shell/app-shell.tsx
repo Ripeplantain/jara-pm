@@ -4,7 +4,6 @@ import { Breadcrumbs } from "@/components/shell/breadcrumbs";
 import { NotificationBell } from "@/components/shell/notification-bell";
 import { OfflineBanner } from "@/components/shell/offline-banner";
 import { Sidebar } from "@/components/shell/sidebar";
-import { WorkspaceSwitcher } from "@/components/shell/workspace-switcher";
 import type { User } from "@/lib/types/auth";
 import type { Workspace } from "@/lib/types/workspace";
 
@@ -42,7 +41,6 @@ export function AppShell({
             </span>
             <span>Kobi</span>
           </Link>
-          {active && <WorkspaceSwitcher workspaces={workspaces} active={active} />}
           <Breadcrumbs context={context} />
         </div>
         <div className="header-account">
@@ -52,7 +50,14 @@ export function AppShell({
       </header>
       <OfflineBanner />
       <div className="app-layout">
-        {active && <Sidebar workspaceId={active.id} role={active.my_role} />}
+        {active && (
+          <Sidebar
+            workspaceId={active.id}
+            role={active.my_role}
+            workspaces={workspaces}
+            active={active}
+          />
+        )}
         <div className="app-content">{children}</div>
       </div>
     </>
