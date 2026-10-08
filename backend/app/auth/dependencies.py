@@ -23,9 +23,9 @@ def get_current_user(
     """The only source of the acting user: the verified Bearer token."""
     if creds is None:
         raise _UNAUTHENTICATED
-    user_id = decode_access_token(creds.credentials)
-    user = db.get(User, user_id) if user_id is not None else None
-    if user is None:
+    claims = decode_access_token(creds.credentials)
+    user = db.get(User, claims.user_id) if claims is not None else None
+    if user is None or not user.is_active or user.auth_version != claims.auth_version:
         raise _UNAUTHENTICATED
     return user
 

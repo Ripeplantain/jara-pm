@@ -1,3 +1,18 @@
 .env
 *.db
 *.db-*
+
+# Local toolchains used when Docker is not running (see scripts/verify.sh)
+backend/.venv/
+frontend/node_modules/
+frontend/.next/
+frontend/tsconfig.tsbuildinfo
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+
+# Ralph loop logs
+.ralph/
+.agent/
+agents.md

@@ -16,34 +16,62 @@ import {
   sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { BoardActions } from "@/components/board/actions";
 import { AiPanel } from "@/components/ai/ai-panel";
 import { AddForm } from "@/components/board/add-form";
-import { CardEditDialog } from "@/components/board/card-edit-dialog";
+import { CardDrawer } from "@/components/board/card-drawer";
 import { ColumnDeleteDialog } from "@/components/board/column-delete-dialog";
 import type { DeleteChoice } from "@/components/board/column-delete-dialog";
 import { ColumnView } from "@/components/board/column-view";
 import { EditableTitle } from "@/components/board/editable-title";
+import { EMPTY_FILTERS, FilterBar } from "@/components/board/filter-bar";
+import type { Filters } from "@/components/board/filter-bar";
+import { SprintBar } from "@/components/board/sprint-bar";
 import * as state from "@/lib/board-state";
 import { api, RequestError } from "@/lib/api/browser";
+import { applyFilters } from "@/lib/filters";
 import type { AppliedChange, PendingAction } from "@/lib/types/ai";
-import type { Board, Card, Column } from "@/lib/types/board";
+import type { Board, Column } from "@/lib/types/board";
+import type { Label } from "@/lib/types/label";
+import type { Sprint } from "@/lib/types/sprint";
+import type { Member, Role } from "@/lib/types/workspace";
+import { canWrite as roleCanWrite } from "@/lib/types/workspace";
 
 const numId = (id: string | number) => Number(String(id).split("-")[1]);
 const message = (err: unknown) =>
   err instanceof RequestError ? err.message : "Something went wrong. Please try again.";
 
-export function BoardView({ initial }: { initial: Board }) {
+interface Props {
+  initial: Board;
+  members: Member[];
+  labels: Label[];
+  sprints: Sprint[];
+  role: Role;
+  meId: number;
+}
+
+export function BoardView({ initial, members, labels, sprints: initialSprints, role, meId }: Props) {
   const router = useRouter();
+  const params = useSearchParams();
   const [board, setBoard] = useState(initial);
+  const [sprints, setSprints] = useState(initialSprints);
+  const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
+  const [density, setDensity] = useState<"comfortable" | "compact">("comfortable");
+  const [grouping, setGrouping] = useState<"none" | "priority" | "assignee">("none");
+  // Deep link: /boards/3?card=42 opens that card straight away.
+  const [openCardId, setOpenCardId] = useState<number | null>(() => {
+    const wanted = Number(params.get("card"));
+    return Number.isInteger(wanted) && wanted > 0 ? wanted : null;
+  });
+  const canWrite = roleCanWrite(role);
   // Only during a card drag: a local preview. Nothing is persisted until the drop.
   const [preview, setPreview] = useState<Board | null>(null);
   const [active, setActive] = useState<{ type: "card" | "column"; title: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [editing, setEditing] = useState<Card | null>(null);
   const [deleting, setDeleting] = useState<Column | null>(null);
+  const [undo, setUndo] = useState<{ card: Board["columns"][number]["cards"][number]; busy: boolean } | null>(null);
   // Element ids the AI just touched, highlighted briefly.
   const [changed, setChanged] = useState<ReadonlySet<string>>(new Set());
   const clearTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -97,7 +125,12 @@ export function BoardView({ initial }: { initial: Board }) {
 
   /** A user-confirmed AI deletion runs exactly like the manual delete. */
   function confirmPending(action: PendingAction) {
-    if (action.tool === "delete_card" && action.card_id) {
+    if (action.proposal_token) {
+      void api.confirmAi(action.board_id, action.proposal_token).then((res) => {
+        applyServerBoard(res.board);
+        highlight(res.changes);
+      }).catch((err) => setError(message(err)));
+    } else if (action.tool === "delete_card" && action.card_id) {
       const id = action.card_id;
       mutate((b) => state.removeCard(b, id), async () => {
         await api.deleteCard(id);
@@ -117,8 +150,26 @@ export function BoardView({ initial }: { initial: Board }) {
     }
   }
 
-  const shown = preview ?? board;
   const columnOf = (b: Board, cardId: number) => state.findCard(b, cardId)?.column;
+
+  // The drawer reads from board state rather than holding its own copy, so an edit made in the
+  // drawer and one made on the board can never disagree. A card that disappears (deleted by the
+  // AI, or by someone else on a refresh) simply stops resolving, and the drawer stops rendering.
+  const openCard = openCardId === null ? null : state.findCard(board, openCardId);
+
+  const filtered = useMemo(() => applyFilters(board, filters, meId), [board, filters, meId]);
+  const shown = preview ?? filtered;
+  const displayColumns = useMemo(() => {
+    if (grouping === "none") return shown.columns;
+    const priorityRank = { urgent: 0, high: 1, medium: 2, low: 3, none: 4 } as const;
+    return shown.columns.map((column) => ({
+      ...column,
+      cards: [...column.cards].sort((a, b) => {
+        if (grouping === "priority") return priorityRank[a.priority] - priorityRank[b.priority];
+        return (a.assignee?.name ?? "Unassigned").localeCompare(b.assignee?.name ?? "Unassigned");
+      }),
+    }));
+  }, [grouping, shown]);
 
   const actions: BoardActions = {
     renameColumn: (id, title) =>
@@ -128,6 +179,10 @@ export function BoardView({ initial }: { initial: Board }) {
     moveColumnTo: (id, position) =>
       mutate((b) => state.moveColumn(b, id, position), async () => {
         await api.updateColumn(id, { position });
+      }, true),
+    updateColumnSettings: (id, patch) =>
+      mutate((b) => state.updateColumn(b, id, patch), async () => {
+        await api.updateColumn(id, patch);
       }, true),
     requestDeleteColumn: setDeleting,
     addCard: (columnId, title) =>
@@ -141,7 +196,7 @@ export function BoardView({ initial }: { initial: Board }) {
           }
         });
       }),
-    editCard: setEditing,
+    openCard: (card) => setOpenCardId(card.id),
     moveCardTo: (cardId, columnId, position) => {
       const target = board.columns.find((c) => c.id === columnId);
       if (!target) return;
@@ -150,6 +205,7 @@ export function BoardView({ initial }: { initial: Board }) {
         await api.moveCard(cardId, columnId, pos);
       }, true);
     },
+    canWrite,
   };
 
   // --- drag and drop ------------------------------------------------------------------------
@@ -231,6 +287,7 @@ export function BoardView({ initial }: { initial: Board }) {
   // --- render -------------------------------------------------------------------------------
 
   const totalCards = board.columns.reduce((count, column) => count + column.cards.length, 0);
+  const visibleCards = filtered.columns.reduce((count, column) => count + column.cards.length, 0);
 
   return (
     <div className="board">
@@ -240,23 +297,35 @@ export function BoardView({ initial }: { initial: Board }) {
             <span aria-hidden="true">←</span> All boards
           </Link>
           <h1>
-            <EditableTitle
-              value={board.title}
-              label="Board title"
-              maxLength={200}
-              className="board-title-button"
-              onCommit={(title) =>
-                mutate((b) => ({ ...b, title }), async () => {
-                  await api.renameBoard(board.id, title);
-                })
-              }
-            />
+            {canWrite ? (
+              <EditableTitle
+                value={board.title}
+                label="Board title"
+                maxLength={200}
+                className="board-title-button"
+                onCommit={(title) =>
+                  mutate((b) => ({ ...b, title }), async () => {
+                    await api.updateBoard(board.id, { title });
+                  })
+                }
+              />
+            ) : (
+              board.title
+            )}
           </h1>
-          <p className="board-subtitle">Plan clearly, move deliberately, ship confidently.</p>
+          {!canWrite && <p className="board-subtitle">You have view-only access to this board.</p>}
         </div>
         <div className="board-stats" aria-label="Board statistics">
-          <span className="stat-pill"><strong>{board.columns.length}</strong> columns</span>
-          <span className="stat-pill"><strong>{totalCards}</strong> cards</span>
+          <Link className="stat-pill" href={`/boards/${board.id}/insights`}>
+            Insights
+          </Link>
+          <span className="stat-pill">
+            <strong>{board.columns.length}</strong> columns
+          </span>
+          <span className="stat-pill">
+            <strong>{visibleCards === totalCards ? totalCards : `${visibleCards} of ${totalCards}`}</strong>{" "}
+            cards
+          </span>
         </div>
       </div>
 
@@ -269,6 +338,52 @@ export function BoardView({ initial }: { initial: Board }) {
         </div>
       )}
 
+      {undo && (
+        <div className="undo-toast" role="status">
+          <span>Card archived.</span>
+          <button
+            type="button"
+            disabled={undo.busy}
+            onClick={async () => {
+              setUndo((current) => current && { ...current, busy: true });
+              try {
+                const restored = await api.unarchiveCard(undo.card.id);
+                setBoard((current) => state.addCard(current, restored));
+                setUndo(null);
+              } catch (err) {
+                setError(message(err));
+                setUndo(null);
+              }
+            }}
+          >
+            Undo
+          </button>
+        </div>
+      )}
+
+      <SprintBar board={board} sprints={sprints} canWrite={canWrite} onSprintsChanged={setSprints} />
+
+      <FilterBar filters={filters} members={members} labels={labels} onChange={setFilters} />
+
+      <div className="board-view-options" aria-label="Board view options">
+        <label>
+          <span>Card density</span>
+          <select value={density} onChange={(event) => setDensity(event.target.value as typeof density)}>
+            <option value="comfortable">Comfortable</option>
+            <option value="compact">Compact</option>
+          </select>
+        </label>
+        <label>
+          <span>Group cards</span>
+          <select value={grouping} onChange={(event) => setGrouping(event.target.value as typeof grouping)}>
+            <option value="none">None</option>
+            <option value="priority">Priority</option>
+            <option value="assignee">Assignee</option>
+          </select>
+        </label>
+        <span className="muted">Keyboard users can move cards with the ↑ and ↓ controls.</span>
+      </div>
+
       <DndContext
         sensors={sensors}
         collisionDetection={closestCorners}
@@ -277,22 +392,24 @@ export function BoardView({ initial }: { initial: Board }) {
         onDragEnd={onDragEnd}
         onDragCancel={onDragCancel}
       >
-        <div className="columns">
+        <div className={`columns density-${density}`}>
           <SortableContext
             items={shown.columns.map((c) => `column-${c.id}`)}
             strategy={horizontalListSortingStrategy}
           >
-            {shown.columns.map((column) => (
+            {displayColumns.map((column) => (
               <ColumnView
                 key={column.id}
                 column={column}
                 columns={shown.columns}
                 actions={actions}
                 changed={changed}
+                canWrite={canWrite}
+                interactive={grouping === "none"}
               />
             ))}
           </SortableContext>
-          <div className="column add-column">
+          {canWrite && <div className="column add-column">
             <AddForm
               label="Add column"
               placeholder="Column title"
@@ -310,40 +427,44 @@ export function BoardView({ initial }: { initial: Board }) {
                 )
               }
             />
-          </div>
+          </div>}
         </div>
         <DragOverlay>
           {active && <div className={`${active.type} overlay`}>{active.title}</div>}
         </DragOverlay>
       </DndContext>
 
-      <AiPanel
-        boardId={board.id}
-        onBoard={applyServerBoard}
-        onChanges={highlight}
-        onConfirm={confirmPending}
-      />
+      {canWrite && (
+        <AiPanel
+          boardId={board.id}
+          onBoard={applyServerBoard}
+          onChanges={highlight}
+          onConfirm={confirmPending}
+        />
+      )}
 
       {board.columns.length === 0 && <p>This board has no columns yet. Add one to get started.</p>}
 
-      {editing && (
-        <CardEditDialog
-          card={editing}
-          onCancel={() => setEditing(null)}
-          onSave={(patch) => {
-            const card = editing;
-            setEditing(null);
-            mutate((b) => state.updateCard(b, card.id, patch), async () => {
-              await api.updateCard(card.id, patch);
-            });
+      {openCard && (
+        <CardDrawer
+          key={openCard.card.id}
+          card={openCard.card}
+          column={openCard.column}
+          columns={board.columns}
+          members={members}
+          labels={labels}
+          sprints={sprints}
+          canWrite={canWrite}
+          meId={meId}
+          onCardChanged={(card) => setBoard((b) => state.replaceCard(b, card))}
+          onArchived={(cardId) => {
+            const archived = openCard?.card;
+            setOpenCardId(null);
+            setBoard((b) => state.removeCard(b, cardId));
+            if (archived) setUndo({ card: archived, busy: false });
           }}
-          onDelete={() => {
-            const card = editing;
-            setEditing(null);
-            mutate((b) => state.removeCard(b, card.id), async () => {
-              await api.deleteCard(card.id);
-            });
-          }}
+          onOpenCard={(next) => setOpenCardId(next.id)}
+          onClose={() => setOpenCardId(null)}
         />
       )}
 

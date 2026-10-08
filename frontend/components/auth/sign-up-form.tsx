@@ -6,7 +6,7 @@ import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { registerAction, type RegisterResult } from "@/app/signup/actions";
 
-export function SignUpForm() {
+export function SignUpForm({ inviteToken }: { inviteToken?: string }) {
   const router = useRouter();
   const [errors, setErrors] = useState<NonNullable<RegisterResult["errors"]>>({});
   const [pending, setPending] = useState(false);
@@ -18,17 +18,18 @@ export function SignUpForm() {
     const password = String(form.get("password") ?? "");
     setPending(true);
     setErrors({});
-    const result = await registerAction(email, password);
+    const result = await registerAction(email, password, inviteToken);
     if (!result.ok) {
       setErrors(result.errors ?? { form: "Could not create the account." });
       setPending(false);
       return;
     }
-    // Sign-up succeeded: sign the new user in.
+    // Sign-up may require email verification in production. Try the existing flow for local
+    // development, then send users to the verification screen when the backend requires it.
     const res = await signIn("credentials", { email, password, redirect: false });
     setPending(false);
     if (!res || res.error) {
-      router.push("/signin");
+      router.push("/verify-email?sent=1");
       return;
     }
     router.push("/");

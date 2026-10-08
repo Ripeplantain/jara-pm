@@ -21,9 +21,11 @@ if docker info >/dev/null 2>&1; then
   run "frontend typecheck" docker compose exec -T frontend npm run typecheck
 else
   echo "(docker daemon unavailable - using host toolchains)"
-  if [ -x backend/.venv/bin/pytest ]; then
-    run "backend pytest" env -C backend ./.venv/bin/pytest -q
-    run "backend ruff" env -C backend ./.venv/bin/ruff check .
+  if [ -x backend/.venv/bin/python ]; then
+    # Invoke modules through the environment's Python so a moved checkout does not
+    # depend on stale absolute shebangs in console scripts.
+    run "backend pytest" env -C backend ./.venv/bin/python -m pytest -q
+    run "backend ruff" env -C backend ./.venv/bin/python -m ruff check .
   else
     echo "    SKIPPED backend: create backend/.venv (python3 -m venv backend/.venv && backend/.venv/bin/pip install -r backend/requirements-dev.txt)"
     FAILED+=("backend env missing")
