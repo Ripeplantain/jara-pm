@@ -361,27 +361,27 @@ export function BoardView({ initial, members, labels, sprints: initialSprints, r
         </div>
       )}
 
-      <SprintBar board={board} sprints={sprints} canWrite={canWrite} onSprintsChanged={setSprints} />
-
-      <FilterBar filters={filters} members={members} labels={labels} onChange={setFilters} />
-
-      <div className="board-view-options" aria-label="Board view options">
-        <label>
-          <span>Card density</span>
-          <select value={density} onChange={(event) => setDensity(event.target.value as typeof density)}>
-            <option value="comfortable">Comfortable</option>
-            <option value="compact">Compact</option>
-          </select>
-        </label>
-        <label>
-          <span>Group cards</span>
-          <select value={grouping} onChange={(event) => setGrouping(event.target.value as typeof grouping)}>
-            <option value="none">None</option>
-            <option value="priority">Priority</option>
-            <option value="assignee">Assignee</option>
-          </select>
-        </label>
-        <span className="muted">Keyboard users can move cards with the ↑ and ↓ controls.</span>
+      <div className="board-controls">
+        <SprintBar board={board} sprints={sprints} canWrite={canWrite} onSprintsChanged={setSprints} />
+        <FilterBar filters={filters} members={members} labels={labels} onChange={setFilters} />
+        <div className="board-view-options" aria-label="Board view options">
+          <label>
+            <span>Card density</span>
+            <select value={density} onChange={(event) => setDensity(event.target.value as typeof density)}>
+              <option value="comfortable">Comfortable</option>
+              <option value="compact">Compact</option>
+            </select>
+          </label>
+          <label>
+            <span>Group cards</span>
+            <select value={grouping} onChange={(event) => setGrouping(event.target.value as typeof grouping)}>
+              <option value="none">None</option>
+              <option value="priority">Priority</option>
+              <option value="assignee">Assignee</option>
+            </select>
+          </label>
+          <span className="muted">Keyboard users can move cards with the ↑ and ↓ controls.</span>
+        </div>
       </div>
 
       <DndContext

@@ -38,6 +38,43 @@ export function BoardList({
     const term = search.trim().toLowerCase();
     return term ? boards.filter((b) => b.title.toLowerCase().includes(term)) : boards;
   }, [boards, search]);
+  const favouriteBoards = shown.filter((board) => board.is_favorite);
+  const otherBoards = shown.filter((board) => !board.is_favorite);
+
+  const renderBoard = (board: BoardStat) => (
+    <li key={board.board_id} className="board-card">
+      <button
+        type="button"
+        className="fav-button"
+        aria-pressed={board.is_favorite}
+        aria-label={
+          board.is_favorite
+            ? `Remove ${board.title} from favourites`
+            : `Add ${board.title} to favourites`
+        }
+        onClick={() => toggleFavorite(board)}
+      >
+        <span aria-hidden="true">{board.is_favorite ? "★" : "☆"}</span>
+      </button>
+      <Link href={`/boards/${board.board_id}`} className="board-card-link">
+        <span className="board-card-kicker">{board.is_favorite ? "Favourite board" : "Board"}</span>
+        <h3>{board.title}</h3>
+      </Link>
+      <p className="board-card-meta">
+        <span><strong>{board.open_cards}</strong> open</span>
+        <span><strong>{board.total_cards}</strong> total</span>
+        {board.overdue > 0 && <span className="pill pill-danger">{board.overdue} overdue</span>}
+      </p>
+      <div className="board-card-actions">
+        <Link href={`/boards/${board.board_id}/insights`}>Insights</Link>
+        {mayWrite && (
+          <button type="button" onClick={() => setConfirming(board)}>
+            Delete
+          </button>
+        )}
+      </div>
+    </li>
+  );
 
   async function run(fn: () => Promise<void>) {
     setBusy(true);
@@ -135,47 +172,26 @@ export function BoardList({
       ) : shown.length === 0 ? (
         <p className="empty-state">No board matches “{search}”.</p>
       ) : (
-        <ul className="board-list">
-          {shown.map((board) => (
-            <li key={board.board_id} className="board-card">
-              <button
-                type="button"
-                className="fav-button"
-                aria-pressed={board.is_favorite}
-                aria-label={
-                  board.is_favorite
-                    ? `Remove ${board.title} from favourites`
-                    : `Add ${board.title} to favourites`
-                }
-                onClick={() => toggleFavorite(board)}
-              >
-                <span aria-hidden="true">{board.is_favorite ? "★" : "☆"}</span>
-              </button>
-              <Link href={`/boards/${board.board_id}`} className="board-card-link">
-                <h3>{board.title}</h3>
-              </Link>
-              <p className="board-card-meta">
-                <span>
-                  <strong>{board.open_cards}</strong> open
-                </span>
-                <span>
-                  <strong>{board.total_cards}</strong> total
-                </span>
-                {board.overdue > 0 && (
-                  <span className="pill pill-danger">{board.overdue} overdue</span>
-                )}
-              </p>
-              <div className="board-card-actions">
-                <Link href={`/boards/${board.board_id}/insights`}>Insights</Link>
-                {mayWrite && (
-                  <button type="button" onClick={() => setConfirming(board)}>
-                    Delete
-                  </button>
-                )}
+        <div className="board-groups">
+          {favouriteBoards.length > 0 && (
+            <section className="board-group" aria-labelledby="favourite-boards-heading">
+              <div className="board-group-heading">
+                <h3 id="favourite-boards-heading">Favourites</h3>
+                <span>{favouriteBoards.length}</span>
               </div>
-            </li>
-          ))}
-        </ul>
+              <ul className="board-list">{favouriteBoards.map(renderBoard)}</ul>
+            </section>
+          )}
+          {otherBoards.length > 0 && (
+            <section className="board-group" aria-labelledby="all-boards-heading">
+              <div className="board-group-heading">
+                <h3 id="all-boards-heading">All boards</h3>
+                <span>{otherBoards.length}</span>
+              </div>
+              <ul className="board-list">{otherBoards.map(renderBoard)}</ul>
+            </section>
+          )}
+        </div>
       )}
 
       {picking && (
