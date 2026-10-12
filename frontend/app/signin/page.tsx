@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { SignInForm } from "@/components/auth/sign-in-form";
+import { KobiLogo } from "@/components/shell/kobi-logo";
 
 export const metadata: Metadata = { title: "Sign in" };
 
@@ -14,8 +15,7 @@ export default async function SignInPage({
       <div className="auth-shell">
         <section className="auth-pitch" aria-label="Kobi">
           <a className="brand-link" href="/signin">
-            <span className="brand-mark" aria-hidden="true">K</span>
-            <span>Kobi</span>
+            <KobiLogo size="md" />
           </a>
           <h1>Make the work feel lighter.</h1>
           <p>A clear, calm space for turning ideas into momentum — with a little help from AI.</p>

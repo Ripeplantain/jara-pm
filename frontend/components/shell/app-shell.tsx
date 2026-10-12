@@ -4,6 +4,7 @@ import { Breadcrumbs } from "@/components/shell/breadcrumbs";
 import { NotificationBell } from "@/components/shell/notification-bell";
 import { OfflineBanner } from "@/components/shell/offline-banner";
 import { Sidebar } from "@/components/shell/sidebar";
+import { KobiLogo } from "@/components/shell/kobi-logo";
 import type { User } from "@/lib/types/auth";
 import type { Workspace } from "@/lib/types/workspace";
 
@@ -36,10 +37,7 @@ export function AppShell({
         </a>
         <div className="header-left">
           <Link href="/" className="brand-link">
-            <span className="brand-mark" aria-hidden="true">
-              K
-            </span>
-            <span>Kobi</span>
+            <KobiLogo size="sm" />
           </Link>
           <Breadcrumbs context={context} />
         </div>

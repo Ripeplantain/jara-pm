@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { GlobalSearch } from "@/components/shell/global-search";
 import { NavLinks } from "@/components/shell/nav-links";
 import { WorkspaceSwitcher } from "@/components/shell/workspace-switcher";
+import { KobiLogo } from "@/components/shell/kobi-logo";
 import type { Role, Workspace } from "@/lib/types/workspace";
 
 export function Sidebar({
@@ -41,9 +42,7 @@ export function Sidebar({
         {!collapsed ? (
           <WorkspaceSwitcher workspaces={workspaces} active={active} />
         ) : (
-          <span className="sidebar-mark" aria-hidden="true">
-            K
-          </span>
+          <KobiLogo size="sm" showWordmark={false} />
         )}
         <button type="button" className="sidebar-toggle" aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"} onClick={toggle}>
           {collapsed ? "→" : "←"}

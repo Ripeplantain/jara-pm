@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { KobiLogo } from "@/components/shell/kobi-logo";
 import type { Metadata } from "next";
 import { backendFetch } from "@/lib/api/client";
 
@@ -28,8 +29,7 @@ export default async function InvitePage({
       <div className="auth-shell">
         <section className="auth-pitch" aria-label="Kobi">
           <a className="brand-link" href="/signin">
-            <span className="brand-mark" aria-hidden="true">K</span>
-            <span>Kobi</span>
+            <KobiLogo size="md" />
           </a>
           <h1>Join the work.</h1>
           <p>One clear place for your team to turn product ideas into momentum.</p>
