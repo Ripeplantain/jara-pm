@@ -82,6 +82,22 @@
         "documentation": {}
     },
     {
+        "label": "field",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
         "label": "dataclass",
         "importPath": "dataclasses",
         "description": "dataclasses",
@@ -938,6 +954,22 @@
         "documentation": {}
     },
     {
+        "label": "build_draft_context",
+        "importPath": "app.ai.context",
+        "description": "app.ai.context",
+        "isExtraImport": true,
+        "detail": "app.ai.context",
+        "documentation": {}
+    },
+    {
+        "label": "AssistantTurn",
+        "importPath": "app.ai.llm",
+        "description": "app.ai.llm",
+        "isExtraImport": true,
+        "detail": "app.ai.llm",
+        "documentation": {}
+    },
+    {
         "label": "LLMClient",
         "importPath": "app.ai.llm",
         "description": "app.ai.llm",
@@ -1026,6 +1058,14 @@
         "documentation": {}
     },
     {
+        "label": "get_llm_client",
+        "importPath": "app.ai.llm",
+        "description": "app.ai.llm",
+        "isExtraImport": true,
+        "detail": "app.ai.llm",
+        "documentation": {}
+    },
+    {
         "label": "AssistantTurn",
         "importPath": "app.ai.llm",
         "description": "app.ai.llm",
@@ -1039,6 +1079,14 @@
         "description": "app.ai.llm",
         "isExtraImport": true,
         "detail": "app.ai.llm",
+        "documentation": {}
+    },
+    {
+        "label": "DRAFT_CARDS",
+        "importPath": "app.ai.tools",
+        "description": "app.ai.tools",
+        "isExtraImport": true,
+        "detail": "app.ai.tools",
         "documentation": {}
     },
     {
@@ -1058,7 +1106,23 @@
         "documentation": {}
     },
     {
+        "label": "ToolResult",
+        "importPath": "app.ai.tools",
+        "description": "app.ai.tools",
+        "isExtraImport": true,
+        "detail": "app.ai.tools",
+        "documentation": {}
+    },
+    {
         "label": "execute",
+        "importPath": "app.ai.tools",
+        "description": "app.ai.tools",
+        "isExtraImport": true,
+        "detail": "app.ai.tools",
+        "documentation": {}
+    },
+    {
+        "label": "tool_definition",
         "importPath": "app.ai.tools",
         "description": "app.ai.tools",
         "isExtraImport": true,
@@ -1095,6 +1159,22 @@
         "description": "app.ai.tools",
         "isExtraImport": true,
         "detail": "app.ai.tools",
+        "documentation": {}
+    },
+    {
+        "label": "tool_definitions",
+        "importPath": "app.ai.tools",
+        "description": "app.ai.tools",
+        "isExtraImport": true,
+        "detail": "app.ai.tools",
+        "documentation": {}
+    },
+    {
+        "label": "AI_MAX_DRAFT_ITERATIONS",
+        "importPath": "app.config",
+        "description": "app.config",
+        "isExtraImport": true,
+        "detail": "app.config",
         "documentation": {}
     },
     {
@@ -1458,7 +1538,31 @@
         "documentation": {}
     },
     {
+        "label": "CardLabel",
+        "importPath": "app.models",
+        "description": "app.models",
+        "isExtraImport": true,
+        "detail": "app.models",
+        "documentation": {}
+    },
+    {
+        "label": "ChecklistItem",
+        "importPath": "app.models",
+        "description": "app.models",
+        "isExtraImport": true,
+        "detail": "app.models",
+        "documentation": {}
+    },
+    {
         "label": "Column",
+        "importPath": "app.models",
+        "description": "app.models",
+        "isExtraImport": true,
+        "detail": "app.models",
+        "documentation": {}
+    },
+    {
+        "label": "Label",
         "importPath": "app.models",
         "description": "app.models",
         "isExtraImport": true,
@@ -2018,6 +2122,54 @@
         "documentation": {}
     },
     {
+        "label": "Activity",
+        "importPath": "app.models",
+        "description": "app.models",
+        "isExtraImport": true,
+        "detail": "app.models",
+        "documentation": {}
+    },
+    {
+        "label": "AiUsage",
+        "importPath": "app.models",
+        "description": "app.models",
+        "isExtraImport": true,
+        "detail": "app.models",
+        "documentation": {}
+    },
+    {
+        "label": "Card",
+        "importPath": "app.models",
+        "description": "app.models",
+        "isExtraImport": true,
+        "detail": "app.models",
+        "documentation": {}
+    },
+    {
+        "label": "Label",
+        "importPath": "app.models",
+        "description": "app.models",
+        "isExtraImport": true,
+        "detail": "app.models",
+        "documentation": {}
+    },
+    {
+        "label": "Notification",
+        "importPath": "app.models",
+        "description": "app.models",
+        "isExtraImport": true,
+        "detail": "app.models",
+        "documentation": {}
+    },
+    {
+        "label": "User",
+        "importPath": "app.models",
+        "description": "app.models",
+        "isExtraImport": true,
+        "detail": "app.models",
+        "documentation": {}
+    },
+    {
         "label": "Column",
         "importPath": "app.models",
         "description": "app.models",
@@ -2250,6 +2402,22 @@
         "documentation": {}
     },
     {
+        "label": "CardDraftRequest",
+        "importPath": "app.schemas.ai",
+        "description": "app.schemas.ai",
+        "isExtraImport": true,
+        "detail": "app.schemas.ai",
+        "documentation": {}
+    },
+    {
+        "label": "CardDraftResponse",
+        "importPath": "app.schemas.ai",
+        "description": "app.schemas.ai",
+        "isExtraImport": true,
+        "detail": "app.schemas.ai",
+        "documentation": {}
+    },
+    {
         "label": "WorkspaceAiRequest",
         "importPath": "app.schemas.ai",
         "description": "app.schemas.ai",
@@ -2279,6 +2447,230 @@
         "description": "app.schemas.ai",
         "isExtraImport": true,
         "detail": "app.schemas.ai",
+        "documentation": {}
+    },
+    {
+        "label": "MAX_BATCH_CARDS",
+        "importPath": "app.schemas.boards",
+        "description": "app.schemas.boards",
+        "isExtraImport": true,
+        "detail": "app.schemas.boards",
+        "documentation": {}
+    },
+    {
+        "label": "CardDraft",
+        "importPath": "app.schemas.boards",
+        "description": "app.schemas.boards",
+        "isExtraImport": true,
+        "detail": "app.schemas.boards",
+        "documentation": {}
+    },
+    {
+        "label": "MAX_BATCH_CARDS",
+        "importPath": "app.schemas.boards",
+        "description": "app.schemas.boards",
+        "isExtraImport": true,
+        "detail": "app.schemas.boards",
+        "documentation": {}
+    },
+    {
+        "label": "BoardTitle",
+        "importPath": "app.schemas.boards",
+        "description": "app.schemas.boards",
+        "isExtraImport": true,
+        "detail": "app.schemas.boards",
+        "documentation": {}
+    },
+    {
+        "label": "CardDraft",
+        "importPath": "app.schemas.boards",
+        "description": "app.schemas.boards",
+        "isExtraImport": true,
+        "detail": "app.schemas.boards",
+        "documentation": {}
+    },
+    {
+        "label": "CardTitle",
+        "importPath": "app.schemas.boards",
+        "description": "app.schemas.boards",
+        "isExtraImport": true,
+        "detail": "app.schemas.boards",
+        "documentation": {}
+    },
+    {
+        "label": "ColumnTitle",
+        "importPath": "app.schemas.boards",
+        "description": "app.schemas.boards",
+        "isExtraImport": true,
+        "detail": "app.schemas.boards",
+        "documentation": {}
+    },
+    {
+        "label": "Description",
+        "importPath": "app.schemas.boards",
+        "description": "app.schemas.boards",
+        "isExtraImport": true,
+        "detail": "app.schemas.boards",
+        "documentation": {}
+    },
+    {
+        "label": "Position",
+        "importPath": "app.schemas.boards",
+        "description": "app.schemas.boards",
+        "isExtraImport": true,
+        "detail": "app.schemas.boards",
+        "documentation": {}
+    },
+    {
+        "label": "BoardCreate",
+        "importPath": "app.schemas.boards",
+        "description": "app.schemas.boards",
+        "isExtraImport": true,
+        "detail": "app.schemas.boards",
+        "documentation": {}
+    },
+    {
+        "label": "BoardFromTemplate",
+        "importPath": "app.schemas.boards",
+        "description": "app.schemas.boards",
+        "isExtraImport": true,
+        "detail": "app.schemas.boards",
+        "documentation": {}
+    },
+    {
+        "label": "BoardOut",
+        "importPath": "app.schemas.boards",
+        "description": "app.schemas.boards",
+        "isExtraImport": true,
+        "detail": "app.schemas.boards",
+        "documentation": {}
+    },
+    {
+        "label": "BoardSummary",
+        "importPath": "app.schemas.boards",
+        "description": "app.schemas.boards",
+        "isExtraImport": true,
+        "detail": "app.schemas.boards",
+        "documentation": {}
+    },
+    {
+        "label": "BoardUpdate",
+        "importPath": "app.schemas.boards",
+        "description": "app.schemas.boards",
+        "isExtraImport": true,
+        "detail": "app.schemas.boards",
+        "documentation": {}
+    },
+    {
+        "label": "CardBatchCreate",
+        "importPath": "app.schemas.boards",
+        "description": "app.schemas.boards",
+        "isExtraImport": true,
+        "detail": "app.schemas.boards",
+        "documentation": {}
+    },
+    {
+        "label": "CardCreate",
+        "importPath": "app.schemas.boards",
+        "description": "app.schemas.boards",
+        "isExtraImport": true,
+        "detail": "app.schemas.boards",
+        "documentation": {}
+    },
+    {
+        "label": "CardMove",
+        "importPath": "app.schemas.boards",
+        "description": "app.schemas.boards",
+        "isExtraImport": true,
+        "detail": "app.schemas.boards",
+        "documentation": {}
+    },
+    {
+        "label": "CardOut",
+        "importPath": "app.schemas.boards",
+        "description": "app.schemas.boards",
+        "isExtraImport": true,
+        "detail": "app.schemas.boards",
+        "documentation": {}
+    },
+    {
+        "label": "CardUpdate",
+        "importPath": "app.schemas.boards",
+        "description": "app.schemas.boards",
+        "isExtraImport": true,
+        "detail": "app.schemas.boards",
+        "documentation": {}
+    },
+    {
+        "label": "ColumnCreate",
+        "importPath": "app.schemas.boards",
+        "description": "app.schemas.boards",
+        "isExtraImport": true,
+        "detail": "app.schemas.boards",
+        "documentation": {}
+    },
+    {
+        "label": "ColumnOut",
+        "importPath": "app.schemas.boards",
+        "description": "app.schemas.boards",
+        "isExtraImport": true,
+        "detail": "app.schemas.boards",
+        "documentation": {}
+    },
+    {
+        "label": "ColumnUpdate",
+        "importPath": "app.schemas.boards",
+        "description": "app.schemas.boards",
+        "isExtraImport": true,
+        "detail": "app.schemas.boards",
+        "documentation": {}
+    },
+    {
+        "label": "TemplateOut",
+        "importPath": "app.schemas.boards",
+        "description": "app.schemas.boards",
+        "isExtraImport": true,
+        "detail": "app.schemas.boards",
+        "documentation": {}
+    },
+    {
+        "label": "CardOut",
+        "importPath": "app.schemas.boards",
+        "description": "app.schemas.boards",
+        "isExtraImport": true,
+        "detail": "app.schemas.boards",
+        "documentation": {}
+    },
+    {
+        "label": "CardHit",
+        "importPath": "app.schemas.boards",
+        "description": "app.schemas.boards",
+        "isExtraImport": true,
+        "detail": "app.schemas.boards",
+        "documentation": {}
+    },
+    {
+        "label": "CardOut",
+        "importPath": "app.schemas.boards",
+        "description": "app.schemas.boards",
+        "isExtraImport": true,
+        "detail": "app.schemas.boards",
+        "documentation": {}
+    },
+    {
+        "label": "BoardOut",
+        "importPath": "app.schemas.boards",
+        "description": "app.schemas.boards",
+        "isExtraImport": true,
+        "detail": "app.schemas.boards",
+        "documentation": {}
+    },
+    {
+        "label": "CardDraft",
+        "importPath": "app.schemas.boards",
+        "description": "app.schemas.boards",
+        "isExtraImport": true,
+        "detail": "app.schemas.boards",
         "documentation": {}
     },
     {
@@ -2890,6 +3282,14 @@
         "documentation": {}
     },
     {
+        "label": "boards",
+        "importPath": "app.services",
+        "description": "app.services",
+        "isExtraImport": true,
+        "detail": "app.services",
+        "documentation": {}
+    },
+    {
         "label": "email",
         "importPath": "app.services",
         "description": "app.services",
@@ -2935,6 +3335,686 @@
         "description": "app.services",
         "isExtraImport": true,
         "detail": "app.services",
+        "documentation": {}
+    },
+    {
+        "label": "UTC",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "UTC",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "timedelta",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "UTC",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "UTC",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "UTC",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "UTC",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "date",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "UTC",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "UTC",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "UTC",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "timedelta",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "UTC",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "UTC",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "UTC",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "UTC",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "date",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "UTC",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "UTC",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "date",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "date",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "UTC",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "timedelta",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "UTC",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "date",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "timedelta",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "UTC",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "timedelta",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "UTC",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "UTC",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "timedelta",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "UTC",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "timedelta",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "timedelta",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "date",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "UTC",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "UTC",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "timedelta",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "UTC",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "timedelta",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "UTC",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "timedelta",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "timedelta",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "UTC",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "timedelta",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "date",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "timedelta",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "timedelta",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
         "documentation": {}
     },
     {
@@ -2999,670 +4079,6 @@
         "description": "collections.abc",
         "isExtraImport": true,
         "detail": "collections.abc",
-        "documentation": {}
-    },
-    {
-        "label": "datetime",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "UTC",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "datetime",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "timedelta",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "UTC",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "datetime",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "UTC",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "datetime",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "UTC",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "datetime",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "UTC",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "date",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "datetime",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "UTC",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "datetime",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "UTC",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "datetime",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "UTC",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "datetime",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "timedelta",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "UTC",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "datetime",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "UTC",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "datetime",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "UTC",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "datetime",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "UTC",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "date",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "datetime",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "UTC",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "datetime",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "UTC",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "datetime",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "datetime",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "datetime",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "datetime",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "datetime",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "datetime",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "datetime",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "date",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "datetime",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "date",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "datetime",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "datetime",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "UTC",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "datetime",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "timedelta",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "UTC",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "date",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "datetime",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "timedelta",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "UTC",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "datetime",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "timedelta",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "UTC",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "datetime",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "UTC",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "datetime",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "timedelta",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "UTC",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "datetime",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "timedelta",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "timedelta",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "datetime",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "date",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "UTC",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "datetime",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "UTC",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "datetime",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "timedelta",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "UTC",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "datetime",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "timedelta",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "UTC",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "datetime",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "timedelta",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "timedelta",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "UTC",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "datetime",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "timedelta",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "date",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "timedelta",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
-        "documentation": {}
-    },
-    {
-        "label": "timedelta",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
         "documentation": {}
     },
     {
@@ -4739,182 +5155,6 @@
         "documentation": {}
     },
     {
-        "label": "BoardTitle",
-        "importPath": "app.schemas.boards",
-        "description": "app.schemas.boards",
-        "isExtraImport": true,
-        "detail": "app.schemas.boards",
-        "documentation": {}
-    },
-    {
-        "label": "CardTitle",
-        "importPath": "app.schemas.boards",
-        "description": "app.schemas.boards",
-        "isExtraImport": true,
-        "detail": "app.schemas.boards",
-        "documentation": {}
-    },
-    {
-        "label": "ColumnTitle",
-        "importPath": "app.schemas.boards",
-        "description": "app.schemas.boards",
-        "isExtraImport": true,
-        "detail": "app.schemas.boards",
-        "documentation": {}
-    },
-    {
-        "label": "Description",
-        "importPath": "app.schemas.boards",
-        "description": "app.schemas.boards",
-        "isExtraImport": true,
-        "detail": "app.schemas.boards",
-        "documentation": {}
-    },
-    {
-        "label": "Position",
-        "importPath": "app.schemas.boards",
-        "description": "app.schemas.boards",
-        "isExtraImport": true,
-        "detail": "app.schemas.boards",
-        "documentation": {}
-    },
-    {
-        "label": "BoardCreate",
-        "importPath": "app.schemas.boards",
-        "description": "app.schemas.boards",
-        "isExtraImport": true,
-        "detail": "app.schemas.boards",
-        "documentation": {}
-    },
-    {
-        "label": "BoardFromTemplate",
-        "importPath": "app.schemas.boards",
-        "description": "app.schemas.boards",
-        "isExtraImport": true,
-        "detail": "app.schemas.boards",
-        "documentation": {}
-    },
-    {
-        "label": "BoardOut",
-        "importPath": "app.schemas.boards",
-        "description": "app.schemas.boards",
-        "isExtraImport": true,
-        "detail": "app.schemas.boards",
-        "documentation": {}
-    },
-    {
-        "label": "BoardSummary",
-        "importPath": "app.schemas.boards",
-        "description": "app.schemas.boards",
-        "isExtraImport": true,
-        "detail": "app.schemas.boards",
-        "documentation": {}
-    },
-    {
-        "label": "BoardUpdate",
-        "importPath": "app.schemas.boards",
-        "description": "app.schemas.boards",
-        "isExtraImport": true,
-        "detail": "app.schemas.boards",
-        "documentation": {}
-    },
-    {
-        "label": "CardCreate",
-        "importPath": "app.schemas.boards",
-        "description": "app.schemas.boards",
-        "isExtraImport": true,
-        "detail": "app.schemas.boards",
-        "documentation": {}
-    },
-    {
-        "label": "CardMove",
-        "importPath": "app.schemas.boards",
-        "description": "app.schemas.boards",
-        "isExtraImport": true,
-        "detail": "app.schemas.boards",
-        "documentation": {}
-    },
-    {
-        "label": "CardOut",
-        "importPath": "app.schemas.boards",
-        "description": "app.schemas.boards",
-        "isExtraImport": true,
-        "detail": "app.schemas.boards",
-        "documentation": {}
-    },
-    {
-        "label": "CardUpdate",
-        "importPath": "app.schemas.boards",
-        "description": "app.schemas.boards",
-        "isExtraImport": true,
-        "detail": "app.schemas.boards",
-        "documentation": {}
-    },
-    {
-        "label": "ColumnCreate",
-        "importPath": "app.schemas.boards",
-        "description": "app.schemas.boards",
-        "isExtraImport": true,
-        "detail": "app.schemas.boards",
-        "documentation": {}
-    },
-    {
-        "label": "ColumnOut",
-        "importPath": "app.schemas.boards",
-        "description": "app.schemas.boards",
-        "isExtraImport": true,
-        "detail": "app.schemas.boards",
-        "documentation": {}
-    },
-    {
-        "label": "ColumnUpdate",
-        "importPath": "app.schemas.boards",
-        "description": "app.schemas.boards",
-        "isExtraImport": true,
-        "detail": "app.schemas.boards",
-        "documentation": {}
-    },
-    {
-        "label": "TemplateOut",
-        "importPath": "app.schemas.boards",
-        "description": "app.schemas.boards",
-        "isExtraImport": true,
-        "detail": "app.schemas.boards",
-        "documentation": {}
-    },
-    {
-        "label": "CardOut",
-        "importPath": "app.schemas.boards",
-        "description": "app.schemas.boards",
-        "isExtraImport": true,
-        "detail": "app.schemas.boards",
-        "documentation": {}
-    },
-    {
-        "label": "CardHit",
-        "importPath": "app.schemas.boards",
-        "description": "app.schemas.boards",
-        "isExtraImport": true,
-        "detail": "app.schemas.boards",
-        "documentation": {}
-    },
-    {
-        "label": "CardOut",
-        "importPath": "app.schemas.boards",
-        "description": "app.schemas.boards",
-        "isExtraImport": true,
-        "detail": "app.schemas.boards",
-        "documentation": {}
-    },
-    {
-        "label": "BoardOut",
-        "importPath": "app.schemas.boards",
-        "description": "app.schemas.boards",
-        "isExtraImport": true,
-        "detail": "app.schemas.boards",
-        "documentation": {}
-    },
-    {
         "label": "Forbidden",
         "importPath": "app.services.errors",
         "description": "app.services.errors",
@@ -5148,6 +5388,30 @@
     },
     {
         "label": "Conflict",
+        "importPath": "app.services.errors",
+        "description": "app.services.errors",
+        "isExtraImport": true,
+        "detail": "app.services.errors",
+        "documentation": {}
+    },
+    {
+        "label": "Forbidden",
+        "importPath": "app.services.errors",
+        "description": "app.services.errors",
+        "isExtraImport": true,
+        "detail": "app.services.errors",
+        "documentation": {}
+    },
+    {
+        "label": "InvalidRequest",
+        "importPath": "app.services.errors",
+        "description": "app.services.errors",
+        "isExtraImport": true,
+        "detail": "app.services.errors",
+        "documentation": {}
+    },
+    {
+        "label": "NotFound",
         "importPath": "app.services.errors",
         "description": "app.services.errors",
         "isExtraImport": true,
@@ -5893,6 +6157,39 @@
         "documentation": {}
     },
     {
+        "label": "time",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "time",
+        "description": "time",
+        "detail": "time",
+        "documentation": {}
+    },
+    {
+        "label": "monotonic",
+        "importPath": "time",
+        "description": "time",
+        "isExtraImport": true,
+        "detail": "time",
+        "documentation": {}
+    },
+    {
+        "label": "monotonic",
+        "importPath": "time",
+        "description": "time",
+        "isExtraImport": true,
+        "detail": "time",
+        "documentation": {}
+    },
+    {
+        "label": "draft_cards",
+        "importPath": "app.ai.agent",
+        "description": "app.ai.agent",
+        "isExtraImport": true,
+        "detail": "app.ai.agent",
+        "documentation": {}
+    },
+    {
         "label": "run_assistant",
         "importPath": "app.ai.agent",
         "description": "app.ai.agent",
@@ -6261,6 +6558,14 @@
         "documentation": {}
     },
     {
+        "label": "ItemText",
+        "importPath": "app.schemas.card_details",
+        "description": "app.schemas.card_details",
+        "isExtraImport": true,
+        "detail": "app.schemas.card_details",
+        "documentation": {}
+    },
+    {
         "label": "HealthResponse",
         "importPath": "app.schemas.health",
         "description": "app.schemas.health",
@@ -6484,23 +6789,6 @@
         "description": "threading",
         "isExtraImport": true,
         "detail": "threading",
-        "documentation": {}
-    },
-    {
-        "label": "time",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "time",
-        "description": "time",
-        "detail": "time",
-        "documentation": {}
-    },
-    {
-        "label": "monotonic",
-        "importPath": "time",
-        "description": "time",
-        "isExtraImport": true,
-        "detail": "time",
         "documentation": {}
     },
     {
@@ -6875,6 +7163,14 @@
         "documentation": {}
     },
     {
+        "label": "bucket_for",
+        "importPath": "app.services.abuse",
+        "description": "app.services.abuse",
+        "isExtraImport": true,
+        "detail": "app.services.abuse",
+        "documentation": {}
+    },
+    {
         "label": "sys",
         "kind": 6,
         "isExtraImport": true,
@@ -7157,6 +7453,14 @@
         "documentation": {}
     },
     {
+        "label": "app",
+        "importPath": "app.main",
+        "description": "app.main",
+        "isExtraImport": true,
+        "detail": "app.main",
+        "documentation": {}
+    },
+    {
         "label": "session_for",
         "importPath": "tests.conftest",
         "description": "tests.conftest",
@@ -7174,6 +7478,14 @@
     },
     {
         "label": "TEST_JWT_SECRET",
+        "importPath": "tests.conftest",
+        "description": "tests.conftest",
+        "isExtraImport": true,
+        "detail": "tests.conftest",
+        "documentation": {}
+    },
+    {
+        "label": "session_for",
         "importPath": "tests.conftest",
         "description": "tests.conftest",
         "isExtraImport": true,
@@ -7285,6 +7597,62 @@
         "documentation": {}
     },
     {
+        "label": "# noqa: F401\n    assert_contiguous",
+        "importPath": "tests.test_boards",
+        "description": "tests.test_boards",
+        "isExtraImport": true,
+        "detail": "tests.test_boards",
+        "documentation": {}
+    },
+    {
+        "label": "auth",
+        "importPath": "tests.test_boards",
+        "description": "tests.test_boards",
+        "isExtraImport": true,
+        "detail": "tests.test_boards",
+        "documentation": {}
+    },
+    {
+        "label": "db",
+        "importPath": "tests.test_boards",
+        "description": "tests.test_boards",
+        "isExtraImport": true,
+        "detail": "tests.test_boards",
+        "documentation": {}
+    },
+    {
+        "label": "make_board",
+        "importPath": "tests.test_boards",
+        "description": "tests.test_boards",
+        "isExtraImport": true,
+        "detail": "tests.test_boards",
+        "documentation": {}
+    },
+    {
+        "label": "other",
+        "importPath": "tests.test_boards",
+        "description": "tests.test_boards",
+        "isExtraImport": true,
+        "detail": "tests.test_boards",
+        "documentation": {}
+    },
+    {
+        "label": "titles",
+        "importPath": "tests.test_boards",
+        "description": "tests.test_boards",
+        "isExtraImport": true,
+        "detail": "tests.test_boards",
+        "documentation": {}
+    },
+    {
+        "label": "user",
+        "importPath": "tests.test_boards",
+        "description": "tests.test_boards",
+        "isExtraImport": true,
+        "detail": "tests.test_boards",
+        "documentation": {}
+    },
+    {
         "label": "ask",
         "importPath": "tests.test_ai",
         "description": "tests.test_ai",
@@ -7302,6 +7670,38 @@
     },
     {
         "label": "say",
+        "importPath": "tests.test_ai",
+        "description": "tests.test_ai",
+        "isExtraImport": true,
+        "detail": "tests.test_ai",
+        "documentation": {}
+    },
+    {
+        "label": "tool_results",
+        "importPath": "tests.test_ai",
+        "description": "tests.test_ai",
+        "isExtraImport": true,
+        "detail": "tests.test_ai",
+        "documentation": {}
+    },
+    {
+        "label": "call",
+        "importPath": "tests.test_ai",
+        "description": "tests.test_ai",
+        "isExtraImport": true,
+        "detail": "tests.test_ai",
+        "documentation": {}
+    },
+    {
+        "label": "say",
+        "importPath": "tests.test_ai",
+        "description": "tests.test_ai",
+        "isExtraImport": true,
+        "detail": "tests.test_ai",
+        "documentation": {}
+    },
+    {
+        "label": "setup",
         "importPath": "tests.test_ai",
         "description": "tests.test_ai",
         "isExtraImport": true,
@@ -7350,6 +7750,22 @@
         "documentation": {}
     },
     {
+        "label": "headers",
+        "importPath": "tests.test_permissions",
+        "description": "tests.test_permissions",
+        "isExtraImport": true,
+        "detail": "tests.test_permissions",
+        "documentation": {}
+    },
+    {
+        "label": "shared",
+        "importPath": "tests.test_permissions",
+        "description": "tests.test_permissions",
+        "isExtraImport": true,
+        "detail": "tests.test_permissions",
+        "documentation": {}
+    },
+    {
         "label": "quote",
         "importPath": "urllib.parse",
         "description": "urllib.parse",
@@ -7391,11 +7807,29 @@
         "documentation": {}
     },
     {
+        "label": "DraftResult",
+        "kind": 6,
+        "importPath": "backend.app.ai.agent",
+        "description": "backend.app.ai.agent",
+        "peekOfCode": "class DraftResult:\n    drafts: list[CardDraft] = field(default_factory=list)\n    note: str = \"\"\n    llm_calls: int = 0\ndef draft_cards(db: Session, user: User, board_id: int, text: str, llm: LLMClient) -> DraftResult:\n    \"\"\"Turn pasted text into card drafts. Reads the board, writes nothing.\n    The model is offered one tool and only that tool is run, whatever name it sends back.\n    \"\"\"\n    board = svc.get_board(db, user, board_id)\n    messages: list[dict[str, Any]] = [",
+        "detail": "backend.app.ai.agent",
+        "documentation": {}
+    },
+    {
         "label": "run_assistant",
         "kind": 2,
         "importPath": "backend.app.ai.agent",
         "description": "backend.app.ai.agent",
         "peekOfCode": "def run_assistant(\n    db: Session,\n    user: User,\n    board_id: int,\n    message: str,\n    history: list[ChatMessage],\n    llm: LLMClient,\n) -> AgentResult:\n    board = svc.get_board(db, user, board_id)  # 404 unless the user owns it\n    messages: list[dict[str, Any]] = [",
+        "detail": "backend.app.ai.agent",
+        "documentation": {}
+    },
+    {
+        "label": "draft_cards",
+        "kind": 2,
+        "importPath": "backend.app.ai.agent",
+        "description": "backend.app.ai.agent",
+        "peekOfCode": "def draft_cards(db: Session, user: User, board_id: int, text: str, llm: LLMClient) -> DraftResult:\n    \"\"\"Turn pasted text into card drafts. Reads the board, writes nothing.\n    The model is offered one tool and only that tool is run, whatever name it sends back.\n    \"\"\"\n    board = svc.get_board(db, user, board_id)\n    messages: list[dict[str, Any]] = [\n        {\"role\": \"system\", \"content\": build_draft_context(board, db, user)},\n        {\"role\": \"user\", \"content\": text},\n    ]\n    tools = [tool_definition(DRAFT_CARDS)]",
         "detail": "backend.app.ai.agent",
         "documentation": {}
     },
@@ -7406,6 +7840,15 @@
         "description": "backend.app.ai.agent",
         "peekOfCode": "log = logging.getLogger(\"app.ai\")\n@dataclass\nclass AgentResult:\n    reply: str\n    changes: list[AppliedChange] = field(default_factory=list)\n    pending: list[PendingAction] = field(default_factory=list)\n    llm_calls: int = 0\ndef run_assistant(\n    db: Session,\n    user: User,",
         "detail": "backend.app.ai.agent",
+        "documentation": {}
+    },
+    {
+        "label": "build_draft_context",
+        "kind": 2,
+        "importPath": "backend.app.ai.context",
+        "description": "backend.app.ai.context",
+        "peekOfCode": "def build_draft_context(board: Board, db: Session, user: User) -> str:\n    \"\"\"What the card-drafting model needs: the same ids-and-names-only rule as the chat context.\"\"\"\n    titles = [card.title for col in board.columns for card in col.cards]\n    data = {\n        \"today\": datetime.now(UTC).date().isoformat(),\n        \"board\": board.title,\n        \"existing_card_titles\": titles[:MAX_EXISTING_TITLES],\n        \"members\": [\n            {\"user_id\": m.user_id, \"name\": m.user.name}\n            for m in workspace_svc.list_members(db, user, board.workspace_id)",
+        "detail": "backend.app.ai.context",
         "documentation": {}
     },
     {
@@ -7422,7 +7865,7 @@
         "kind": 5,
         "importPath": "backend.app.ai.context",
         "description": "backend.app.ai.context",
-        "peekOfCode": "MAX_CARDS_PER_COLUMN = 50\nMAX_DESCRIPTION_CHARS = 200\nSYSTEM_PROMPT = \"\"\"You are the assistant inside Kobi, a product-management app. You help the \\\nuser manage the board they have open: columns and cards, assignees, priorities, due dates, \\\nestimates, labels, checklists, comments, and sprints.\nRules:\n- Act only through the provided tools. Use the exact numeric IDs from the board state below; \\\nnever invent IDs. Positions are 0-based.\n- If a tool returns an error, read it, fix the arguments and try again, or explain the problem.\n- Deleting needs the user's confirmation. Delete tools only PROPOSE a deletion; after calling \\",
+        "peekOfCode": "MAX_CARDS_PER_COLUMN = 50\nMAX_DESCRIPTION_CHARS = 200\nMAX_EXISTING_TITLES = 100\nSYSTEM_PROMPT = \"\"\"You are the assistant inside Kobi, a product-management app. You help the \\\nuser manage the board they have open: columns and cards, assignees, priorities, due dates, \\\nestimates, labels, checklists, comments, and sprints.\nRules:\n- Act only through the provided tools. Use the exact numeric IDs from the board state below; \\\nnever invent IDs. Positions are 0-based.\n- If a tool returns an error, read it, fix the arguments and try again, or explain the problem.",
         "detail": "backend.app.ai.context",
         "documentation": {}
     },
@@ -7431,7 +7874,16 @@
         "kind": 5,
         "importPath": "backend.app.ai.context",
         "description": "backend.app.ai.context",
-        "peekOfCode": "MAX_DESCRIPTION_CHARS = 200\nSYSTEM_PROMPT = \"\"\"You are the assistant inside Kobi, a product-management app. You help the \\\nuser manage the board they have open: columns and cards, assignees, priorities, due dates, \\\nestimates, labels, checklists, comments, and sprints.\nRules:\n- Act only through the provided tools. Use the exact numeric IDs from the board state below; \\\nnever invent IDs. Positions are 0-based.\n- If a tool returns an error, read it, fix the arguments and try again, or explain the problem.\n- Deleting needs the user's confirmation. Delete tools only PROPOSE a deletion; after calling \\\none, tell the user it is waiting for their confirmation. Never claim something was deleted. \\",
+        "peekOfCode": "MAX_DESCRIPTION_CHARS = 200\nMAX_EXISTING_TITLES = 100\nSYSTEM_PROMPT = \"\"\"You are the assistant inside Kobi, a product-management app. You help the \\\nuser manage the board they have open: columns and cards, assignees, priorities, due dates, \\\nestimates, labels, checklists, comments, and sprints.\nRules:\n- Act only through the provided tools. Use the exact numeric IDs from the board state below; \\\nnever invent IDs. Positions are 0-based.\n- If a tool returns an error, read it, fix the arguments and try again, or explain the problem.\n- Deleting needs the user's confirmation. Delete tools only PROPOSE a deletion; after calling \\",
+        "detail": "backend.app.ai.context",
+        "documentation": {}
+    },
+    {
+        "label": "MAX_EXISTING_TITLES",
+        "kind": 5,
+        "importPath": "backend.app.ai.context",
+        "description": "backend.app.ai.context",
+        "peekOfCode": "MAX_EXISTING_TITLES = 100\nSYSTEM_PROMPT = \"\"\"You are the assistant inside Kobi, a product-management app. You help the \\\nuser manage the board they have open: columns and cards, assignees, priorities, due dates, \\\nestimates, labels, checklists, comments, and sprints.\nRules:\n- Act only through the provided tools. Use the exact numeric IDs from the board state below; \\\nnever invent IDs. Positions are 0-based.\n- If a tool returns an error, read it, fix the arguments and try again, or explain the problem.\n- Deleting needs the user's confirmation. Delete tools only PROPOSE a deletion; after calling \\\none, tell the user it is waiting for their confirmation. Never claim something was deleted. \\",
         "detail": "backend.app.ai.context",
         "documentation": {}
     },
@@ -7449,7 +7901,16 @@
         "kind": 5,
         "importPath": "backend.app.ai.context",
         "description": "backend.app.ai.context",
-        "peekOfCode": "VIEWER_NOTE = \"\"\"\nThe user's role in this workspace is VIEWER: they can read this board but change nothing. Do \\\nnot call any tool that writes. Answer their questions from the state below and from \\\nboard_stats, and if they ask for a change, say plainly that their role is read-only and they \\\nwould need a member or admin to make it.\n\"\"\"\ndef build_context(board: Board, db: Session | None = None, user: User | None = None) -> str:\n    \"\"\"Board state for the model.\n    `db` and `user` are optional so the board-only form stays usable in tests; with them, the\n    context also carries the members, labels and sprints the new tools need ids for.",
+        "peekOfCode": "VIEWER_NOTE = \"\"\"\nThe user's role in this workspace is VIEWER: they can read this board but change nothing. Do \\\nnot call any tool that writes. Answer their questions from the state below and from \\\nboard_stats, and if they ask for a change, say plainly that their role is read-only and they \\\nwould need a member or admin to make it.\n\"\"\"\nDRAFT_PROMPT = \"\"\"You turn what the user pastes into trackable cards for a board in Kobi, a \\\nproduct-management app. The paste may be a brief, a spec, meeting notes, a list, or a request \\\ndescribing what they want planned or built; either way, break it down into the work to be done.\nRules:",
+        "detail": "backend.app.ai.context",
+        "documentation": {}
+    },
+    {
+        "label": "DRAFT_PROMPT",
+        "kind": 5,
+        "importPath": "backend.app.ai.context",
+        "description": "backend.app.ai.context",
+        "peekOfCode": "DRAFT_PROMPT = \"\"\"You turn what the user pastes into trackable cards for a board in Kobi, a \\\nproduct-management app. The paste may be a brief, a spec, meeting notes, a list, or a request \\\ndescribing what they want planned or built; either way, break it down into the work to be done.\nRules:\n- Call draft_cards once with every card. Reply in prose only if the text holds nothing that can \\\nbecome a card; then say so in one short sentence.\n- One card per distinct, deliverable piece of work, 25 at most. Merge duplicates, and skip work \\\nthat existing_card_titles already covers.\n- title: short and imperative, under 80 characters. description: the context someone needs to \\\npick the card up, drawn from the text. Do not invent requirements, people or dates.",
         "detail": "backend.app.ai.context",
         "documentation": {}
     },
@@ -7539,7 +8000,7 @@
         "kind": 6,
         "importPath": "backend.app.ai.tools",
         "description": "backend.app.ai.tools",
-        "peekOfCode": "class ToolResult:\n    data: dict[str, Any]\n    change: AppliedChange | None = None\n    pending: PendingAction | None = None\n    changes: list[AppliedChange] = field(default_factory=list)\n# --- argument schemas -----------------------------------------------------------------------\nclass _Args(BaseModel):\n    model_config = {\"extra\": \"forbid\"}\nclass ColumnSpec(_Args):\n    title: ColumnTitle",
+        "peekOfCode": "class ToolResult:\n    data: dict[str, Any]\n    change: AppliedChange | None = None\n    pending: PendingAction | None = None\n    changes: list[AppliedChange] = field(default_factory=list)\n    drafts: list[CardDraft] = field(default_factory=list)\n# --- argument schemas -----------------------------------------------------------------------\nclass _Args(BaseModel):\n    model_config = {\"extra\": \"forbid\"}\nclass ColumnSpec(_Args):",
         "detail": "backend.app.ai.tools",
         "documentation": {}
     },
@@ -7755,7 +8216,16 @@
         "kind": 6,
         "importPath": "backend.app.ai.tools",
         "description": "backend.app.ai.tools",
-        "peekOfCode": "class BatchCardAuthoringArgs(_Args):\n    changes: list[CardAuthoringArgs] = Field(min_length=1, max_length=20)\n    rationale: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=500)] = \"\"\nclass DeleteCardArgs(_Args):\n    card_id: int\nclass DeleteBoardArgs(_Args):\n    pass\n# --- handlers -------------------------------------------------------------------------------\ndef _change(ctx: ToolContext, kind: str, summary: str, **ids: int | None) -> AppliedChange:\n    return AppliedChange(kind=kind, summary=summary, board_id=ids.pop(\"board_id\", None) or ctx.board_id, **ids)",
+        "peekOfCode": "class BatchCardAuthoringArgs(_Args):\n    changes: list[CardAuthoringArgs] = Field(min_length=1, max_length=20)\n    rationale: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=500)] = \"\"\nclass DraftCardsArgs(_Args):\n    cards: list[CardDraft] = Field(min_length=1, max_length=MAX_BATCH_CARDS)\nclass DeleteCardArgs(_Args):\n    card_id: int\nclass DeleteBoardArgs(_Args):\n    pass\n# --- handlers -------------------------------------------------------------------------------",
+        "detail": "backend.app.ai.tools",
+        "documentation": {}
+    },
+    {
+        "label": "DraftCardsArgs",
+        "kind": 6,
+        "importPath": "backend.app.ai.tools",
+        "description": "backend.app.ai.tools",
+        "peekOfCode": "class DraftCardsArgs(_Args):\n    cards: list[CardDraft] = Field(min_length=1, max_length=MAX_BATCH_CARDS)\nclass DeleteCardArgs(_Args):\n    card_id: int\nclass DeleteBoardArgs(_Args):\n    pass\n# --- handlers -------------------------------------------------------------------------------\ndef _change(ctx: ToolContext, kind: str, summary: str, **ids: int | None) -> AppliedChange:\n    return AppliedChange(kind=kind, summary=summary, board_id=ids.pop(\"board_id\", None) or ctx.board_id, **ids)\ndef _card_data(card: Card) -> dict[str, Any]:",
         "detail": "backend.app.ai.tools",
         "documentation": {}
     },
@@ -7787,11 +8257,20 @@
         "documentation": {}
     },
     {
+        "label": "tool_definition",
+        "kind": 2,
+        "importPath": "backend.app.ai.tools",
+        "description": "backend.app.ai.tools",
+        "peekOfCode": "def tool_definition(name: str) -> dict[str, Any]:\n    t = TOOLS[name]\n    return {\n        \"type\": \"function\",\n        \"function\": {\"name\": t.name, \"description\": t.description, \"parameters\": t.args.model_json_schema()},\n    }\ndef tool_definitions() -> list[dict[str, Any]]:\n    return [tool_definition(t.name) for t in TOOLS.values() if t.exposed]\ndef execute(ctx: ToolContext, name: str, args: Any) -> ToolResult:\n    \"\"\"Validate and run one tool call. Every failure becomes a ToolError for the model.\"\"\"",
+        "detail": "backend.app.ai.tools",
+        "documentation": {}
+    },
+    {
         "label": "tool_definitions",
         "kind": 2,
         "importPath": "backend.app.ai.tools",
         "description": "backend.app.ai.tools",
-        "peekOfCode": "def tool_definitions() -> list[dict[str, Any]]:\n    return [\n        {\n            \"type\": \"function\",\n            \"function\": {\"name\": t.name, \"description\": t.description, \"parameters\": t.args.model_json_schema()},\n        }\n        for t in TOOLS.values()\n        if t.exposed\n    ]\ndef execute(ctx: ToolContext, name: str, args: Any) -> ToolResult:",
+        "peekOfCode": "def tool_definitions() -> list[dict[str, Any]]:\n    return [tool_definition(t.name) for t in TOOLS.values() if t.exposed]\ndef execute(ctx: ToolContext, name: str, args: Any) -> ToolResult:\n    \"\"\"Validate and run one tool call. Every failure becomes a ToolError for the model.\"\"\"\n    tool = TOOLS.get(name)\n    if tool is None:\n        raise ToolError(f\"Unknown tool '{name}'. Available: {', '.join(TOOLS)}.\")\n    try:\n        parsed = tool.args.model_validate(args)\n    except ValidationError as exc:  # keep the message short for the model",
         "detail": "backend.app.ai.tools",
         "documentation": {}
     },
@@ -7801,6 +8280,15 @@
         "importPath": "backend.app.ai.tools",
         "description": "backend.app.ai.tools",
         "peekOfCode": "def execute(ctx: ToolContext, name: str, args: Any) -> ToolResult:\n    \"\"\"Validate and run one tool call. Every failure becomes a ToolError for the model.\"\"\"\n    tool = TOOLS.get(name)\n    if tool is None:\n        raise ToolError(f\"Unknown tool '{name}'. Available: {', '.join(TOOLS)}.\")\n    try:\n        parsed = tool.args.model_validate(args)\n    except ValidationError as exc:  # keep the message short for the model\n        detail = \"; \".join(f\"{'.'.join(map(str, e['loc'])) or 'arguments'}: {e['msg']}\" for e in exc.errors()[:5])\n        raise ToolError(f\"Invalid arguments: {detail}\") from None",
+        "detail": "backend.app.ai.tools",
+        "documentation": {}
+    },
+    {
+        "label": "DRAFT_CARDS",
+        "kind": 5,
+        "importPath": "backend.app.ai.tools",
+        "description": "backend.app.ai.tools",
+        "peekOfCode": "DRAFT_CARDS = \"draft_cards\"\n\"\"\"Offered only by the card-drafting endpoint, never in the board chat.\"\"\"\n@dataclass(frozen=True)\nclass Tool:\n    name: str\n    description: str\n    args: type[BaseModel]\n    run: Callable[[ToolContext, Any], ToolResult]\n    exposed: bool = True\nTOOLS: dict[str, Tool] = {",
         "detail": "backend.app.ai.tools",
         "documentation": {}
     },
@@ -8241,7 +8729,16 @@
         "kind": 2,
         "importPath": "backend.app.routers.ai",
         "description": "backend.app.routers.ai",
-        "peekOfCode": "def chat(\n    board_id: int,\n    body: AiRequest,\n    user: CurrentUser,\n    db: DbSession,\n    llm: Annotated[LLMClient, Depends(get_llm_client)],\n):\n    board = svc.get_board(db, user, board_id)\n    ai_usage.reserve(db, user, board.workspace_id)\n    from time import monotonic",
+        "peekOfCode": "def chat(\n    board_id: int,\n    body: AiRequest,\n    user: CurrentUser,\n    db: DbSession,\n    llm: Annotated[LLMClient, Depends(get_llm_client)],\n):\n    board = svc.get_board(db, user, board_id)\n    ai_usage.reserve(db, user, board.workspace_id)\n    started = monotonic()",
+        "detail": "backend.app.routers.ai",
+        "documentation": {}
+    },
+    {
+        "label": "draft",
+        "kind": 2,
+        "importPath": "backend.app.routers.ai",
+        "description": "backend.app.routers.ai",
+        "peekOfCode": "def draft(\n    board_id: int,\n    body: CardDraftRequest,\n    user: CurrentUser,\n    db: DbSession,\n    llm: Annotated[LLMClient, Depends(get_llm_client)],\n):\n    # A viewer could not create the cards, so they are refused before the budget is touched.\n    board = svc.board_for(db, user, board_id, svc.MEMBER)\n    ai_usage.reserve(db, user, board.workspace_id)",
         "detail": "backend.app.routers.ai",
         "documentation": {}
     },
@@ -8512,6 +9009,15 @@
         "importPath": "backend.app.routers.boards",
         "description": "backend.app.routers.boards",
         "peekOfCode": "def create_card(column_id: int, body: CardCreate, user: CurrentUser, db: DbSession):\n    return svc.create_card(\n        db,\n        user,\n        column_id,\n        body.title,\n        body.description,\n        body.position,\n        body.assignee_id,\n        body.priority,",
+        "detail": "backend.app.routers.boards",
+        "documentation": {}
+    },
+    {
+        "label": "create_cards",
+        "kind": 2,
+        "importPath": "backend.app.routers.boards",
+        "description": "backend.app.routers.boards",
+        "peekOfCode": "def create_cards(column_id: int, body: CardBatchCreate, user: CurrentUser, db: DbSession):\n    \"\"\"All or nothing. Returns the board, since several cards changed at once.\"\"\"\n    return svc.create_cards(db, user, column_id, [svc.NewCard(**card.model_dump()) for card in body.cards])\n@router.patch(\"/cards/{card_id}\", response_model=CardOut)\ndef update_card(card_id: int, body: CardUpdate, user: CurrentUser, db: DbSession):\n    \"\"\"A field the client did not send is left alone; sending null clears it.\"\"\"\n    sent = body.model_fields_set\n    return svc.update_card(\n        db,\n        user,",
         "detail": "backend.app.routers.boards",
         "documentation": {}
     },
@@ -9204,7 +9710,7 @@
         "kind": 6,
         "importPath": "backend.app.schemas.ai",
         "description": "backend.app.schemas.ai",
-        "peekOfCode": "class AiResponse(BaseModel):\n    reply: str\n    changes: list[AppliedChange]\n    pending: list[PendingAction]\n    board: BoardOut  # fresh state, so the UI reconciles from the server\nclass AiConfirmRequest(BaseModel):\n    proposal_token: Annotated[str, StringConstraints(strip_whitespace=True, min_length=20, max_length=200)]\nclass WorkspaceAiRequest(BaseModel):\n    question: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=500)]\nclass WorkspaceAiEvidence(BaseModel):",
+        "peekOfCode": "class AiResponse(BaseModel):\n    reply: str\n    changes: list[AppliedChange]\n    pending: list[PendingAction]\n    board: BoardOut  # fresh state, so the UI reconciles from the server\nclass AiConfirmRequest(BaseModel):\n    proposal_token: Annotated[str, StringConstraints(strip_whitespace=True, min_length=20, max_length=200)]\nclass CardDraftRequest(BaseModel):\n    text: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=12_000)]\nclass CardDraftResponse(BaseModel):",
         "detail": "backend.app.schemas.ai",
         "documentation": {}
     },
@@ -9213,7 +9719,25 @@
         "kind": 6,
         "importPath": "backend.app.schemas.ai",
         "description": "backend.app.schemas.ai",
-        "peekOfCode": "class AiConfirmRequest(BaseModel):\n    proposal_token: Annotated[str, StringConstraints(strip_whitespace=True, min_length=20, max_length=200)]\nclass WorkspaceAiRequest(BaseModel):\n    question: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=500)]\nclass WorkspaceAiEvidence(BaseModel):\n    kind: str\n    title: str\n    board_id: int\n    card_id: int | None = None\nclass WorkspaceAiResponse(BaseModel):",
+        "peekOfCode": "class AiConfirmRequest(BaseModel):\n    proposal_token: Annotated[str, StringConstraints(strip_whitespace=True, min_length=20, max_length=200)]\nclass CardDraftRequest(BaseModel):\n    text: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=12_000)]\nclass CardDraftResponse(BaseModel):\n    \"\"\"Proposed cards only. Nothing exists until the user creates the ones they keep.\"\"\"\n    drafts: list[CardDraft]\n    note: str = \"\"  # what the model said when it drafted nothing\nclass WorkspaceAiRequest(BaseModel):\n    question: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=500)]",
+        "detail": "backend.app.schemas.ai",
+        "documentation": {}
+    },
+    {
+        "label": "CardDraftRequest",
+        "kind": 6,
+        "importPath": "backend.app.schemas.ai",
+        "description": "backend.app.schemas.ai",
+        "peekOfCode": "class CardDraftRequest(BaseModel):\n    text: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=12_000)]\nclass CardDraftResponse(BaseModel):\n    \"\"\"Proposed cards only. Nothing exists until the user creates the ones they keep.\"\"\"\n    drafts: list[CardDraft]\n    note: str = \"\"  # what the model said when it drafted nothing\nclass WorkspaceAiRequest(BaseModel):\n    question: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=500)]\nclass WorkspaceAiEvidence(BaseModel):\n    kind: str",
+        "detail": "backend.app.schemas.ai",
+        "documentation": {}
+    },
+    {
+        "label": "CardDraftResponse",
+        "kind": 6,
+        "importPath": "backend.app.schemas.ai",
+        "description": "backend.app.schemas.ai",
+        "peekOfCode": "class CardDraftResponse(BaseModel):\n    \"\"\"Proposed cards only. Nothing exists until the user creates the ones they keep.\"\"\"\n    drafts: list[CardDraft]\n    note: str = \"\"  # what the model said when it drafted nothing\nclass WorkspaceAiRequest(BaseModel):\n    question: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=500)]\nclass WorkspaceAiEvidence(BaseModel):\n    kind: str\n    title: str\n    board_id: int",
         "detail": "backend.app.schemas.ai",
         "documentation": {}
     },
@@ -9465,7 +9989,25 @@
         "kind": 6,
         "importPath": "backend.app.schemas.boards",
         "description": "backend.app.schemas.boards",
-        "peekOfCode": "class CardCreate(BaseModel):\n    title: CardTitle\n    description: Description = \"\"\n    position: Position | None = None  # None appends\n    assignee_id: int | None = None\n    priority: Priority = Priority.NONE\n    sprint_id: int | None = None\n    due_date: datetime | None = None\n    estimate: Estimate | None = None\nclass CardUpdate(BaseModel):",
+        "peekOfCode": "class CardCreate(BaseModel):\n    title: CardTitle\n    description: Description = \"\"\n    position: Position | None = None  # None appends\n    assignee_id: int | None = None\n    priority: Priority = Priority.NONE\n    sprint_id: int | None = None\n    due_date: datetime | None = None\n    estimate: Estimate | None = None\nMAX_BATCH_CARDS = 25",
+        "detail": "backend.app.schemas.boards",
+        "documentation": {}
+    },
+    {
+        "label": "CardDraft",
+        "kind": 6,
+        "importPath": "backend.app.schemas.boards",
+        "description": "backend.app.schemas.boards",
+        "peekOfCode": "class CardDraft(BaseModel):\n    \"\"\"A card that does not exist yet: what batch create accepts and what AI drafting returns.\"\"\"\n    title: CardTitle\n    description: Description = \"\"\n    assignee_id: int | None = None\n    priority: Priority = Priority.NONE\n    due_date: datetime | None = None\n    estimate: Estimate | None = None\n    label_ids: list[int] = Field(default_factory=list, max_length=20)\n    checklist: list[ItemText] = Field(default_factory=list, max_length=20)",
+        "detail": "backend.app.schemas.boards",
+        "documentation": {}
+    },
+    {
+        "label": "CardBatchCreate",
+        "kind": 6,
+        "importPath": "backend.app.schemas.boards",
+        "description": "backend.app.schemas.boards",
+        "peekOfCode": "class CardBatchCreate(BaseModel):\n    cards: list[CardDraft] = Field(min_length=1, max_length=MAX_BATCH_CARDS)\nclass CardUpdate(BaseModel):\n    \"\"\"Absent fields are left alone. `assignee_id`, `due_date` and `estimate` sent as null are\n    cleared, which `model_fields_set` lets the router tell apart from absent.\"\"\"\n    title: CardTitle | None = None\n    description: Description | None = None\n    assignee_id: int | None = None\n    priority: Priority | None = None\n    due_date: datetime | None = None",
         "detail": "backend.app.schemas.boards",
         "documentation": {}
     },
@@ -9601,6 +10143,15 @@
         "importPath": "backend.app.schemas.boards",
         "description": "backend.app.schemas.boards",
         "peekOfCode": "Estimate = Annotated[int, Field(ge=0, le=1000)]\nclass CardCreate(BaseModel):\n    title: CardTitle\n    description: Description = \"\"\n    position: Position | None = None  # None appends\n    assignee_id: int | None = None\n    priority: Priority = Priority.NONE\n    sprint_id: int | None = None\n    due_date: datetime | None = None\n    estimate: Estimate | None = None",
+        "detail": "backend.app.schemas.boards",
+        "documentation": {}
+    },
+    {
+        "label": "MAX_BATCH_CARDS",
+        "kind": 5,
+        "importPath": "backend.app.schemas.boards",
+        "description": "backend.app.schemas.boards",
+        "peekOfCode": "MAX_BATCH_CARDS = 25\nclass CardDraft(BaseModel):\n    \"\"\"A card that does not exist yet: what batch create accepts and what AI drafting returns.\"\"\"\n    title: CardTitle\n    description: Description = \"\"\n    assignee_id: int | None = None\n    priority: Priority = Priority.NONE\n    due_date: datetime | None = None\n    estimate: Estimate | None = None\n    label_ids: list[int] = Field(default_factory=list, max_length=20)",
         "detail": "backend.app.schemas.boards",
         "documentation": {}
     },
@@ -10478,6 +11029,15 @@
         "documentation": {}
     },
     {
+        "label": "NewCard",
+        "kind": 6,
+        "importPath": "backend.app.services.boards",
+        "description": "backend.app.services.boards",
+        "peekOfCode": "class NewCard:\n    \"\"\"One card of a batch: everything `create_card` takes, plus its checklist and labels.\"\"\"\n    title: str\n    description: str = \"\"\n    assignee_id: int | None = None\n    priority: Priority = Priority.NONE\n    due_date: datetime | None = None\n    estimate: int | None = None\n    label_ids: list[int] = field(default_factory=list)\n    checklist: list[str] = field(default_factory=list)",
+        "detail": "backend.app.services.boards",
+        "documentation": {}
+    },
+    {
         "label": "list_boards",
         "kind": 2,
         "importPath": "backend.app.services.boards",
@@ -10591,6 +11151,15 @@
         "importPath": "backend.app.services.boards",
         "description": "backend.app.services.boards",
         "peekOfCode": "def create_card(\n    db: Session,\n    user: User,\n    column_id: int,\n    title: str,\n    description: str = \"\",\n    position: int | None = None,\n    assignee_id: int | None = None,\n    priority: Priority = Priority.NONE,\n    due_date: datetime | None = None,",
+        "detail": "backend.app.services.boards",
+        "documentation": {}
+    },
+    {
+        "label": "create_cards",
+        "kind": 2,
+        "importPath": "backend.app.services.boards",
+        "description": "backend.app.services.boards",
+        "peekOfCode": "def create_cards(db: Session, user: User, column_id: int, cards: list[NewCard]) -> Board:\n    \"\"\"Append several cards to a column in one transaction: all of them land, or none do.\n    Everything is checked before the first row is added, so a bad assignee or label on the last\n    card leaves no trace of the ones before it.\n    \"\"\"\n    column = _column(db, user, column_id, MEMBER)\n    board = _board(db, user, column.board_id)\n    known_labels = set(db.scalars(select(Label.id).where(Label.workspace_id == board.workspace_id)))\n    for new in cards:\n        _check_assignee(db, board, new.assignee_id)",
         "detail": "backend.app.services.boards",
         "documentation": {}
     },
@@ -11751,7 +12320,7 @@
         "kind": 2,
         "importPath": "backend.app.config",
         "description": "backend.app.config",
-        "peekOfCode": "def resend_from_email() -> str | None:\n    return os.environ.get(\"RESEND_FROM_EMAIL\") or None\ndef resend_reply_to() -> str | None:\n    return os.environ.get(\"RESEND_REPLY_TO\") or None\n# --- AI assistant (any OpenAI-compatible endpoint; OpenRouter by default) ---------------------\nDEFAULT_LLM_BASE_URL = \"https://openrouter.ai/api/v1\"\nDEFAULT_LLM_MODEL = \"nvidia/nemotron-3-super-120b-a12b:free\"\nAI_MAX_TOOL_ITERATIONS = 8\ndef ai_monthly_action_limit() -> int:\n    return max(1, int(os.environ.get(\"AI_MONTHLY_ACTION_LIMIT\", \"500\")))",
+        "peekOfCode": "def resend_from_email() -> str | None:\n    return os.environ.get(\"RESEND_FROM_EMAIL\") or None\ndef resend_reply_to() -> str | None:\n    return os.environ.get(\"RESEND_REPLY_TO\") or None\n# --- AI assistant (any OpenAI-compatible endpoint; OpenRouter by default) ---------------------\nDEFAULT_LLM_BASE_URL = \"https://openrouter.ai/api/v1\"\nDEFAULT_LLM_MODEL = \"nvidia/nemotron-3-super-120b-a12b:free\"\nAI_MAX_TOOL_ITERATIONS = 8\nAI_MAX_DRAFT_ITERATIONS = 3\ndef ai_monthly_action_limit() -> int:",
         "detail": "backend.app.config",
         "documentation": {}
     },
@@ -11760,7 +12329,7 @@
         "kind": 2,
         "importPath": "backend.app.config",
         "description": "backend.app.config",
-        "peekOfCode": "def resend_reply_to() -> str | None:\n    return os.environ.get(\"RESEND_REPLY_TO\") or None\n# --- AI assistant (any OpenAI-compatible endpoint; OpenRouter by default) ---------------------\nDEFAULT_LLM_BASE_URL = \"https://openrouter.ai/api/v1\"\nDEFAULT_LLM_MODEL = \"nvidia/nemotron-3-super-120b-a12b:free\"\nAI_MAX_TOOL_ITERATIONS = 8\ndef ai_monthly_action_limit() -> int:\n    return max(1, int(os.environ.get(\"AI_MONTHLY_ACTION_LIMIT\", \"500\")))\ndef llm_api_key() -> str | None:\n    return os.environ.get(\"LLM_API_KEY\") or None",
+        "peekOfCode": "def resend_reply_to() -> str | None:\n    return os.environ.get(\"RESEND_REPLY_TO\") or None\n# --- AI assistant (any OpenAI-compatible endpoint; OpenRouter by default) ---------------------\nDEFAULT_LLM_BASE_URL = \"https://openrouter.ai/api/v1\"\nDEFAULT_LLM_MODEL = \"nvidia/nemotron-3-super-120b-a12b:free\"\nAI_MAX_TOOL_ITERATIONS = 8\nAI_MAX_DRAFT_ITERATIONS = 3\ndef ai_monthly_action_limit() -> int:\n    return max(1, int(os.environ.get(\"AI_MONTHLY_ACTION_LIMIT\", \"500\")))\ndef llm_api_key() -> str | None:",
         "detail": "backend.app.config",
         "documentation": {}
     },
@@ -11814,7 +12383,7 @@
         "kind": 5,
         "importPath": "backend.app.config",
         "description": "backend.app.config",
-        "peekOfCode": "DEFAULT_LLM_BASE_URL = \"https://openrouter.ai/api/v1\"\nDEFAULT_LLM_MODEL = \"nvidia/nemotron-3-super-120b-a12b:free\"\nAI_MAX_TOOL_ITERATIONS = 8\ndef ai_monthly_action_limit() -> int:\n    return max(1, int(os.environ.get(\"AI_MONTHLY_ACTION_LIMIT\", \"500\")))\ndef llm_api_key() -> str | None:\n    return os.environ.get(\"LLM_API_KEY\") or None\ndef llm_model() -> str:\n    return os.environ.get(\"LLM_MODEL\") or DEFAULT_LLM_MODEL\ndef llm_base_url() -> str:",
+        "peekOfCode": "DEFAULT_LLM_BASE_URL = \"https://openrouter.ai/api/v1\"\nDEFAULT_LLM_MODEL = \"nvidia/nemotron-3-super-120b-a12b:free\"\nAI_MAX_TOOL_ITERATIONS = 8\nAI_MAX_DRAFT_ITERATIONS = 3\ndef ai_monthly_action_limit() -> int:\n    return max(1, int(os.environ.get(\"AI_MONTHLY_ACTION_LIMIT\", \"500\")))\ndef llm_api_key() -> str | None:\n    return os.environ.get(\"LLM_API_KEY\") or None\ndef llm_model() -> str:\n    return os.environ.get(\"LLM_MODEL\") or DEFAULT_LLM_MODEL",
         "detail": "backend.app.config",
         "documentation": {}
     },
@@ -11823,7 +12392,7 @@
         "kind": 5,
         "importPath": "backend.app.config",
         "description": "backend.app.config",
-        "peekOfCode": "DEFAULT_LLM_MODEL = \"nvidia/nemotron-3-super-120b-a12b:free\"\nAI_MAX_TOOL_ITERATIONS = 8\ndef ai_monthly_action_limit() -> int:\n    return max(1, int(os.environ.get(\"AI_MONTHLY_ACTION_LIMIT\", \"500\")))\ndef llm_api_key() -> str | None:\n    return os.environ.get(\"LLM_API_KEY\") or None\ndef llm_model() -> str:\n    return os.environ.get(\"LLM_MODEL\") or DEFAULT_LLM_MODEL\ndef llm_base_url() -> str:\n    return os.environ.get(\"LLM_BASE_URL\") or DEFAULT_LLM_BASE_URL",
+        "peekOfCode": "DEFAULT_LLM_MODEL = \"nvidia/nemotron-3-super-120b-a12b:free\"\nAI_MAX_TOOL_ITERATIONS = 8\nAI_MAX_DRAFT_ITERATIONS = 3\ndef ai_monthly_action_limit() -> int:\n    return max(1, int(os.environ.get(\"AI_MONTHLY_ACTION_LIMIT\", \"500\")))\ndef llm_api_key() -> str | None:\n    return os.environ.get(\"LLM_API_KEY\") or None\ndef llm_model() -> str:\n    return os.environ.get(\"LLM_MODEL\") or DEFAULT_LLM_MODEL\ndef llm_base_url() -> str:",
         "detail": "backend.app.config",
         "documentation": {}
     },
@@ -11832,7 +12401,16 @@
         "kind": 5,
         "importPath": "backend.app.config",
         "description": "backend.app.config",
-        "peekOfCode": "AI_MAX_TOOL_ITERATIONS = 8\ndef ai_monthly_action_limit() -> int:\n    return max(1, int(os.environ.get(\"AI_MONTHLY_ACTION_LIMIT\", \"500\")))\ndef llm_api_key() -> str | None:\n    return os.environ.get(\"LLM_API_KEY\") or None\ndef llm_model() -> str:\n    return os.environ.get(\"LLM_MODEL\") or DEFAULT_LLM_MODEL\ndef llm_base_url() -> str:\n    return os.environ.get(\"LLM_BASE_URL\") or DEFAULT_LLM_BASE_URL",
+        "peekOfCode": "AI_MAX_TOOL_ITERATIONS = 8\nAI_MAX_DRAFT_ITERATIONS = 3\ndef ai_monthly_action_limit() -> int:\n    return max(1, int(os.environ.get(\"AI_MONTHLY_ACTION_LIMIT\", \"500\")))\ndef llm_api_key() -> str | None:\n    return os.environ.get(\"LLM_API_KEY\") or None\ndef llm_model() -> str:\n    return os.environ.get(\"LLM_MODEL\") or DEFAULT_LLM_MODEL\ndef llm_base_url() -> str:\n    return os.environ.get(\"LLM_BASE_URL\") or DEFAULT_LLM_BASE_URL",
+        "detail": "backend.app.config",
+        "documentation": {}
+    },
+    {
+        "label": "AI_MAX_DRAFT_ITERATIONS",
+        "kind": 5,
+        "importPath": "backend.app.config",
+        "description": "backend.app.config",
+        "peekOfCode": "AI_MAX_DRAFT_ITERATIONS = 3\ndef ai_monthly_action_limit() -> int:\n    return max(1, int(os.environ.get(\"AI_MONTHLY_ACTION_LIMIT\", \"500\")))\ndef llm_api_key() -> str | None:\n    return os.environ.get(\"LLM_API_KEY\") or None\ndef llm_model() -> str:\n    return os.environ.get(\"LLM_MODEL\") or DEFAULT_LLM_MODEL\ndef llm_base_url() -> str:\n    return os.environ.get(\"LLM_BASE_URL\") or DEFAULT_LLM_BASE_URL",
         "detail": "backend.app.config",
         "documentation": {}
     },
@@ -14327,6 +14905,141 @@
         "description": "backend.tests.test_card_details",
         "peekOfCode": "def test_a_missing_comment_is_404_for_everyone(client, card):\n    _, _, tokens = card\n    assert client.patch(\"/api/comments/9999\", json={\"body\": \"x\"}, headers=headers(tokens[\"owner\"])).status_code == 404\n    assert client.delete(\"/api/comments/9999\", headers=headers(tokens[\"owner\"])).status_code == 404",
         "detail": "backend.tests.test_card_details",
+        "documentation": {}
+    },
+    {
+        "label": "draft",
+        "kind": 2,
+        "importPath": "backend.tests.test_card_drafting",
+        "description": "backend.tests.test_card_drafting",
+        "peekOfCode": "def draft(client, h, board_id, text=\"Ship the onboarding flow\"):\n    return client.post(f\"/api/boards/{board_id}/ai/draft-cards\", json={\"text\": text}, headers=h)\ndef card_count():\n    with session_for() as session:\n        return session.scalar(sa.select(sa.func.count()).select_from(Card))\n# --- service: create_cards ------------------------------------------------------------------\ndef test_create_cards_appends_in_order_with_checklist_labels_and_history(db, user):  # noqa: F811\n    board = make_board(db, user)\n    todo = board.columns[0]\n    svc.create_card(db, user, todo.id, \"Existing\")",
+        "detail": "backend.tests.test_card_drafting",
+        "documentation": {}
+    },
+    {
+        "label": "card_count",
+        "kind": 2,
+        "importPath": "backend.tests.test_card_drafting",
+        "description": "backend.tests.test_card_drafting",
+        "peekOfCode": "def card_count():\n    with session_for() as session:\n        return session.scalar(sa.select(sa.func.count()).select_from(Card))\n# --- service: create_cards ------------------------------------------------------------------\ndef test_create_cards_appends_in_order_with_checklist_labels_and_history(db, user):  # noqa: F811\n    board = make_board(db, user)\n    todo = board.columns[0]\n    svc.create_card(db, user, todo.id, \"Existing\")\n    label = Label(workspace_id=board.workspace_id, name=\"bug\")\n    db.add(label)",
+        "detail": "backend.tests.test_card_drafting",
+        "documentation": {}
+    },
+    {
+        "label": "test_create_cards_appends_in_order_with_checklist_labels_and_history",
+        "kind": 2,
+        "importPath": "backend.tests.test_card_drafting",
+        "description": "backend.tests.test_card_drafting",
+        "peekOfCode": "def test_create_cards_appends_in_order_with_checklist_labels_and_history(db, user):  # noqa: F811\n    board = make_board(db, user)\n    todo = board.columns[0]\n    svc.create_card(db, user, todo.id, \"Existing\")\n    label = Label(workspace_id=board.workspace_id, name=\"bug\")\n    db.add(label)\n    db.commit()\n    fresh = svc.create_cards(\n        db,\n        user,",
+        "detail": "backend.tests.test_card_drafting",
+        "documentation": {}
+    },
+    {
+        "label": "test_create_cards_is_all_or_nothing",
+        "kind": 2,
+        "importPath": "backend.tests.test_card_drafting",
+        "description": "backend.tests.test_card_drafting",
+        "peekOfCode": "def test_create_cards_is_all_or_nothing(db, user, other):  # noqa: F811\n    board = make_board(db, user)\n    todo = board.columns[0]\n    before = db.scalar(sa.select(sa.func.count()).select_from(Activity))\n    with pytest.raises(InvalidRequest):  # `other` is not in this workspace\n        svc.create_cards(db, user, todo.id, [svc.NewCard(title=\"Fine\"), svc.NewCard(title=\"Bad\", assignee_id=other.id)])\n    with pytest.raises(NotFound):\n        svc.create_cards(db, user, todo.id, [svc.NewCard(title=\"Fine\"), svc.NewCard(title=\"Bad\", label_ids=[999])])\n    db.rollback()\n    assert svc.get_board(db, user, board.id).columns[0].cards == []",
+        "detail": "backend.tests.test_card_drafting",
+        "documentation": {}
+    },
+    {
+        "label": "test_create_cards_in_a_done_column_are_completed",
+        "kind": 2,
+        "importPath": "backend.tests.test_card_drafting",
+        "description": "backend.tests.test_card_drafting",
+        "peekOfCode": "def test_create_cards_in_a_done_column_are_completed(db, user):  # noqa: F811\n    board = make_board(db, user)\n    done = board.columns[2]\n    svc.update_column(db, user, done.id, is_done=True)\n    fresh = svc.create_cards(db, user, done.id, [svc.NewCard(title=\"Already shipped\")])\n    assert fresh.columns[2].cards[0].completed_at is not None\ndef test_create_cards_respects_membership_and_role(shared, client, register_and_login):  # noqa: F811\n    board, tokens = shared\n    column_id = board[\"columns\"][0][\"id\"]\n    path = f\"/api/columns/{column_id}/cards/batch\"",
+        "detail": "backend.tests.test_card_drafting",
+        "documentation": {}
+    },
+    {
+        "label": "test_create_cards_respects_membership_and_role",
+        "kind": 2,
+        "importPath": "backend.tests.test_card_drafting",
+        "description": "backend.tests.test_card_drafting",
+        "peekOfCode": "def test_create_cards_respects_membership_and_role(shared, client, register_and_login):  # noqa: F811\n    board, tokens = shared\n    column_id = board[\"columns\"][0][\"id\"]\n    path = f\"/api/columns/{column_id}/cards/batch\"\n    body = {\"cards\": [{\"title\": \"A\"}, {\"title\": \"B\"}]}\n    assert client.post(path, json=body).status_code == 401\n    assert client.post(path, json=body, headers=headers(tokens[\"outsider\"])).status_code == 404\n    assert client.post(path, json=body, headers=headers(tokens[\"viewer\"])).status_code == 403\n    with session_for() as session:\n        viewer = session.scalar(sa.select(User).where(User.email == \"viewer@example.com\"))",
+        "detail": "backend.tests.test_card_drafting",
+        "documentation": {}
+    },
+    {
+        "label": "test_batch_endpoint_validates_its_body",
+        "kind": 2,
+        "importPath": "backend.tests.test_card_drafting",
+        "description": "backend.tests.test_card_drafting",
+        "peekOfCode": "def test_batch_endpoint_validates_its_body(client, setup):  # noqa: F811\n    h, _board, todo, *_ = setup\n    path = f\"/api/columns/{todo['id']}/cards/batch\"\n    assert client.post(path, json={\"cards\": []}, headers=h).status_code == 422\n    assert client.post(path, json={\"cards\": [{\"title\": \"x\"}] * 26}, headers=h).status_code == 422\n    assert client.post(path, json={\"cards\": [{\"title\": \"  \"}]}, headers=h).status_code == 422\n    assert card_count() == 1  # only the fixture's card\n# --- drafting -------------------------------------------------------------------------------\ndef test_draft_returns_cards_and_writes_nothing(client, setup, use_llm):  # noqa: F811\n    h, board, *_ = setup",
+        "detail": "backend.tests.test_card_drafting",
+        "documentation": {}
+    },
+    {
+        "label": "test_draft_returns_cards_and_writes_nothing",
+        "kind": 2,
+        "importPath": "backend.tests.test_card_drafting",
+        "description": "backend.tests.test_card_drafting",
+        "peekOfCode": "def test_draft_returns_cards_and_writes_nothing(client, setup, use_llm):  # noqa: F811\n    h, board, *_ = setup\n    fake = use_llm(\n        call(\n            \"draft_cards\",\n            cards=[\n                {\"title\": \"Build sign-up form\", \"priority\": \"high\", \"checklist\": [\"Validate email\"]},\n                {\"title\": \"Write welcome email\", \"description\": \"Sent after sign-up\", \"estimate\": 2},\n            ],\n        )",
+        "detail": "backend.tests.test_card_drafting",
+        "documentation": {}
+    },
+    {
+        "label": "test_draft_offers_only_the_draft_tool_and_runs_no_other",
+        "kind": 2,
+        "importPath": "backend.tests.test_card_drafting",
+        "description": "backend.tests.test_card_drafting",
+        "peekOfCode": "def test_draft_offers_only_the_draft_tool_and_runs_no_other(client, setup, use_llm):  # noqa: F811\n    h, board, todo, _done, card = setup\n    seen: list[list[dict]] = []\n    turns = [\n        call(\"create_card\", column_id=todo[\"id\"], title=\"Sneaky\"),\n        call(\"delete_card\", card_id=card[\"id\"]),\n        say(\"Nothing to draft.\"),\n    ]\n    class Recording:\n        def complete(self, messages, tools):",
+        "detail": "backend.tests.test_card_drafting",
+        "documentation": {}
+    },
+    {
+        "label": "test_draft_tool_is_not_offered_in_the_board_chat",
+        "kind": 2,
+        "importPath": "backend.tests.test_card_drafting",
+        "description": "backend.tests.test_card_drafting",
+        "peekOfCode": "def test_draft_tool_is_not_offered_in_the_board_chat():\n    assert \"draft_cards\" not in [t[\"function\"][\"name\"] for t in tool_definitions()]\ndef test_draft_sends_invalid_ids_back_to_the_model(client, setup, use_llm):  # noqa: F811\n    h, board, *_ = setup\n    fake = use_llm(\n        call(\"draft_cards\", cards=[{\"title\": \"A\", \"assignee_id\": 9999}]),\n        call(\"draft_cards\", cards=[{\"title\": \"A\", \"label_ids\": [777]}]),\n        call(\"draft_cards\", cards=[{\"title\": \"A\"}]),\n    )\n    res = draft(client, h, board[\"id\"]).json()",
+        "detail": "backend.tests.test_card_drafting",
+        "documentation": {}
+    },
+    {
+        "label": "test_draft_sends_invalid_ids_back_to_the_model",
+        "kind": 2,
+        "importPath": "backend.tests.test_card_drafting",
+        "description": "backend.tests.test_card_drafting",
+        "peekOfCode": "def test_draft_sends_invalid_ids_back_to_the_model(client, setup, use_llm):  # noqa: F811\n    h, board, *_ = setup\n    fake = use_llm(\n        call(\"draft_cards\", cards=[{\"title\": \"A\", \"assignee_id\": 9999}]),\n        call(\"draft_cards\", cards=[{\"title\": \"A\", \"label_ids\": [777]}]),\n        call(\"draft_cards\", cards=[{\"title\": \"A\"}]),\n    )\n    res = draft(client, h, board[\"id\"]).json()\n    assert [d[\"title\"] for d in res[\"drafts\"]] == [\"A\"]\n    errors = [r[\"error\"] for r in tool_results(fake)]",
+        "detail": "backend.tests.test_card_drafting",
+        "documentation": {}
+    },
+    {
+        "label": "test_draft_gives_up_after_the_iteration_cap",
+        "kind": 2,
+        "importPath": "backend.tests.test_card_drafting",
+        "description": "backend.tests.test_card_drafting",
+        "peekOfCode": "def test_draft_gives_up_after_the_iteration_cap(client, setup, use_llm):  # noqa: F811\n    h, board, *_ = setup\n    fake = use_llm(*[call(\"draft_cards\", cards=[])] * 5)\n    res = draft(client, h, board[\"id\"]).json()\n    assert res[\"drafts\"] == [] and \"couldn't\" in res[\"note\"]\n    assert len(fake.calls) == 3\ndef test_draft_refuses_viewers_and_outsiders_before_spending_budget(shared, client, use_llm):  # noqa: F811\n    board, tokens = shared\n    fake = use_llm(call(\"draft_cards\", cards=[{\"title\": \"A\"}]))\n    assert client.post(f\"/api/boards/{board['id']}/ai/draft-cards\", json={\"text\": \"x\"}).status_code == 401",
+        "detail": "backend.tests.test_card_drafting",
+        "documentation": {}
+    },
+    {
+        "label": "test_draft_refuses_viewers_and_outsiders_before_spending_budget",
+        "kind": 2,
+        "importPath": "backend.tests.test_card_drafting",
+        "description": "backend.tests.test_card_drafting",
+        "peekOfCode": "def test_draft_refuses_viewers_and_outsiders_before_spending_budget(shared, client, use_llm):  # noqa: F811\n    board, tokens = shared\n    fake = use_llm(call(\"draft_cards\", cards=[{\"title\": \"A\"}]))\n    assert client.post(f\"/api/boards/{board['id']}/ai/draft-cards\", json={\"text\": \"x\"}).status_code == 401\n    assert draft(client, headers(tokens[\"outsider\"]), board[\"id\"]).status_code == 404\n    assert draft(client, headers(tokens[\"viewer\"]), board[\"id\"]).status_code == 403\n    assert fake.calls == []\n    with session_for() as session:\n        assert session.scalar(sa.select(sa.func.count()).select_from(AiUsage)) == 0\n    assert draft(client, headers(tokens[\"member\"]), board[\"id\"]).status_code == 200",
+        "detail": "backend.tests.test_card_drafting",
+        "documentation": {}
+    },
+    {
+        "label": "test_draft_counts_against_the_monthly_budget_and_is_rate_limited",
+        "kind": 2,
+        "importPath": "backend.tests.test_card_drafting",
+        "description": "backend.tests.test_card_drafting",
+        "peekOfCode": "def test_draft_counts_against_the_monthly_budget_and_is_rate_limited(client, setup, use_llm, monkeypatch):  # noqa: F811\n    monkeypatch.setenv(\"AI_MONTHLY_ACTION_LIMIT\", \"1\")\n    h, board, *_ = setup\n    use_llm(call(\"draft_cards\", cards=[{\"title\": \"A\"}]))\n    assert draft(client, h, board[\"id\"]).status_code == 200\n    with session_for() as session:\n        usage = session.query(AiUsage).one()\n        assert usage.actions == 1 and usage.provider_calls == 1\n    limited = draft(client, h, board[\"id\"])\n    assert limited.status_code == 422 and \"monthly AI action limit\" in limited.json()[\"detail\"]",
+        "detail": "backend.tests.test_card_drafting",
+        "documentation": {}
+    },
+    {
+        "label": "test_draft_validates_the_pasted_text",
+        "kind": 2,
+        "importPath": "backend.tests.test_card_drafting",
+        "description": "backend.tests.test_card_drafting",
+        "peekOfCode": "def test_draft_validates_the_pasted_text(client, setup, use_llm):  # noqa: F811\n    h, board, *_ = setup\n    use_llm()\n    assert draft(client, h, board[\"id\"], \"   \").status_code == 422\n    assert draft(client, h, board[\"id\"], \"x\" * 12_001).status_code == 422",
+        "detail": "backend.tests.test_card_drafting",
         "documentation": {}
     },
     {
