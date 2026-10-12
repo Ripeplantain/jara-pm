@@ -39,6 +39,18 @@ export interface Card {
   comment_count: number;
 }
 
+/** A card that does not exist yet: what batch create accepts and what AI drafting returns. */
+export interface CardDraft {
+  title: string;
+  description: string;
+  assignee_id: number | null;
+  priority: Priority;
+  due_date: string | null;
+  estimate: number | null;
+  label_ids: number[];
+  checklist: string[];
+}
+
 /** A card found by search, shown outside its own board. */
 export interface CardHit extends Card {
   board_id: number;

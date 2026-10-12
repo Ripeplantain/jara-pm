@@ -2,7 +2,7 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, Field, StringConstraints
 
-from app.schemas.boards import BoardOut
+from app.schemas.boards import BoardOut, CardDraft
 
 
 class ChatMessage(BaseModel):
@@ -48,6 +48,17 @@ class AiResponse(BaseModel):
 
 class AiConfirmRequest(BaseModel):
     proposal_token: Annotated[str, StringConstraints(strip_whitespace=True, min_length=20, max_length=200)]
+
+
+class CardDraftRequest(BaseModel):
+    text: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=12_000)]
+
+
+class CardDraftResponse(BaseModel):
+    """Proposed cards only. Nothing exists until the user creates the ones they keep."""
+
+    drafts: list[CardDraft]
+    note: str = ""  # what the model said when it drafted nothing
 
 
 class WorkspaceAiRequest(BaseModel):

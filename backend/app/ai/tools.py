@@ -15,7 +15,15 @@ from sqlalchemy.orm import Session
 
 from app.models import Board, Card, Column, Priority, User, WorkspaceMember
 from app.schemas.ai import AppliedChange, PendingAction
-from app.schemas.boards import BoardTitle, CardTitle, ColumnTitle, Description, Position
+from app.schemas.boards import (
+    MAX_BATCH_CARDS,
+    BoardTitle,
+    CardDraft,
+    CardTitle,
+    ColumnTitle,
+    Description,
+    Position,
+)
 from app.services import ai_proposals, permissions
 from app.services import analytics as analytics_svc
 from app.services import boards as svc
@@ -62,6 +70,7 @@ class ToolResult:
     change: AppliedChange | None = None
     pending: PendingAction | None = None
     changes: list[AppliedChange] = field(default_factory=list)
+    drafts: list[CardDraft] = field(default_factory=list)
 
 
 # --- argument schemas -----------------------------------------------------------------------
@@ -225,6 +234,10 @@ class CardAuthoringArgs(_Args):
 class BatchCardAuthoringArgs(_Args):
     changes: list[CardAuthoringArgs] = Field(min_length=1, max_length=20)
     rationale: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=500)] = ""
+
+
+class DraftCardsArgs(_Args):
+    cards: list[CardDraft] = Field(min_length=1, max_length=MAX_BATCH_CARDS)
 
 
 class DeleteCardArgs(_Args):
@@ -494,21 +507,25 @@ def _board_stats(ctx: ToolContext, _a: BoardStatsArgs) -> ToolResult:
 def _validate_authoring(ctx: ToolContext, a: CardAuthoringArgs) -> Card:
     permissions.require_board(ctx.db, ctx.user, ctx.board_id, permissions.MEMBER)
     card = ctx.card(a.card_id)
-    if a.assignee_id is not None:
+    _check_people_and_labels(ctx, a.assignee_id, a.label_ids)
+    return card
+
+
+def _check_people_and_labels(ctx: ToolContext, assignee_id: int | None, label_ids: list[int]) -> None:
+    if assignee_id is not None:
         member = ctx.db.scalar(
             select(WorkspaceMember).where(
                 WorkspaceMember.workspace_id == ctx.workspace_id(),
-                WorkspaceMember.user_id == a.assignee_id,
+                WorkspaceMember.user_id == assignee_id,
             )
         )
         if member is None:
             raise ToolError("The suggested assignee is not a member of this workspace.")
-    if a.label_ids:
+    if label_ids:
         available = {label.id for label in label_svc.list_labels(ctx.db, ctx.user, ctx.workspace_id())}
-        missing = sorted(set(a.label_ids) - available)
+        missing = sorted(set(label_ids) - available)
         if missing:
             raise ToolError(f"Labels do not exist in this workspace: {missing}")
-    return card
 
 
 def _authoring_summary(ctx: ToolContext, a: CardAuthoringArgs) -> tuple[str, list[str]]:
@@ -617,6 +634,17 @@ def _apply_batch_authoring(ctx: ToolContext, a: BatchCardAuthoringArgs) -> ToolR
     )
 
 
+def _draft_cards(ctx: ToolContext, a: DraftCardsArgs) -> ToolResult:
+    """Writes nothing: the drafts go back to the user, who creates the ones they keep."""
+    permissions.require_board(ctx.db, ctx.user, ctx.board_id, permissions.MEMBER)
+    for index, card in enumerate(a.cards, start=1):
+        try:
+            _check_people_and_labels(ctx, card.assignee_id, card.label_ids)
+        except ToolError as exc:
+            raise ToolError(f"Card {index} (“{card.title}”): {exc}") from None
+    return ToolResult({"ok": True, "drafted": len(a.cards)}, drafts=list(a.cards))
+
+
 def _delete_card(ctx: ToolContext, a: DeleteCardArgs) -> ToolResult:
     card = ctx.card(a.card_id)
     pending = PendingAction(
@@ -676,6 +704,10 @@ def _awaiting(summary: str) -> dict[str, Any]:
 
 
 # --- registry -------------------------------------------------------------------------------
+
+
+DRAFT_CARDS = "draft_cards"
+"""Offered only by the card-drafting endpoint, never in the board chat."""
 
 
 @dataclass(frozen=True)
@@ -753,19 +785,27 @@ TOOLS: dict[str, Tool] = {
         ),
         Tool("apply_card_authoring", "Internal confirmed card authoring operation.", CardAuthoringArgs, _apply_card_authoring, False),
         Tool("apply_batch_card_authoring", "Internal confirmed batch operation.", BatchCardAuthoringArgs, _apply_batch_authoring, False),
+        Tool(
+            DRAFT_CARDS,
+            "Submit the cards drafted from the user's text for their review. Nothing is created until they approve.",
+            DraftCardsArgs,
+            _draft_cards,
+            False,
+        ),
     ]
 }
 
 
+def tool_definition(name: str) -> dict[str, Any]:
+    t = TOOLS[name]
+    return {
+        "type": "function",
+        "function": {"name": t.name, "description": t.description, "parameters": t.args.model_json_schema()},
+    }
+
+
 def tool_definitions() -> list[dict[str, Any]]:
-    return [
-        {
-            "type": "function",
-            "function": {"name": t.name, "description": t.description, "parameters": t.args.model_json_schema()},
-        }
-        for t in TOOLS.values()
-        if t.exposed
-    ]
+    return [tool_definition(t.name) for t in TOOLS.values() if t.exposed]
 
 
 def execute(ctx: ToolContext, name: str, args: Any) -> ToolResult:

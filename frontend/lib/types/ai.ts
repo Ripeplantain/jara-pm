@@ -1,4 +1,4 @@
-import type { Board } from "@/lib/types/board";
+import type { Board, CardDraft } from "@/lib/types/board";
 
 /** Mirror backend schemas in backend/app/schemas/ai.py. */
 export interface ChatMessage {
@@ -32,6 +32,12 @@ export interface AiResponse {
   changes: AppliedChange[];
   pending: PendingAction[];
   board: Board;
+}
+
+export interface CardDraftResponse {
+  drafts: CardDraft[];
+  /** What the assistant said when it drafted nothing. */
+  note: string;
 }
 
 export interface WorkspaceAiEvidence {

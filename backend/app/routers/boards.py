@@ -15,6 +15,7 @@ from app.schemas.boards import (
     BoardOut,
     BoardSummary,
     BoardUpdate,
+    CardBatchCreate,
     CardCreate,
     CardMove,
     CardOut,
@@ -153,6 +154,12 @@ def create_card(column_id: int, body: CardCreate, user: CurrentUser, db: DbSessi
         body.due_date,
         body.estimate,
     )
+
+
+@router.post("/columns/{column_id}/cards/batch", response_model=BoardOut, status_code=status.HTTP_201_CREATED)
+def create_cards(column_id: int, body: CardBatchCreate, user: CurrentUser, db: DbSession):
+    """All or nothing. Returns the board, since several cards changed at once."""
+    return svc.create_cards(db, user, column_id, [svc.NewCard(**card.model_dump()) for card in body.cards])
 
 
 @router.patch("/cards/{card_id}", response_model=CardOut)

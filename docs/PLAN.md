@@ -511,3 +511,21 @@ the foundation; these phases harden and package it for real users.
 - Secret verification: redacted `gitleaks detect` scan completed with no leaks found in repository
   history. Production dependency audit is clean; the remaining development-only lint-chain finding
   is documented in `docs/SECURITY_REVIEW.md`.
+
+## Phase 20 - Generate cards from pasted text
+
+- [x] 20.1 Add an all-or-nothing batch card create (`services/boards.create_cards`,
+  `POST /api/columns/{id}/cards/batch`) carrying card fields, checklist and labels.
+- [x] 20.2 Add `POST /api/boards/{id}/ai/draft-cards`: pasted text in, validated card drafts out,
+  nothing written.
+- [x] 20.3 Add the "Generate cards" dialog on the board: paste, review and edit the drafts, create
+  the ones kept.
+
+### Notes
+
+- Drafting and creating are separate requests on purpose. The draft is only a suggestion, so the
+  write is the user's own submission through the normal service path and needs no proposal token.
+- The drafting model gets one tool (`draft_cards`, not exposed to the board chat) and at most
+  `AI_MAX_DRAFT_ITERATIONS` (3) turns; a successful draft ends the loop without another call.
+- Drafts go to one column chosen in the dialog. Per-card columns and sprint assignment are not
+  drafted.

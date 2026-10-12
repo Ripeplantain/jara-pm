@@ -1,4 +1,4 @@
-import type { AiResponse, ChatMessage, WorkspaceAiResponse } from "@/lib/types/ai";
+import type { AiResponse, CardDraftResponse, ChatMessage, WorkspaceAiResponse } from "@/lib/types/ai";
 import type { Activity, Notification } from "@/lib/types/activity";
 import type { BoardAnalytics, WorkspaceOverview } from "@/lib/types/analytics";
 import type { User } from "@/lib/types/auth";
@@ -7,6 +7,7 @@ import type {
   BoardSummary,
   BoardTemplate,
   Card,
+  CardDraft,
   CardHit,
   Column,
   Priority,
@@ -180,6 +181,9 @@ export const api = {
   // --- cards -------------------------------------------------------------------------------
   createCard: (columnId: number, title: string, description = "") =>
     request<Card>("POST", `/columns/${columnId}/cards`, { title, description }),
+  /** All or nothing; returns the whole board. */
+  createCards: (columnId: number, cards: CardDraft[]) =>
+    request<Board>("POST", `/columns/${columnId}/cards/batch`, { cards }),
   updateCard: (id: number, patch: CardPatch) => request<Card>("PATCH", `/cards/${id}`, patch),
   moveCard: (id: number, columnId: number, position: number) =>
     request<Card>("POST", `/cards/${id}/move`, { column_id: columnId, position }),
@@ -259,6 +263,9 @@ export const api = {
     request<AiResponse>("POST", `/boards/${boardId}/ai`, { message, history }),
   confirmAi: (boardId: number, proposalToken: string) =>
     request<AiResponse>("POST", `/boards/${boardId}/ai/confirm`, { proposal_token: proposalToken }),
+  /** Drafts only: nothing is created until `createCards`. */
+  draftCards: (boardId: number, text: string) =>
+    request<CardDraftResponse>("POST", `/boards/${boardId}/ai/draft-cards`, { text }),
   askWorkspaceAi: (workspaceId: number, question: string) =>
     request<WorkspaceAiResponse>("POST", `/workspaces/${workspaceId}/ai`, { question }),
 };

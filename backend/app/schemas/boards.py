@@ -5,7 +5,7 @@ from pydantic import BaseModel, ConfigDict, Field, StringConstraints
 
 from app.models.board import Priority
 from app.schemas.auth import UserOut
-from app.schemas.card_details import ChecklistItemOut
+from app.schemas.card_details import ChecklistItemOut, ItemText
 from app.schemas.labels import LabelOut
 
 BoardTitle = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=200)]
@@ -54,6 +54,26 @@ class CardCreate(BaseModel):
     sprint_id: int | None = None
     due_date: datetime | None = None
     estimate: Estimate | None = None
+
+
+MAX_BATCH_CARDS = 25
+
+
+class CardDraft(BaseModel):
+    """A card that does not exist yet: what batch create accepts and what AI drafting returns."""
+
+    title: CardTitle
+    description: Description = ""
+    assignee_id: int | None = None
+    priority: Priority = Priority.NONE
+    due_date: datetime | None = None
+    estimate: Estimate | None = None
+    label_ids: list[int] = Field(default_factory=list, max_length=20)
+    checklist: list[ItemText] = Field(default_factory=list, max_length=20)
+
+
+class CardBatchCreate(BaseModel):
+    cards: list[CardDraft] = Field(min_length=1, max_length=MAX_BATCH_CARDS)
 
 
 class CardUpdate(BaseModel):

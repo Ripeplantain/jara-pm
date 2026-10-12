@@ -9,13 +9,25 @@ Positions are contiguous integers 0..n-1 within a parent (board columns, column 
 mutation renumbers the affected siblings and commits once, so it is atomic and gap-free.
 """
 
+from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Any
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
-from app.models import Board, BoardFavorite, Card, Column, User, WorkspaceMember, WorkspaceRole
+from app.models import (
+    Board,
+    BoardFavorite,
+    Card,
+    CardLabel,
+    ChecklistItem,
+    Column,
+    Label,
+    User,
+    WorkspaceMember,
+    WorkspaceRole,
+)
 from app.models.board import Priority
 from app.services import activity, notifications, permissions, product_analytics
 from app.services.errors import Conflict, Forbidden, InvalidRequest, NotFound
@@ -445,6 +457,73 @@ def create_card(
     product_analytics.track(db, "card_created", user=user, workspace_id=board.workspace_id, properties={"board_id": board.id})
     db.commit()
     return _card(db, user, card.id)
+
+
+@dataclass(frozen=True)
+class NewCard:
+    """One card of a batch: everything `create_card` takes, plus its checklist and labels."""
+
+    title: str
+    description: str = ""
+    assignee_id: int | None = None
+    priority: Priority = Priority.NONE
+    due_date: datetime | None = None
+    estimate: int | None = None
+    label_ids: list[int] = field(default_factory=list)
+    checklist: list[str] = field(default_factory=list)
+
+
+def create_cards(db: Session, user: User, column_id: int, cards: list[NewCard]) -> Board:
+    """Append several cards to a column in one transaction: all of them land, or none do.
+
+    Everything is checked before the first row is added, so a bad assignee or label on the last
+    card leaves no trace of the ones before it.
+    """
+    column = _column(db, user, column_id, MEMBER)
+    board = _board(db, user, column.board_id)
+    known_labels = set(db.scalars(select(Label.id).where(Label.workspace_id == board.workspace_id)))
+    for new in cards:
+        _check_assignee(db, board, new.assignee_id)
+        if not known_labels.issuperset(new.label_ids):
+            raise NotFound("Label")
+
+    siblings = _cards_of(db, column.id)
+    created: list[Card] = []
+    for new in cards:
+        card = Card(
+            column_id=column.id,
+            title=new.title,
+            description=new.description,
+            position=len(siblings),
+            created_by_id=user.id,
+            assignee_id=new.assignee_id,
+            priority=Priority(new.priority).value,
+            due_date=new.due_date,
+            estimate=new.estimate,
+        )
+        db.add(card)
+        siblings.append(card)
+        _sync_completion(db, card)
+        created.append(card)
+    db.flush()
+
+    for card, new in zip(created, cards, strict=True):
+        db.add_all(
+            ChecklistItem(card_id=card.id, text=text, position=i) for i, text in enumerate(new.checklist)
+        )
+        db.add_all(CardLabel(card_id=card.id, label_id=label_id) for label_id in dict.fromkeys(new.label_ids))
+        activity.record(
+            db, user, board.workspace_id, activity.CARD_CREATED,
+            f"added “{card.title}” to {column.title}", board_id=board.id, card_id=card.id,
+        )
+        notifications.notify(
+            db, card.assignee_id, user, board.workspace_id, notifications.ASSIGNED,
+            f"{user.name} assigned you “{card.title}”", board.title,
+            board_id=board.id, card_id=card.id,
+        )
+        product_analytics.track(db, "card_created", user=user, workspace_id=board.workspace_id, properties={"board_id": board.id})
+    db.commit()
+    return get_board(db, user, board.id)
 
 
 def update_card(

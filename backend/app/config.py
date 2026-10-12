@@ -41,6 +41,7 @@ def resend_reply_to() -> str | None:
 DEFAULT_LLM_BASE_URL = "https://openrouter.ai/api/v1"
 DEFAULT_LLM_MODEL = "nvidia/nemotron-3-super-120b-a12b:free"
 AI_MAX_TOOL_ITERATIONS = 8
+AI_MAX_DRAFT_ITERATIONS = 3
 
 
 def ai_monthly_action_limit() -> int:

@@ -20,6 +20,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { BoardActions } from "@/components/board/actions";
 import { AiPanel } from "@/components/ai/ai-panel";
+import { GenerateCardsDialog } from "@/components/ai/generate-cards-dialog";
 import { AddForm } from "@/components/board/add-form";
 import { CardDrawer } from "@/components/board/card-drawer";
 import { ColumnDeleteDialog } from "@/components/board/column-delete-dialog";
@@ -71,6 +72,7 @@ export function BoardView({ initial, members, labels, sprints: initialSprints, r
   const [active, setActive] = useState<{ type: "card" | "column"; title: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<Column | null>(null);
+  const [generating, setGenerating] = useState(false);
   const [undo, setUndo] = useState<{ card: Board["columns"][number]["cards"][number]; busy: boolean } | null>(null);
   // Element ids the AI just touched, highlighted briefly.
   const [changed, setChanged] = useState<ReadonlySet<string>>(new Set());
@@ -316,6 +318,11 @@ export function BoardView({ initial, members, labels, sprints: initialSprints, r
           {!canWrite && <p className="board-subtitle">You have view-only access to this board.</p>}
         </div>
         <div className="board-stats" aria-label="Board statistics">
+          {canWrite && board.columns.length > 0 && (
+            <button type="button" className="stat-pill" onClick={() => setGenerating(true)}>
+              <span aria-hidden="true">✦</span> Generate cards
+            </button>
+          )}
           <Link className="stat-pill" href={`/boards/${board.id}/insights`}>
             Insights
           </Link>
@@ -465,6 +472,27 @@ export function BoardView({ initial, members, labels, sprints: initialSprints, r
           }}
           onOpenCard={(next) => setOpenCardId(next.id)}
           onClose={() => setOpenCardId(null)}
+        />
+      )}
+
+      {generating && (
+        <GenerateCardsDialog
+          board={board}
+          members={members}
+          labels={labels}
+          onClose={() => setGenerating(false)}
+          onCreated={(fresh) => {
+            const known = new Set(board.columns.flatMap((c) => c.cards.map((card) => card.id)));
+            setGenerating(false);
+            applyServerBoard(fresh);
+            highlight(
+              fresh.columns.flatMap((c) =>
+                c.cards
+                  .filter((card) => !known.has(card.id))
+                  .map((card) => ({ kind: "create_card", summary: "", board_id: fresh.id, column_id: null, card_id: card.id })),
+              ),
+            );
+          }}
         />
       )}
 

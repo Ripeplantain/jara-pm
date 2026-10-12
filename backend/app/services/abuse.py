@@ -56,7 +56,7 @@ def bucket_for(method: str, path: str) -> str | None:
         return "verification_email"
     if method == "POST" and "/invites" in path:
         return "invitation"
-    if method == "POST" and path.endswith("/ai"):
+    if method == "POST" and path.endswith(("/ai", "/ai/draft-cards")):
         return "ai"
     return None
 

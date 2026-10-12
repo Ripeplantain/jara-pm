@@ -14,6 +14,7 @@ endpoint; the browser never receives provider credentials, raw prompts, or direc
 - Planning: create a sprint, plan cards, start or complete a sprint, and create a board from a
   template.
 - Reversible maintenance: archive a card.
+- Card drafting: paste a brief, spec or notes and get up to 25 draft cards to review. See below.
 - Destructive actions: delete a card, column, or board only creates a pending proposal.
 
 ## Response shape
@@ -41,6 +42,20 @@ POST /api/boards/{board_id}/ai/confirm
 
 The token is bound to the current user and board, expires after 15 minutes, and is consumed before
 the confirmed write runs. Batch authoring previews every operation before any card is changed.
+
+## Card drafting
+
+`POST /api/boards/{board_id}/ai/draft-cards` takes `{ "text": "..." }` (12,000 characters at most)
+and returns `{ "drafts": [...], "note": "" }`. It writes nothing. Each draft carries a title,
+description, priority, estimate, due date, assignee, labels and checklist; assignee and label ids
+are checked against the workspace before they are returned. The model is offered a single
+`draft_cards` tool, which is never exposed in the board chat, and no other tool is run whatever
+name it sends back. The request needs the member role and counts as one AI action.
+
+The user reviews the drafts in the "Generate cards" dialog and creates the ones they keep with
+`POST /api/columns/{column_id}/cards/batch`. That is an ordinary, permission-checked write through
+`services/boards.create_cards`: one transaction, so every card lands or none do, with activity and
+assignee notifications recorded for each.
 
 ## Evidence and safety rules
 
@@ -75,4 +90,6 @@ run the following scripted checks against a disposable workspace:
 | Invalid card/column id | Tool error; model corrects or explains; no cross-board access |
 | Provider timeout or missing key | Clear error response; board is unchanged |
 | Workspace question asks for counts | Evidence comes from analytics, not model arithmetic |
+| Viewer asks to draft cards | 403 before any provider call or budget use |
+| Draft model calls a write tool instead | Tool error; nothing is created |
 | Workspace exceeds its monthly AI budget | New request is rejected; no provider call or board mutation occurs |

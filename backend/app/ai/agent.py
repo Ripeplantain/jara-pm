@@ -7,12 +7,21 @@ from typing import Any
 
 from sqlalchemy.orm import Session
 
-from app.ai.context import build_context
-from app.ai.llm import LLMClient
-from app.ai.tools import ToolContext, ToolError, execute, tool_definitions
-from app.config import AI_MAX_TOOL_ITERATIONS
+from app.ai.context import build_context, build_draft_context
+from app.ai.llm import AssistantTurn, LLMClient
+from app.ai.tools import (
+    DRAFT_CARDS,
+    ToolContext,
+    ToolError,
+    ToolResult,
+    execute,
+    tool_definition,
+    tool_definitions,
+)
+from app.config import AI_MAX_DRAFT_ITERATIONS, AI_MAX_TOOL_ITERATIONS
 from app.models import User
 from app.schemas.ai import AppliedChange, ChatMessage, PendingAction
+from app.schemas.boards import MAX_BATCH_CARDS, CardDraft
 from app.services import boards as svc
 
 log = logging.getLogger("app.ai")
@@ -50,16 +59,7 @@ def run_assistant(
         if not turn.tool_calls:
             result.reply = (turn.content or "").strip()
             break
-        messages.append(
-            {
-                "role": "assistant",
-                "content": turn.content,
-                "tool_calls": [
-                    {"id": tc.id, "type": "function", "function": {"name": tc.name, "arguments": tc.arguments}}
-                    for tc in turn.tool_calls
-                ],
-            }
-        )
+        messages.append(_assistant_message(turn))
         for tc in turn.tool_calls:
             payload = _run_tool(ctx, tc.name, tc.arguments, result)
             messages.append({"role": "tool", "tool_call_id": tc.id, "content": json.dumps(payload)})
@@ -71,13 +71,78 @@ def run_assistant(
     return result
 
 
+@dataclass
+class DraftResult:
+    drafts: list[CardDraft] = field(default_factory=list)
+    note: str = ""
+    llm_calls: int = 0
+
+
+def draft_cards(db: Session, user: User, board_id: int, text: str, llm: LLMClient) -> DraftResult:
+    """Turn pasted text into card drafts. Reads the board, writes nothing.
+
+    The model is offered one tool and only that tool is run, whatever name it sends back.
+    """
+    board = svc.get_board(db, user, board_id)
+    messages: list[dict[str, Any]] = [
+        {"role": "system", "content": build_draft_context(board, db, user)},
+        {"role": "user", "content": text},
+    ]
+    tools = [tool_definition(DRAFT_CARDS)]
+    ctx = ToolContext(db=db, user=user, board_id=board_id)
+    result = DraftResult()
+
+    for _ in range(AI_MAX_DRAFT_ITERATIONS):
+        result.llm_calls += 1
+        turn = llm.complete(messages, tools)
+        if not turn.tool_calls:
+            result.note = (turn.content or "").strip()
+            break
+        messages.append(_assistant_message(turn))
+        for tc in turn.tool_calls:
+            try:
+                if tc.name != DRAFT_CARDS:
+                    raise ToolError(f"Only {DRAFT_CARDS} is available here.")
+                outcome = _execute(ctx, tc.name, tc.arguments)
+            except ToolError as exc:
+                log.info("ai tool=%s error=%s", tc.name, exc)
+                payload: dict[str, Any] = {"error": str(exc)}
+            else:
+                log.info("ai tool=%s ok drafts=%d", tc.name, len(outcome.drafts))
+                result.drafts.extend(outcome.drafts)
+                payload = outcome.data
+            messages.append({"role": "tool", "tool_call_id": tc.id, "content": json.dumps(payload)})
+        if result.drafts:
+            break
+
+    del result.drafts[MAX_BATCH_CARDS:]
+    if not result.drafts and not result.note:
+        result.note = "I couldn't turn that into cards. Try rephrasing it or pasting more detail."
+    return result
+
+
+def _assistant_message(turn: AssistantTurn) -> dict[str, Any]:
+    return {
+        "role": "assistant",
+        "content": turn.content,
+        "tool_calls": [
+            {"id": tc.id, "type": "function", "function": {"name": tc.name, "arguments": tc.arguments}}
+            for tc in turn.tool_calls
+        ],
+    }
+
+
+def _execute(ctx: ToolContext, name: str, raw_args: str) -> ToolResult:
+    try:
+        args = json.loads(raw_args or "{}")
+    except json.JSONDecodeError:
+        raise ToolError("Arguments must be a valid JSON object.") from None
+    return execute(ctx, name, args)
+
+
 def _run_tool(ctx: ToolContext, name: str, raw_args: str, result: AgentResult) -> dict[str, Any]:
     try:
-        try:
-            args = json.loads(raw_args or "{}")
-        except json.JSONDecodeError:
-            raise ToolError("Arguments must be a valid JSON object.") from None
-        outcome = execute(ctx, name, args)
+        outcome = _execute(ctx, name, raw_args)
     except ToolError as exc:
         log.info("ai tool=%s error=%s args=%.200s", name, exc, raw_args)
         return {"error": str(exc)}
