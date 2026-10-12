@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { KobiLogo } from "@/components/shell/kobi-logo";
 
 export const metadata: Metadata = { title: "Privacy · Kobi" };
 
@@ -7,7 +8,7 @@ export default function PrivacyPage() {
   return (
     <main className="public-page">
       <div className="public-page-inner">
-        <Link className="brand-link" href="/signin"><span className="brand-mark" aria-hidden="true">K</span> Kobi</Link>
+        <Link className="brand-link" href="/signin"><KobiLogo size="md" /></Link>
         <h1>Privacy</h1>
         <p>We use the information needed to provide Kobi: your account email, profile, workspace content and product usage required to operate the service.</p>
         <h2>How we use data</h2>

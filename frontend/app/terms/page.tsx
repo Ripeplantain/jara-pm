@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { KobiLogo } from "@/components/shell/kobi-logo";
 
 export const metadata: Metadata = { title: "Terms · Kobi" };
 
@@ -7,7 +8,7 @@ export default function TermsPage() {
   return (
     <main className="public-page">
       <div className="public-page-inner">
-        <Link className="brand-link" href="/signin"><span className="brand-mark" aria-hidden="true">K</span> Kobi</Link>
+        <Link className="brand-link" href="/signin"><KobiLogo size="md" /></Link>
         <h1>Terms</h1>
         <p>Kobi is a collaborative product-management workspace. You are responsible for the content you add, the people you invite and keeping your credentials secure.</p>
         <h2>Acceptable use</h2>

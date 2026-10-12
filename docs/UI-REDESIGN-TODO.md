@@ -1,7 +1,8 @@
 # Kobi UI redesign todo
 
-Direction: combine Linear's focused, keyboard-first work surface with Notion's calm, flexible
-workspace canvas. This work is visual and interaction-focused; it does not change backend
+Direction: combine Notion's calm, flexible workspace canvas with a focused, keyboard-friendly
+product surface. The visual system uses warm paper neutrals, graphite text, restrained borders and
+one paprika accent. This work is visual and interaction-focused; it does not change backend
 contracts or product permissions.
 
 ## Foundation
@@ -36,6 +37,6 @@ contracts or product permissions.
 - [ ] Manually smoke-test authenticated desktop, tablet, and narrow-screen flows once the local backend is running.
 - [x] Run `./scripts/verify.sh` before closing the redesign workstream.
 
-The implementation is complete. The remaining checkbox is an environment-dependent manual check;
-the local Next.js preview was verified on the public sign-in surface, but no backend/database was
-running for an authenticated board walkthrough.
+The implementation is complete. The public desktop entry page was visually checked after the
+redesign and the production build passes. The remaining checkbox is environment-dependent: an
+authenticated board walkthrough still needs the local backend/database running.
