@@ -158,8 +158,10 @@ Enable the versioned pre-push hook once per checkout:
 ```
 
 Before every push, the hook runs backend tests and Ruff, frontend type generation/typecheck/lint,
-and production Docker image builds. It requires a running Docker daemon and blocks the push if any
-step fails.
+and production builds. With Docker running, it builds both production images. Without Docker, it
+uses the same host fallbacks as `scripts/verify.sh`, runs the frontend production build and backend
+Python compilation, and warns that Docker image builds were skipped. The push is blocked if an
+available check fails; CI still validates the production images.
 
 ## How it fits together
 
