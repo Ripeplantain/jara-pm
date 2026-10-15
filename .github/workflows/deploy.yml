@@ -1,0 +1,115 @@
+name: Verify and deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production
+  cancel-in-progress: false
+
+env:
+  # These are CI-only placeholders. Production secrets stay on the VPS in /opt/kobi/.env.
+  BACKEND_JWT_SECRET: ci-only-backend-jwt-secret-not-for-production
+  AUTH_SECRET: ci-only-auth-secret-not-for-production
+  FRONTEND_ORIGIN: http://localhost:3000
+  AUTH_URL: http://localhost:3000
+  BACKEND_INTERNAL_URL: http://backend:8000
+
+jobs:
+  verify:
+    name: Verify and build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v6
+
+      - name: Create CI Compose environment
+        run: cp .env.example .env
+
+      - name: Run backend tests and lint
+        run: >-
+          docker compose run --rm --no-deps backend
+          sh -c 'pytest -q && ruff check .'
+
+      - name: Run frontend typecheck and lint
+        run: >-
+          docker compose run --rm --no-deps frontend
+          sh -c 'npx next typegen && npm run typecheck && npm run lint'
+
+      - name: Build production images
+        run: >-
+          docker compose
+          -f docker-compose.yml
+          -f docker-compose.prod.yml
+          build
+
+      - name: Clean up CI containers
+        if: always()
+        run: docker compose down
+
+  deploy:
+    name: Deploy to production
+    needs: verify
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v6
+
+      - name: Configure SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d "$HOME/.ssh"
+          printf '%s\n' "$SSH_PRIVATE_KEY" > "$HOME/.ssh/id_ed25519"
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 600 "$HOME/.ssh/id_ed25519"
+          chmod 644 "$HOME/.ssh/known_hosts"
+
+      - name: Sync application source
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+        run: |
+          rsync -az --delete \
+            --exclude='.env' \
+            --exclude='.git/' \
+            --exclude='backups/' \
+            --exclude='frontend/node_modules/' \
+            --exclude='frontend/.next/' \
+            --exclude='backend/.venv/' \
+            --exclude='backend/.pytest_cache/' \
+            --exclude='backend/.ruff_cache/' \
+            ./ "${VPS_USER}@${VPS_HOST}:/opt/kobi/"
+
+      - name: Rebuild and restart production
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+        run: |
+          ssh "${VPS_USER}@${VPS_HOST}" 'bash -se' <<'REMOTE'
+          set -euo pipefail
+          cd /opt/kobi
+          docker compose \
+            -f docker-compose.yml \
+            -f docker-compose.prod.yml \
+            config --quiet
+          docker compose \
+            -f docker-compose.yml \
+            -f docker-compose.prod.yml \
+            up --build -d
+          docker compose \
+            -f docker-compose.yml \
+            -f docker-compose.prod.yml \
+            ps
+          REMOTE
