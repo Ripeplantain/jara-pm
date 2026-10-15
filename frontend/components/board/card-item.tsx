@@ -3,6 +3,7 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { BoardActions } from "@/components/board/actions";
+import { Icon } from "@/components/icon";
 import { CardFace } from "@/components/board/card-face";
 import type { Card, Column } from "@/lib/types/board";
 
@@ -38,7 +39,7 @@ export function CardItem({ card, index, count, columns, actions, changed, canMov
           {...attributes}
           {...listeners}
         >
-          ⠿
+          <Icon name="grip-vertical" size="sm" />
         </button>}
         <button
           type="button"
@@ -58,7 +59,7 @@ export function CardItem({ card, index, count, columns, actions, changed, canMov
             disabled={index === 0}
             onClick={() => actions.moveCardTo(card.id, card.column_id, index - 1)}
           >
-            ↑
+            <Icon name="arrow-up" size="sm" />
           </button>
           <button
             type="button"
@@ -66,7 +67,7 @@ export function CardItem({ card, index, count, columns, actions, changed, canMov
             disabled={index === count - 1}
             onClick={() => actions.moveCardTo(card.id, card.column_id, index + 1)}
           >
-            ↓
+            <Icon name="arrow-down" size="sm" />
           </button>
           <select
             aria-label={`Move card ${card.title} to column`}

@@ -1,3 +1,5 @@
+import { BoardSkeleton } from "@/components/shell/skeleton";
+
 export default function Loading() {
-  return <main className="simple-state" role="status"><p>Loading your board…</p></main>;
+  return <BoardSkeleton />;
 }

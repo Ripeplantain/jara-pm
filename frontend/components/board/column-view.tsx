@@ -7,6 +7,7 @@ import type { BoardActions } from "@/components/board/actions";
 import { AddForm } from "@/components/board/add-form";
 import { CardItem } from "@/components/board/card-item";
 import { EditableTitle } from "@/components/board/editable-title";
+import { Icon } from "@/components/icon";
 import { ColumnSettings } from "@/components/board/column-settings";
 import type { Column } from "@/lib/types/board";
 
@@ -46,7 +47,7 @@ export function ColumnView({ column, columns, actions, changed, canWrite, intera
           {...attributes}
           {...listeners}
         >
-          ⠿
+          <Icon name="grip-vertical" size="sm" />
         </button>}
         <span className="column-color" aria-hidden="true" />
         <h2 className="column-heading">
@@ -83,7 +84,7 @@ export function ColumnView({ column, columns, actions, changed, canWrite, intera
           disabled={first}
           onClick={() => actions.moveColumnTo(column.id, column.position - 1)}
         >
-          <span aria-hidden="true">←</span>
+          <Icon name="arrow-left" size="sm" />
         </button>}
         {canWrite && interactive && <button
           type="button"
@@ -91,7 +92,7 @@ export function ColumnView({ column, columns, actions, changed, canWrite, intera
           disabled={last}
           onClick={() => actions.moveColumnTo(column.id, column.position + 1)}
         >
-          <span aria-hidden="true">→</span>
+          <Icon name="arrow-right" size="sm" />
         </button>}
         {canWrite && <ColumnSettings column={column} actions={actions} />}
       </header>

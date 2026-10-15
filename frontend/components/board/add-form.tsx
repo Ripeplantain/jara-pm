@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { SkeletonLabel } from "@/components/shell/skeleton";
 
 interface Props {
   label: string; // e.g. "Add card"
@@ -63,8 +64,8 @@ export function AddForm({ label, placeholder, maxLength, onSubmit }: Props) {
           if (e.key === "Escape") close();
         }}
       />
-      <button type="submit" disabled={busy || !title.trim()}>
-        {label}
+      <button type="submit" disabled={busy || !title.trim()} aria-label={busy ? `${label} in progress` : undefined}>
+        {busy ? <SkeletonLabel /> : label}
       </button>
       <button type="button" onClick={close}>
         Cancel

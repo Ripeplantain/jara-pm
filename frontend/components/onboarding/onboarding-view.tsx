@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { api, RequestError } from "@/lib/api/browser";
+import { SkeletonLabel } from "@/components/shell/skeleton";
 import type { Role } from "@/lib/types/workspace";
 
 const templates = [
@@ -105,8 +106,13 @@ export function OnboardingView() {
         <textarea value={emails} rows={2} placeholder="One email per line or separated by commas" onChange={(e) => setEmails(e.target.value)} />
       </label>
       <div className="onboarding-actions">
-        <button type="button" disabled={pending || !workspaceName.trim()} onClick={() => void finish()}>
-          {pending ? "Creating your workspace…" : "Create workspace"}
+        <button
+          type="button"
+          disabled={pending || !workspaceName.trim()}
+          aria-label={pending ? "Creating your workspace" : undefined}
+          onClick={() => void finish()}
+        >
+          {pending ? <SkeletonLabel className="skeleton-label--wide" /> : "Create workspace"}
         </button>
         <button type="button" className="secondary" disabled={pending} onClick={() => void finish(true)}>
           Start with a demo

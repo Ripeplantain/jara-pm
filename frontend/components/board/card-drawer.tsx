@@ -1,13 +1,16 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Icon } from "@/components/icon";
+import { Modal } from "@/components/board/modal";
 import { Avatar } from "@/components/shell/avatar";
+import { Skeleton } from "@/components/shell/skeleton";
 import { api, RequestError } from "@/lib/api/browser";
 import { fromDateInput, longDateTime, toDateInput } from "@/lib/dates";
 import type { Activity } from "@/lib/types/activity";
 import type { Card, Column, Priority } from "@/lib/types/board";
 import { PRIORITIES, PRIORITY_LABEL } from "@/lib/types/board";
-import type { Comment } from "@/lib/types/card-detail";
+import type { ChecklistItem, Comment } from "@/lib/types/card-detail";
 import type { Label } from "@/lib/types/label";
 import type { Sprint } from "@/lib/types/sprint";
 import type { Member } from "@/lib/types/workspace";
@@ -57,6 +60,8 @@ export function CardDrawer({
   const [newItem, setNewItem] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [deletingChecklistItem, setDeletingChecklistItem] = useState<ChecklistItem | null>(null);
+  const [deletingComment, setDeletingComment] = useState<Comment | null>(null);
   const panel = useRef<HTMLDivElement>(null);
   const closeButton = useRef<HTMLButtonElement>(null);
 
@@ -64,6 +69,7 @@ export function CardDrawer({
   useEffect(() => {
     closeButton.current?.focus();
     function onKey(e: KeyboardEvent) {
+      if (e.target instanceof Element && e.target.closest("dialog")) return;
       if (e.key === "Escape") {
         e.stopPropagation();
         onClose();
@@ -165,7 +171,7 @@ export function CardDrawer({
         <header className="drawer-head">
           <span className="muted">{column?.title ?? "Card"}</span>
           <button type="button" ref={closeButton} onClick={onClose} aria-label="Close card">
-            ✕
+            <Icon name="x" size="sm" />
           </button>
         </header>
 
@@ -274,9 +280,9 @@ export function CardDrawer({
                         type="button"
                         aria-label={`Delete “${item.text}”`}
                         disabled={busy}
-                        onClick={() => changeChecklist(() => api.deleteChecklistItem(item.id))}
+                        onClick={() => setDeletingChecklistItem(item)}
                       >
-                        ✕
+                        <Icon name="x" size="sm" />
                       </button>
                     )}
                   </li>
@@ -312,7 +318,7 @@ export function CardDrawer({
 
             <section aria-labelledby="comments-heading" className="drawer-section">
               <h3 id="comments-heading">Comments</h3>
-              {comments === null && <p className="muted">Loading…</p>}
+              {comments === null && <Skeleton rows={2} className="skeleton-block--compact" label="Loading comments" />}
               {comments?.length === 0 && <p className="muted">No comments yet.</p>}
               <ul className="comments">
                 {comments?.map((entry) => (
@@ -325,15 +331,7 @@ export function CardDrawer({
                         <button
                           type="button"
                           disabled={busy}
-                          onClick={() =>
-                            run(async () => {
-                              await api.deleteComment(entry.id);
-                              setComments((list) =>
-                                list?.filter((c) => c.id !== entry.id) ?? null,
-                              );
-                              onCardChanged(await api.updateCard(card.id, {}));
-                            })
-                          }
+                          onClick={() => setDeletingComment(entry)}
                         >
                           Delete
                         </button>
@@ -378,7 +376,7 @@ export function CardDrawer({
 
             <section aria-labelledby="history-heading" className="drawer-section">
               <h3 id="history-heading">History</h3>
-              {activity === null && <p className="muted">Loading…</p>}
+              {activity === null && <Skeleton rows={2} className="skeleton-block--compact" label="Loading history" />}
               {activity?.length === 0 && <p className="muted">Nothing recorded yet.</p>}
               <ul className="activity-list">
                 {activity?.map((entry) => (
@@ -563,6 +561,56 @@ export function CardDrawer({
           </aside>
         </div>
       </div>
+
+      {deletingChecklistItem && (
+        <Modal label="Delete checklist item" onClose={() => setDeletingChecklistItem(null)}>
+          <h2>Delete checklist item?</h2>
+          <p>“{deletingChecklistItem.text}” will be removed from this card.</p>
+          <div className="row-actions">
+            <button
+              type="button"
+              className="danger"
+              onClick={() => {
+                const item = deletingChecklistItem;
+                setDeletingChecklistItem(null);
+                void changeChecklist(() => api.deleteChecklistItem(item.id));
+              }}
+            >
+              Delete item
+            </button>
+            <button type="button" onClick={() => setDeletingChecklistItem(null)}>
+              Cancel
+            </button>
+          </div>
+        </Modal>
+      )}
+
+      {deletingComment && (
+        <Modal label="Delete comment" onClose={() => setDeletingComment(null)}>
+          <h2>Delete this comment?</h2>
+          <p>This comment will be permanently removed from the card.</p>
+          <div className="row-actions">
+            <button
+              type="button"
+              className="danger"
+              onClick={() => {
+                const entry = deletingComment;
+                setDeletingComment(null);
+                void run(async () => {
+                  await api.deleteComment(entry.id);
+                  setComments((list) => list?.filter((commentRow) => commentRow.id !== entry.id) ?? null);
+                  onCardChanged(await api.updateCard(card.id, {}));
+                });
+              }}
+            >
+              Delete comment
+            </button>
+            <button type="button" onClick={() => setDeletingComment(null)}>
+              Cancel
+            </button>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }

@@ -1,35 +1,96 @@
 :root {
-  --canvas: #f7f6f2;
-  --surface: #fffefa;
-  --surface-muted: #f1efe9;
-  --surface-tint: #f7e5dc;
-  --ink: #292723;
-  --ink-soft: #77736b;
-  --ink-faint: #a19c92;
-  --line: #e6e2da;
-  --line-strong: #d2cdc2;
-  --brand: #d9654c;
-  --brand-dark: #b84f39;
-  --brand-soft: #f7e6df;
-  --cyan: #568f8a;
-  --danger: #b94f57;
-  --danger-soft: #fbe9e6;
-  --success: #4b8568;
-  --logo-tile: #292723;
-  --logo-ink: #f7f6f2;
-  --logo-dot: #d9654c;
-  --shadow-sm: 0 1px 2px rgba(51, 45, 38, 0.035), 0 4px 14px rgba(51, 45, 38, 0.035);
-  --shadow-md: 0 18px 44px rgba(51, 45, 38, 0.1), 0 2px 8px rgba(51, 45, 38, 0.04);
-  --radius-sm: 5px;
-  --radius-md: 9px;
-  --radius-lg: 15px;
+  /* Notion design tokens (unofficial — observed values from the current Notion app). */
+  --notion-bg-page: #FFFFFF;
+  --notion-bg-sidebar: #F7F7F5;
+  --notion-text-default: #373530;
+  --notion-text-gray: #787774;
+  --notion-text-brown: #976D57;
+  --notion-text-orange: #CC782F;
+  --notion-text-yellow: #C29343;
+  --notion-text-green: #548164;
+  --notion-text-blue: #487CA5;
+  --notion-text-purple: #8A67AB;
+  --notion-text-pink: #B35488;
+  --notion-text-red: #C4554D;
+  --notion-bg-default: #FFFFFF;
+  --notion-bg-gray: #F1F1EF;
+  --notion-bg-brown: #F3EEEE;
+  --notion-bg-orange: #F8ECDF;
+  --notion-bg-yellow: #FAF3DD;
+  --notion-bg-green: #EEF3ED;
+  --notion-bg-blue: #E9F3F7;
+  --notion-bg-purple: #F6F3F8;
+  --notion-bg-pink: #F9F2F5;
+  --notion-bg-red: #FAECEC;
+  --notion-icon-blue: #337EA9;
+  /* Loaded and self-hosted by next/font in app/layout.tsx. The --font-* variables are set on
+     <html>; the fallbacks keep text readable if a font file ever fails to load. */
+  --notion-font-sans: var(--font-sans), ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  --notion-font-serif: var(--font-display), Georgia, ui-serif, serif;
+  /* No mono webfont: the only monospaced text is the ⌘K hint, which the system face
+     renders perfectly well. */
+  --notion-font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  /* The display face, used for headings and brand moments. SOFT and WONK are Fraunces
+     axes: they round the terminals and switch in the alternate 'wonky' letterforms. */
+  --font-display-stack: var(--font-display), Georgia, ui-serif, serif;
+  --display-variation: "SOFT" 40, "WONK" 1;
+  --notion-font-size-body: 16px;
+  --notion-line-height-body: 1.5;
+  --notion-font-size-title: 40px;
+  --notion-font-size-h1: 1.875em;
+  --notion-font-size-h2: 1.5em;
+  --notion-font-size-h3: 1.25em;
+  --notion-font-weight-heading: 600;
+  --notion-font-weight-title: 700;
+  --notion-page-width: 900px;
+  --notion-radius: 4px;
+  --notion-block-gap: 2px;
+
+  /* Icon sizing. Icons are stroke SVGs that take their colour from currentColor, so they need no
+     dark-mode rule of their own - see components/icon.tsx. */
+  --icon-sm: 0.875rem;
+  --icon-md: 1.0625rem;
+  --icon-lg: 1.25rem;
+  --icon-stroke: 1.75;
+
+  /* Page shell widths. Page containers sit inside .app-content, which the sidebar has already
+     narrowed, so they are centred with margin-inline rather than viewport maths. */
+  --page-gutter: 2rem;
+  --page-max: 1440px;
+
+  /* Existing app tokens mapped to the Notion palette. */
+  --canvas: var(--notion-bg-page);
+  --surface: var(--notion-bg-default);
+  --surface-sidebar: var(--notion-bg-sidebar);
+  --surface-muted: var(--notion-bg-gray);
+  --surface-tint: var(--notion-bg-blue);
+  --ink: var(--notion-text-default);
+  --ink-soft: var(--notion-text-gray);
+  --ink-faint: var(--notion-text-gray);
+  --line: color-mix(in srgb, var(--notion-text-gray) 18%, var(--notion-bg-page));
+  --line-strong: color-mix(in srgb, var(--notion-text-gray) 35%, var(--notion-bg-page));
+  --brand: var(--notion-icon-blue);
+  --brand-dark: var(--notion-text-blue);
+  --brand-soft: var(--notion-bg-blue);
+  --cyan: var(--notion-text-blue);
+  --danger: var(--notion-text-red);
+  --danger-soft: var(--notion-bg-red);
+  --success: var(--notion-text-green);
+  --logo-tile: var(--notion-text-default);
+  --logo-ink: var(--notion-bg-page);
+  --logo-dot: var(--notion-icon-blue);
+  --shadow-sm: 0 1px 2px color-mix(in srgb, var(--notion-text-default) 8%, transparent), 0 4px 14px color-mix(in srgb, var(--notion-text-default) 8%, transparent);
+  --shadow-md: 0 18px 44px color-mix(in srgb, var(--notion-text-default) 12%, transparent), 0 2px 8px color-mix(in srgb, var(--notion-text-default) 5%, transparent);
+  --radius-sm: var(--notion-radius);
+  --radius-md: var(--notion-radius);
+  --radius-lg: var(--notion-radius);
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
   --space-4: 1rem;
   --space-6: 1.5rem;
   --space-8: 2rem;
-  --focus-ring: 0 0 0 3px rgba(217, 101, 76, 0.22);
+  --focus-ring: 0 0 0 3px color-mix(in srgb, var(--notion-icon-blue) 28%, transparent);
   --ease-standard: 150ms ease;
 }
 
@@ -41,10 +102,20 @@ body {
   min-width: 320px;
   margin: 0;
   color: var(--ink);
-  background: radial-gradient(circle at 88% -10%, rgba(91, 92, 226, 0.1), transparent 30rem), var(--canvas);
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--canvas);
+  font-family: var(--notion-font-sans);
+  font-size: var(--notion-font-size-body);
+  line-height: var(--notion-line-height-body);
   -webkit-font-smoothing: antialiased;
 }
+
+/* Icons. Sizing lives here rather than in the component so the tokens stay the single source,
+   and `currentColor` means an icon simply takes the colour of the text it sits beside. */
+.icon { flex: 0 0 auto; width: var(--icon-md); height: var(--icon-md); vertical-align: -0.185em; }
+.icon-sm { width: var(--icon-sm); height: var(--icon-sm); }
+.icon-lg { width: var(--icon-lg); height: var(--icon-lg); }
+.icon :is(path, circle, rect, line, polyline, polygon) { stroke-width: var(--icon-stroke); }
+.icon-filled :is(path, circle, rect, polygon) { fill: currentColor; }
 
 button, select, input, textarea { font: inherit; }
 button, a, select { -webkit-tap-highlight-color: transparent; }
@@ -271,7 +342,6 @@ main { width: min(1180px, calc(100% - 3rem)); margin: 0 auto; }
 .ai-pending-status.confirmed { color: var(--success); }
 .ai-pending-status.cancelled { color: var(--ink-faint); }
 .ai-thinking { display: flex; align-items: center; gap: 0.4rem; margin: 0; color: var(--ink-soft); font-size: 0.78rem; }
-.ai-thinking-dots { letter-spacing: 0.16em; animation: ai-pulse 1.1s ease-in-out infinite; }
 .ai-form { display: flex; flex-direction: column; align-items: stretch; gap: 0.55rem; padding: 0.9rem; border: 1px solid var(--line); border-radius: 12px; background: rgba(255, 255, 255, 0.82); }
 .ai-compose-label { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
 .ai-form label { color: var(--ink); font-size: 0.75rem; }
@@ -282,7 +352,6 @@ main { width: min(1180px, calc(100% - 3rem)); margin: 0 auto; }
 .ai-count { font-variant-numeric: tabular-nums; }
 .ai-form button.ai-send { min-height: 2.2rem; padding: 0.4rem 0.7rem; }
 .ai-send span { margin-left: 0.25rem; }
-@keyframes ai-pulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
 .changed { border-color: rgba(37, 140, 105, 0.56) !important; box-shadow: 0 0 0 3px rgba(37, 140, 105, 0.13), var(--shadow-sm) !important; }
 
 /* Kobi AI follows a quiet, document-like assistant pattern: neutral chrome,
@@ -504,8 +573,12 @@ button.label-chip.chosen { border-color: var(--tint); }
 .theme-toggle button { flex: 1; min-height: 1.9rem !important; padding: 0.2rem !important; border: 0 !important; background: transparent !important; box-shadow: none !important; font-size: 0.72rem !important; }
 .theme-toggle button[aria-pressed="true"] { color: var(--ink) !important; background: var(--surface) !important; box-shadow: var(--shadow-sm) !important; }
 
-.bell-button { position: relative; min-width: 2.4rem; border-color: transparent !important; background: transparent !important; box-shadow: none !important; }
-.bell-count { position: absolute; top: 0.15rem; right: 0.1rem; min-width: 1.05rem; padding: 0 0.2rem; border-radius: 999px; color: #fff; background: var(--danger); font-size: 0.6rem; font-weight: 800; line-height: 1.05rem; }
+.bell-button { position: relative; display: inline-grid; min-width: 2.25rem; min-height: 2.25rem; place-items: center; border-color: transparent !important; color: var(--ink-soft); background: transparent !important; box-shadow: none !important; }
+.bell-button:hover { color: var(--ink); background: var(--surface-muted) !important; }
+/* The numeric badge already says "unread"; tinting the bell makes it readable at a glance
+   without stacking a second indicator dot under the badge. */
+.bell-button.has-unread { color: var(--brand); }
+.bell-count { position: absolute; top: 0.28rem; right: 0.28rem; min-width: 0.95rem; padding: 0 0.17rem; border: 1.5px solid var(--surface); border-radius: 999px; color: #fff; background: var(--danger); font-size: 0.58rem; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 0.92rem; transform: translate(35%, -35%); }
 .bell-panel { width: 22rem; max-height: 26rem; overflow-y: auto; }
 .bell-head { display: flex; align-items: center; justify-content: space-between; padding: 0.3rem 0.4rem 0.5rem; border-bottom: 1px solid var(--line); }
 .bell-head button { min-height: 1.9rem !important; padding: 0.2rem 0.4rem !important; background: transparent !important; box-shadow: none !important; font-size: 0.72rem !important; }
@@ -593,7 +666,22 @@ a.hero-metric:hover { border-color: rgba(91, 92, 226, 0.34); }
 .sprint-health-progress > span { position: relative; z-index: 1; height: 0.4rem; min-width: 0.2rem; border-radius: 999px; background: var(--brand); }
 .sprint-health-progress em { flex: 0 0 auto; color: var(--ink-soft); font-size: 0.7rem; font-style: normal; font-weight: 800; }
 .board-search input { min-width: 12rem; }
-.settings-page { max-width: 46rem; }
+/* Settings used to cap at 46rem, which left most of a wide content column empty. The cards now
+   sit in a grid so the space is used without stretching a single form to full width. */
+.settings-page { max-width: var(--page-max); }
+
+@media (min-width: 70rem) {
+  .settings-page {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    gap: var(--space-6);
+  }
+  /* The heading, and the danger zone, read better across the full width. */
+  .settings-page > .page-heading,
+  .settings-page > .danger-zone { grid-column: 1 / -1; }
+  .settings-page > .settings-card { margin-bottom: 0; }
+}
 .settings-card { margin-bottom: 1.25rem; padding: 1.35rem; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface); box-shadow: var(--shadow-sm); }
 .settings-card h2 { margin-bottom: 0.5rem; font-size: 1.02rem; letter-spacing: -0.02em; }
 .settings-card > .muted { margin-bottom: 1.1rem; font-size: 0.84rem; line-height: 1.55; }
@@ -671,6 +759,7 @@ a.hero-metric:hover { border-color: rgba(91, 92, 226, 0.34); }
 .card-footer { margin-top: 0.5rem; }
 .card-footer .avatar-wrap { margin-left: auto; }
 .priority { display: inline-flex; align-items: center; gap: 0.2rem; color: var(--ink-faint); font-size: 0.68rem; font-weight: 800; text-transform: capitalize; }
+.priority-dot { width: 0.4rem; height: 0.4rem; border-radius: 50%; background: currentColor; }
 .priority-urgent, .priority-high { color: var(--danger); }
 .priority-medium { color: #b5791b; }
 .due { padding: 0.08rem 0.4rem; border-radius: 999px; background: var(--surface-muted); color: var(--ink-soft); font-size: 0.68rem; font-weight: 700; }
@@ -720,7 +809,7 @@ a.hero-metric:hover { border-color: rgba(91, 92, 226, 0.34); }
 
 /* --- insights -------------------------------------------------------------------------------- */
 
-.insights-page { max-width: 62rem; }
+.insights-page { max-width: var(--page-max); }
 .stat-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); gap: 0.75rem; margin: 0 0 1.75rem; padding: 0; list-style: none; }
 .stat-tile { padding: 1rem 1.1rem; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface); box-shadow: var(--shadow-sm); }
 .stat-tile span { display: block; margin-bottom: 0.3rem; color: var(--ink-faint); font-size: 0.72rem; font-weight: 700; }
@@ -793,6 +882,113 @@ a.hero-metric:hover { border-color: rgba(91, 92, 226, 0.34); }
 
 :root[data-theme="dark"] { color-scheme: dark; --canvas: #10131c; --surface: #191d2b; --surface-muted: #1f2433; --surface-tint: #232842; --ink: #e8ecf6; --ink-soft: #a9b3c9; --ink-faint: #a1acc0; --line: #2a3145; --line-strong: #3a4159; --brand: #7e80ea; --brand-dark: #9a9bf2; --brand-soft: #242747; --cyan: #3fc0d1; --danger: #e2748a; --danger-soft: #34202a; --success: #4fbf92; --chart-series: #7e80ea; --chart-alarm: #d9697f; --chart-track: #222839; --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.22); --shadow-md: 0 14px 32px rgba(0, 0, 0, 0.42), 0 2px 8px rgba(0, 0, 0, 0.3); }
 
+/* Dark Notion tokens and the corresponding semantic aliases. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --notion-bg-page: #191919;
+    --notion-bg-sidebar: #202020;
+    --notion-text-default: #D4D4D4;
+    --notion-text-gray: #9B9B9B;
+    --notion-text-brown: #A27763;
+    --notion-text-orange: #CB7B37;
+    --notion-text-yellow: #C19138;
+    --notion-text-green: #4F9768;
+    --notion-text-blue: #447ACB;
+    --notion-text-purple: #865DBB;
+    --notion-text-pink: #BA4A78;
+    --notion-text-red: #BE524B;
+    --notion-bg-default: #191919;
+    --notion-bg-gray: #252525;
+    --notion-bg-brown: #2E2724;
+    --notion-bg-orange: #36291F;
+    --notion-bg-yellow: #372E20;
+    --notion-bg-green: #242B26;
+    --notion-bg-blue: #1F282D;
+    --notion-bg-purple: #2A2430;
+    --notion-bg-pink: #2E2328;
+    --notion-bg-red: #332523;
+    --notion-icon-blue: #447ACB;
+    --canvas: var(--notion-bg-page);
+    --surface: var(--notion-bg-default);
+    --surface-sidebar: var(--notion-bg-sidebar);
+    --surface-muted: var(--notion-bg-gray);
+    --surface-tint: var(--notion-bg-blue);
+    --ink: var(--notion-text-default);
+    --ink-soft: var(--notion-text-gray);
+    --ink-faint: var(--notion-text-gray);
+    --line: color-mix(in srgb, var(--notion-text-gray) 24%, var(--notion-bg-page));
+    --line-strong: color-mix(in srgb, var(--notion-text-gray) 42%, var(--notion-bg-page));
+    --brand: var(--notion-icon-blue);
+    --brand-dark: var(--notion-text-blue);
+    --brand-soft: var(--notion-bg-blue);
+    --cyan: var(--notion-text-blue);
+    --danger: var(--notion-text-red);
+    --danger-soft: var(--notion-bg-red);
+    --success: var(--notion-text-green);
+    --logo-tile: var(--notion-text-default);
+    --logo-ink: var(--notion-bg-page);
+    --logo-dot: var(--notion-icon-blue);
+    --chart-series: var(--notion-text-blue);
+    --chart-alarm: var(--notion-text-red);
+    --chart-track: var(--notion-bg-gray);
+    --shadow-sm: 0 1px 2px color-mix(in srgb, #000 30%, transparent), 0 4px 12px color-mix(in srgb, #000 22%, transparent);
+    --shadow-md: 0 14px 32px color-mix(in srgb, #000 42%, transparent), 0 2px 8px color-mix(in srgb, #000 30%, transparent);
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --notion-bg-page: #191919;
+  --notion-bg-sidebar: #202020;
+  --notion-text-default: #D4D4D4;
+  --notion-text-gray: #9B9B9B;
+  --notion-text-brown: #A27763;
+  --notion-text-orange: #CB7B37;
+  --notion-text-yellow: #C19138;
+  --notion-text-green: #4F9768;
+  --notion-text-blue: #447ACB;
+  --notion-text-purple: #865DBB;
+  --notion-text-pink: #BA4A78;
+  --notion-text-red: #BE524B;
+  --notion-bg-default: #191919;
+  --notion-bg-gray: #252525;
+  --notion-bg-brown: #2E2724;
+  --notion-bg-orange: #36291F;
+  --notion-bg-yellow: #372E20;
+  --notion-bg-green: #242B26;
+  --notion-bg-blue: #1F282D;
+  --notion-bg-purple: #2A2430;
+  --notion-bg-pink: #2E2328;
+  --notion-bg-red: #332523;
+  --notion-icon-blue: #447ACB;
+  --canvas: var(--notion-bg-page);
+  --surface: var(--notion-bg-default);
+  --surface-sidebar: var(--notion-bg-sidebar);
+  --surface-muted: var(--notion-bg-gray);
+  --surface-tint: var(--notion-bg-blue);
+  --ink: var(--notion-text-default);
+  --ink-soft: var(--notion-text-gray);
+  --ink-faint: var(--notion-text-gray);
+  --line: color-mix(in srgb, var(--notion-text-gray) 24%, var(--notion-bg-page));
+  --line-strong: color-mix(in srgb, var(--notion-text-gray) 42%, var(--notion-bg-page));
+  --brand: var(--notion-icon-blue);
+  --brand-dark: var(--notion-text-blue);
+  --brand-soft: var(--notion-bg-blue);
+  --cyan: var(--notion-text-blue);
+  --danger: var(--notion-text-red);
+  --danger-soft: var(--notion-bg-red);
+  --success: var(--notion-text-green);
+  --logo-tile: var(--notion-text-default);
+  --logo-ink: var(--notion-bg-page);
+  --logo-dot: var(--notion-icon-blue);
+  --chart-series: var(--notion-text-blue);
+  --chart-alarm: var(--notion-text-red);
+  --chart-track: var(--notion-bg-gray);
+  --shadow-sm: 0 1px 2px color-mix(in srgb, #000 30%, transparent), 0 4px 12px color-mix(in srgb, #000 22%, transparent);
+  --shadow-md: 0 14px 32px color-mix(in srgb, #000 42%, transparent), 0 2px 8px color-mix(in srgb, #000 30%, transparent);
+}
+
 /* Pieces written with literal colours before the token set existed. Rather than rewrite those
    rules, the dark theme restates the handful that would otherwise stay light. */
 
@@ -850,9 +1046,77 @@ a.hero-metric:hover { border-color: rgba(91, 92, 226, 0.34); }
 
 /* --- loading placeholders ------------------------------------------------------------------- */
 
+.skeleton-shape { background: linear-gradient(90deg, var(--surface-muted) 25%, var(--surface) 50%, var(--surface-muted) 75%); background-size: 200% 100%; animation: skeleton-sweep 1.4s ease-in-out infinite; }
 .skeleton-block { display: grid; gap: 0.75rem; }
-.skeleton-row { display: block; height: 4.5rem; border-radius: var(--radius-md); background: linear-gradient(90deg, var(--surface-muted) 25%, var(--surface) 50%, var(--surface-muted) 75%); background-size: 200% 100%; animation: skeleton-sweep 1.4s ease-in-out infinite; }
+.skeleton-row { display: block; height: 4.5rem; border-radius: var(--radius-md); }
 .skeleton-row:first-child { height: 2.5rem; max-width: 22rem; }
+.skeleton-block--compact { gap: 0.5rem; }
+.skeleton-block--compact .skeleton-row { height: 2.7rem; border-radius: var(--radius-sm); }
+.skeleton-block--compact .skeleton-row:first-child { height: 2.7rem; max-width: none; }
+.skeleton-page { width: 100%; }
+.skeleton-stack { display: grid; gap: 0.45rem; }
+.skeleton-line { display: block; height: 0.7rem; border-radius: 999px; }
+.skeleton-line--eyebrow { width: 5.5rem; height: 0.55rem; }
+.skeleton-line--hero-title { width: min(25rem, 80vw); height: 2.35rem; border-radius: 0.35rem; }
+.skeleton-line--onboarding-title { width: min(30rem, 90%); height: 2.1rem; border-radius: 0.35rem; }
+.skeleton-line--board-title { width: min(24rem, 70vw); height: 1.9rem; border-radius: 0.35rem; }
+.skeleton-line--copy { width: min(30rem, 90%); }
+.skeleton-line--copy-short { width: min(19rem, 65%); }
+.skeleton-line--strong { width: 8rem; height: 0.8rem; }
+.skeleton-line--label { width: 4.5rem; height: 0.58rem; }
+.skeleton-line--metric { width: 2.5rem; height: 1.3rem; border-radius: 0.3rem; }
+.skeleton-line--briefing-title { width: min(29rem, 90%); height: 1.25rem; margin-top: 0.35rem; border-radius: 0.3rem; }
+.skeleton-line--action { width: 6.5rem; height: 0.65rem; }
+.skeleton-line--section-title { width: 6.5rem; height: 0.85rem; }
+.skeleton-line--back { width: 5rem; height: 0.6rem; }
+.skeleton-line--column-title { flex: 1; width: auto; height: 0.75rem; }
+.skeleton-line--card-title { width: 85%; height: 0.75rem; }
+.skeleton-line--card-meta { width: 55%; height: 0.55rem; }
+.skeleton-line--activity { width: min(28rem, 80%); }
+.skeleton-line--short { width: 35%; }
+.skeleton-label { display: inline-block; width: 4.5rem; height: 0.72rem; border-radius: 999px; vertical-align: middle; }
+.skeleton-label--wide { width: 7.5rem; }
+.skeleton-label--thinking { width: 4.25rem; }
+.skeleton-input, .skeleton-button, .skeleton-field, .skeleton-textarea, .skeleton-control-row, .skeleton-add-form, .skeleton-ai-form { display: block; border-radius: var(--radius-sm); }
+.skeleton-input { width: min(20rem, 100%); height: 2.35rem; }
+.skeleton-input--search { width: 10rem; }
+.skeleton-input--small { width: 8rem; height: 2rem; }
+.skeleton-input--filter { width: 9rem; }
+.skeleton-control-row { width: 100%; height: 2.5rem; }
+.skeleton-button { width: 5.5rem; height: 2.35rem; }
+.skeleton-button--small { width: 4.5rem; height: 2rem; }
+.skeleton-button--wide { width: 8rem; }
+.skeleton-field { width: 100%; height: 3.7rem; }
+.skeleton-field--short { width: min(12rem, 100%); }
+.skeleton-textarea { width: 100%; height: 5.5rem; margin-bottom: 1rem; }
+.skeleton-textarea--short { height: 4rem; }
+.skeleton-count { display: block; width: 1.35rem; height: 1.35rem; border-radius: 999px; }
+.skeleton-pill { display: block; width: 5.5rem; height: 2rem; border-radius: 999px; }
+.skeleton-pill--role { width: 4rem; height: 1.7rem; }
+.skeleton-avatar { display: block; flex: 0 0 auto; width: 2.2rem; height: 2.2rem; border-radius: 50%; }
+.skeleton-card { display: grid; align-content: start; gap: 0.55rem; min-height: 5rem; }
+.skeleton-add-form { width: 100%; height: 2.35rem; }
+.skeleton-column-color { display: block; flex: 0 0 auto; width: 0.45rem; height: 1.4rem; border-radius: 999px; }
+.skeleton-activity-row { min-height: 2.7rem; padding: 0.75rem 0; border-bottom: 1px solid var(--line); }
+.skeleton-list { display: grid; }
+.activity-feed-item-skeleton { display: flex; align-items: flex-start; gap: 0.7rem; min-height: 3.5rem; padding: 0.7rem 0.8rem; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface); }
+.activity-feed-item-skeleton .skeleton-stack { flex: 1; }
+.skeleton-invite-form { display: flex; align-items: flex-end; gap: 0.75rem; }
+.skeleton-invite-form .skeleton-field:first-child { flex: 1; }
+.skeleton-invite-row { display: block; width: 100%; height: 2.5rem; margin-top: 0.5rem; border-radius: var(--radius-sm); }
+.skeleton-table td { height: 4.1rem; }
+.skeleton-work-heading { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.7rem; }
+.skeleton-work-heading .skeleton-line--section-title { width: 7rem; }
+.skeleton-stat-row .skeleton-stack { gap: 0.45rem; }
+.skeleton-insight-card { min-height: 18rem; }
+.skeleton-chart { display: block; width: 100%; height: 9rem; margin: 1.1rem 0; border-radius: var(--radius-sm); }
+.skeleton-chart--columns { height: 8rem; }
+.skeleton-chart-table { display: grid; gap: 0.45rem; }
+.skeleton-table-row { display: block; width: 100%; height: 1.65rem; border-radius: 0.25rem; }
+.skeleton-template-option { display: block; min-height: 6.5rem; border-radius: 12px; }
+.skeleton-ai-panel { display: block; }
+.skeleton-ai-icon { display: block; flex: 0 0 auto; width: 1.8rem; height: 1.8rem; border-radius: 6px; }
+.skeleton-ai-log { display: block; width: 100%; height: 11rem; }
 @keyframes skeleton-sweep { from { background-position: 200% 0; } to { background-position: -200% 0; } }
 
 /* --- public policy pages -------------------------------------------------------------------- */
@@ -886,7 +1150,7 @@ body { background: var(--canvas); }
 .sidebar-search-trigger:hover { border-color: var(--line-strong); color: var(--ink); background: var(--surface-muted); }
 .sidebar .nav-links { gap: 0.1rem; }
 .sidebar .nav-links a { min-height: 2.25rem; gap: 0.1rem; padding-inline: 0.55rem; border-radius: var(--radius-sm); }
-.nav-icon { display: inline-grid; flex: 0 0 1.35rem; place-items: center; color: var(--ink-faint); font-size: 0.86rem; font-weight: 800; line-height: 1; }
+.nav-icon { display: inline-grid; flex: 0 0 1.35rem; place-items: center; color: var(--ink-faint); line-height: 1; }
 .nav-label { min-width: 0; }
 .sidebar .nav-links a:hover .nav-icon, .sidebar .nav-links a[aria-current="page"] .nav-icon { color: var(--brand); }
 .sidebar .nav-links a[aria-current="page"] { color: var(--ink); background: var(--brand-soft); }
@@ -899,7 +1163,7 @@ body { background: var(--canvas); }
 .sidebar.collapsed .sidebar-heading { justify-content: center; }
 .sidebar.collapsed .sidebar-heading .sidebar-toggle { margin-left: 0.1rem; }
 .sidebar.collapsed .nav-label { display: none; }
-.sidebar.collapsed .nav-icon { flex-basis: auto; font-size: 0.95rem; }
+.sidebar.collapsed .nav-icon { flex-basis: auto; }
 .sidebar.collapsed .sidebar-ai-entry .nav-icon { flex-basis: auto; }
 .command-panel { padding: 0.75rem; border-radius: var(--radius-md); }
 .command-panel input { min-height: 2.6rem; border-color: var(--line); background: var(--surface-muted); }
@@ -913,7 +1177,7 @@ body { background: var(--canvas); }
 }
 
 /* --- UI redesign: product surfaces --------------------------------------------------------- */
-.dashboard-page { padding: 2rem max(1.5rem, calc((100vw - 1180px) / 2)) 4rem; }
+.dashboard-page { width: 100%; max-width: var(--page-max); margin-inline: auto; padding: 2rem var(--page-gutter) 4rem; }
 .dashboard-hero { align-items: center; gap: 1.5rem; margin-bottom: 1.25rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--line); }
 .dashboard-hero h1 { margin-bottom: 0.35rem; font-size: clamp(1.7rem, 3vw, 2.35rem); letter-spacing: -0.05em; }
 .dashboard-hero p { font-size: 0.86rem; line-height: 1.5; }
@@ -1085,7 +1349,9 @@ body { background: var(--canvas); }
 .preview-content { display: grid; grid-template-columns: 7rem 1fr; min-height: 20rem; }
 .preview-sidebar { display: grid; align-content: start; gap: 0.8rem; padding: 1rem 0.75rem; color: var(--ink-faint); background: var(--surface-muted); font-size: 0.65rem; }
 .preview-sidebar strong { margin-bottom: 0.6rem; color: var(--ink); font-size: 0.8rem; }
-.preview-sidebar span:last-child { padding: 0.45rem; border-radius: 6px; color: var(--brand-dark); background: var(--brand-soft); font-weight: 800; }
+/* Target the Ask Kobi row by name: `span:last-child` also matched .kobi-logo-wordmark, which
+   is the last child of .kobi-logo, and gave the wordmark an accent box. */
+.preview-sidebar .preview-ask { padding: 0.45rem; border-radius: 6px; color: var(--brand-dark); background: var(--brand-soft); font-weight: 800; }
 .preview-board { padding: 1.4rem 1rem; }
 .preview-board small { color: var(--brand-dark); font-size: 0.58rem; font-weight: 800; letter-spacing: 0.08em; }
 .preview-board h2 { margin: 0.5rem 0 1.5rem; font-size: 1.2rem; letter-spacing: -0.04em; }
@@ -1161,7 +1427,7 @@ body { background: var(--canvas); }
 
 /* --- Kobi visual system: quiet workspace -------------------------------------------------- */
 :root {
-  --chart-track: #e7e2d9;
+  --chart-track: var(--notion-bg-gray);
   --chart-series: var(--brand);
   --chart-alarm: var(--danger);
 }
@@ -1169,7 +1435,9 @@ body { background: var(--canvas); }
 body {
   background: var(--canvas);
   color: var(--ink);
-  font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--notion-font-sans);
+  font-size: var(--notion-font-size-body);
+  line-height: var(--notion-line-height-body);
 }
 
 a { color: var(--brand-dark); }
@@ -1218,7 +1486,7 @@ input::placeholder, textarea::placeholder { color: var(--ink-faint); }
   min-height: calc(100vh - 3.5rem);
   padding: 0.8rem 0.7rem;
   border-right: 1px solid var(--line);
-  background: var(--surface);
+  background: var(--surface-sidebar);
 }
 .sidebar.collapsed { flex-basis: 4rem; width: 4rem; }
 .sidebar-heading { min-height: 2.35rem; margin-bottom: 0.75rem; padding-inline: 0.05rem; }
@@ -1232,7 +1500,7 @@ input::placeholder, textarea::placeholder { color: var(--ink-faint); }
 .sidebar .nav-links a { min-height: 2.3rem; gap: 0.15rem; padding-inline: 0.55rem; border-radius: var(--radius-sm); color: var(--ink-soft); font-size: 0.77rem; font-weight: 650; }
 .sidebar .nav-links a:hover { color: var(--ink); background: var(--surface-muted); }
 .sidebar .nav-links a[aria-current="page"] { color: var(--ink); background: var(--surface-muted); box-shadow: inset 2px 0 0 var(--brand); }
-.nav-icon { color: var(--ink-faint); font-size: 0.84rem; }
+.nav-icon { color: var(--ink-faint); }
 .sidebar .nav-links a:hover .nav-icon, .sidebar .nav-links a[aria-current="page"] .nav-icon { color: var(--brand); }
 .sidebar-divider { margin: 0.85rem 0 0.65rem; background: var(--line); }
 .sidebar-ai-entry { min-height: 2.3rem; padding: 0.45rem 0.55rem; border: 1px solid transparent; border-radius: var(--radius-sm); color: var(--ink-soft); background: transparent; font-size: 0.77rem; font-weight: 700; }
@@ -1288,7 +1556,7 @@ input::placeholder, textarea::placeholder { color: var(--ink-faint); }
 .activity-list { gap: 0; border-top: 1px solid var(--line); }
 .activity-list li { padding: 0.75rem 0; border-bottom: 1px solid var(--line); }
 
-.board-page { padding: 1.5rem max(1rem, calc((100vw - 1460px) / 2)) 3.5rem; }
+.board-page { width: 100%; max-width: none; margin-inline: 0; padding: 1.5rem var(--page-gutter) 3.5rem; }
 .board-heading { margin-bottom: 1rem; }
 .board-heading h1 { font-size: clamp(1.5rem, 2.8vw, 2.15rem); }
 .back-link { margin-bottom: 0.6rem; color: var(--ink-faint); font-size: 0.7rem; }
@@ -1340,7 +1608,7 @@ input::placeholder, textarea::placeholder { color: var(--ink-faint); }
 .ai-form button.ai-send { color: #fff; background: var(--ink); }
 .ai-form button.ai-send:hover:not(:disabled) { border-color: var(--ink); background: var(--brand); }
 
-.page { padding: 2.2rem max(1rem, calc((100vw - 1040px) / 2)) 4rem; }
+.page { width: 100%; max-width: var(--page-max); margin-inline: auto; padding: 2.2rem var(--page-gutter) 4rem; }
 .page-heading { margin-bottom: 1.3rem; padding-bottom: 1rem; border-bottom-color: var(--line); }
 .page-heading h1 { font-size: clamp(1.5rem, 3vw, 2.05rem); }
 .settings-card, .insight-card, .stat-tile, .work-card, .activity-feed li, .member-table, .chart-table { border-color: var(--line); border-radius: var(--radius-md); background: var(--surface); box-shadow: none; }
@@ -1381,7 +1649,9 @@ input::placeholder, textarea::placeholder { color: var(--ink-faint); }
 .preview-sidebar .kobi-logo { margin-bottom: 1.1rem; }
 .preview-sidebar .kobi-logo-mark { width: 1.35rem; height: 1.35rem; }
 .preview-sidebar .kobi-logo-wordmark { font-size: 0.72rem; }
-.preview-sidebar span:not(.kobi-logo-wordmark) { display: block; padding: 0.45rem 0.5rem; }
+/* Direct children only: the descendant form also matched .kobi-logo itself, which turned the
+   logo from inline-flex into a block and collapsed the gap between mark and wordmark. */
+.preview-sidebar > span:not(.kobi-logo) { display: block; padding: 0.45rem 0.5rem; }
 .preview-sidebar .preview-active { color: var(--ink); border-radius: 4px; background: #e9e5de; font-weight: 760; }
 .preview-sidebar-spacer { flex: 1; }
 .preview-sidebar .preview-ask { color: var(--brand-dark); }
@@ -1414,59 +1684,6 @@ input::placeholder, textarea::placeholder { color: var(--ink-faint); }
   .preview-board h2 { font-size: 1.15rem; }
   .preview-columns { grid-template-columns: 1fr; }
   .preview-columns div:nth-child(3) { display: none; }
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --canvas: #191816;
-    --surface: #24221f;
-    --surface-muted: #2b2824;
-    --surface-tint: #392a25;
-    --ink: #f1eee8;
-    --ink-soft: #b8b1a8;
-    --ink-faint: #898177;
-    --line: #3b3732;
-    --line-strong: #514b43;
-    --brand: #e47c61;
-    --brand-dark: #f09a7d;
-    --brand-soft: #3b2a25;
-    --cyan: #82bcb2;
-    --danger: #e48686;
-    --danger-soft: #422b2b;
-    --success: #8bc19a;
-    --logo-tile: #f1eee8;
-    --logo-ink: #24221f;
-    --logo-dot: #e47c61;
-    --chart-track: #3a3631;
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.16);
-    --shadow-md: 0 18px 44px rgba(0, 0, 0, 0.36), 0 2px 8px rgba(0, 0, 0, 0.2);
-  }
-}
-
-:root[data-theme="dark"] {
-  color-scheme: dark;
-  --canvas: #191816;
-  --surface: #24221f;
-  --surface-muted: #2b2824;
-  --surface-tint: #392a25;
-  --ink: #f1eee8;
-  --ink-soft: #b8b1a8;
-  --ink-faint: #898177;
-  --line: #3b3732;
-  --line-strong: #514b43;
-  --brand: #e47c61;
-  --brand-dark: #f09a7d;
-  --brand-soft: #3b2a25;
-  --cyan: #82bcb2;
-  --danger: #e48686;
-  --danger-soft: #422b2b;
-  --success: #8bc19a;
-  --logo-tile: #f1eee8;
-  --logo-ink: #24221f;
-  --logo-dot: #e47c61;
-  --chart-track: #3a3631;
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.16);
-  --shadow-md: 0 18px 44px rgba(0, 0, 0, 0.36), 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 :root[data-theme="dark"] .preview-sidebar,
@@ -1519,3 +1736,39 @@ dialog.draft-dialog { width: min(44rem, calc(100% - 2rem)); max-width: 44rem; }
 .draft-description { margin: var(--space-2) 0 0; white-space: pre-wrap; }
 .draft-body details ul { margin: var(--space-2) 0 0; padding-left: 1.1rem; }
 #draft-column { width: 100%; margin-top: 0.4rem; }
+
+/* --- Display type ----------------------------------------------------------------------------
+   Fraunces carries headings and brand moments; every control, label and card face stays in the
+   UI sans so dense columns remain legible. This block comes last so it wins over the per-section
+   heading rules above, which only set size, margin and tracking.
+
+   The tracking is reset here on purpose: those rules carry tight negative letter-spacing tuned
+   for a geometric sans, which pinches a serif's wedge serifs together. */
+.page-heading h1,
+.board-heading h1,
+.dashboard-hero h1,
+.briefing-card h2,
+.landing-copy h1,
+.auth-pitch h1,
+.auth-form-wrap h1,
+.public-page h1,
+.simple-state h1,
+.drawer-title,
+.kobi-logo-wordmark {
+  font-family: var(--font-display-stack);
+  font-variation-settings: var(--display-variation);
+  font-optical-sizing: auto;
+  font-weight: 600;
+}
+
+/* Serifs need more room than the sans tracking these headings were tuned for. */
+.page-heading h1, .board-heading h1, .dashboard-hero h1, .auth-pitch h1, .auth-form-wrap h1,
+.public-page h1, .simple-state h1 { letter-spacing: -0.02em; }
+.briefing-card h2, .drawer-title { letter-spacing: -0.01em; }
+.landing-copy h1 { letter-spacing: -0.03em; }
+.kobi-logo-wordmark { font-weight: 700; letter-spacing: -0.01em; }
+
+/* The hero is the one place the display face gets to be loud. */
+.landing-copy h1 { font-weight: 500; }
+
+kbd { font-family: var(--notion-font-mono); font-size: 0.92em; }

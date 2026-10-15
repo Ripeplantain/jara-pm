@@ -1,5 +1,5 @@
-import { PageSkeleton } from "@/components/shell/skeleton";
+import { InsightsSkeleton } from "@/components/shell/skeleton";
 
 export default function Loading() {
-  return <PageSkeleton title="Insights" rows={6} />;
+  return <InsightsSkeleton />;
 }

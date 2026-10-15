@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Modal } from "@/components/board/modal";
+import { Skeleton, SkeletonLabel } from "@/components/shell/skeleton";
 import { api, RequestError } from "@/lib/api/browser";
 import { shortDate } from "@/lib/dates";
 import { PRIORITIES, PRIORITY_LABEL } from "@/lib/types/board";
@@ -111,13 +112,19 @@ export function GenerateCardsDialog({ board, members, labels, onCreated, onClose
           </p>
           {note && <p role="status">{note}</p>}
           {error && <p role="alert" className="draft-error">{error}</p>}
-          {busy && <p role="status">Drafting cards… this can take up to a minute.</p>}
+          {busy && (
+            <Skeleton
+              rows={2}
+              className="skeleton-block--compact"
+              label="Drafting cards"
+            />
+          )}
           <div className="dialog-actions">
             <button type="button" onClick={onClose}>
               Cancel
             </button>
-            <button type="submit" disabled={busy || !text.trim()}>
-              {busy ? "Drafting…" : "Draft cards"}
+            <button type="submit" disabled={busy || !text.trim()} aria-label={busy ? "Drafting cards" : undefined}>
+              {busy ? <SkeletonLabel className="skeleton-label--wide" /> : "Draft cards"}
             </button>
           </div>
         </form>
@@ -215,8 +222,8 @@ export function GenerateCardsDialog({ board, members, labels, onCreated, onClose
             <button type="button" disabled={busy} onClick={onClose}>
               Cancel
             </button>
-            <button type="submit" disabled={busy || !kept.length}>
-              {busy ? "Creating…" : `Create ${kept.length === 1 ? "1 card" : `${kept.length} cards`}`}
+            <button type="submit" disabled={busy || !kept.length} aria-label={busy ? "Creating cards" : undefined}>
+              {busy ? <SkeletonLabel className="skeleton-label--wide" /> : `Create ${kept.length === 1 ? "1 card" : `${kept.length} cards`}`}
             </button>
           </div>
         </form>

@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Avatar } from "@/components/shell/avatar";
+import { SkeletonLabel } from "@/components/shell/skeleton";
 import { api, RequestError } from "@/lib/api/browser";
 import type { User } from "@/lib/types/auth";
 
@@ -86,8 +87,8 @@ export function ProfileForm({ user }: { user: User }) {
         </p>
       )}
 
-      <button type="submit" disabled={saving || !name.trim()}>
-        {saving ? "Saving…" : "Save profile"}
+      <button type="submit" disabled={saving || !name.trim()} aria-label={saving ? "Saving profile" : undefined}>
+        {saving ? <SkeletonLabel className="skeleton-label--wide" /> : "Save profile"}
       </button>
     </form>
   );

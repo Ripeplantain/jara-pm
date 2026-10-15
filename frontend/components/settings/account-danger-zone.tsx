@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { useState } from "react";
 import { api, RequestError } from "@/lib/api/browser";
+import { SkeletonLabel } from "@/components/shell/skeleton";
 
 export function AccountDangerZone() {
   const router = useRouter();
@@ -49,8 +50,14 @@ export function AccountDangerZone() {
           />
           {error && <p className="field-error" role="alert">{error}</p>}
           <div className="row-actions">
-            <button type="button" className="danger" disabled={busy || !password} onClick={() => void removeAccount()}>
-              {busy ? "Deleting…" : "Permanently delete"}
+            <button
+              type="button"
+              className="danger"
+              disabled={busy || !password}
+              aria-label={busy ? "Deleting account" : undefined}
+              onClick={() => void removeAccount()}
+            >
+              {busy ? <SkeletonLabel className="skeleton-label--wide" /> : "Permanently delete"}
             </button>
             <button type="button" disabled={busy} onClick={() => setConfirming(false)}>Cancel</button>
           </div>

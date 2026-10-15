@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { useState } from "react";
+import { SkeletonLabel } from "@/components/shell/skeleton";
 
 /** Only allow same-site relative paths as post-login targets. */
 function safeCallback(url: string | null): string {
@@ -68,8 +69,8 @@ export function SignInForm({ callbackUrl }: { callbackUrl: string | null }) {
           aria-describedby={error ? "signin-error" : undefined}
         />
       </p>
-      <button className="auth-submit" type="submit" disabled={pending}>
-        {pending ? "Signing in…" : "Sign in"}
+      <button className="auth-submit" type="submit" disabled={pending} aria-label={pending ? "Signing in" : undefined}>
+        {pending ? <SkeletonLabel /> : "Sign in"}
       </button>
       <p className="auth-switch">
         Forgot your password? <Link href="/forgot-password">Reset it</Link>

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { GlobalSearch } from "@/components/shell/global-search";
 import { NavLinks } from "@/components/shell/nav-links";
 import { WorkspaceSwitcher } from "@/components/shell/workspace-switcher";
+import { Icon } from "@/components/icon";
 import { KobiLogo } from "@/components/shell/kobi-logo";
 import type { Role, Workspace } from "@/lib/types/workspace";
 
@@ -45,7 +46,7 @@ export function Sidebar({
           <KobiLogo size="sm" showWordmark={false} />
         )}
         <button type="button" className="sidebar-toggle" aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"} onClick={toggle}>
-          {collapsed ? "→" : "←"}
+          <Icon name={collapsed ? "panel-left-open" : "panel-left-close"} />
         </button>
       </div>
       <GlobalSearch workspaceId={workspaceId} />
@@ -53,7 +54,9 @@ export function Sidebar({
       <div className="sidebar-footer">
         <div className="sidebar-divider" />
         <Link className="sidebar-ai-entry" href="/" title="Ask Kobi from a board">
-          <span className="nav-icon" aria-hidden="true">✦</span>
+          <span className="nav-icon">
+            <Icon name="sparkles" />
+          </span>
           {!collapsed && <span className="nav-label">Ask Kobi</span>}
         </Link>
         {!collapsed && <p className="sidebar-tip">Use ⌘K to find cards anywhere in this workspace.</p>}

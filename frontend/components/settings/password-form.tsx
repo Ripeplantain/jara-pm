@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { api, RequestError } from "@/lib/api/browser";
+import { SkeletonLabel } from "@/components/shell/skeleton";
 
 export function PasswordForm() {
   const [current, setCurrent] = useState("");
@@ -92,8 +93,8 @@ export function PasswordForm() {
         </p>
       )}
 
-      <button type="submit" disabled={busy}>
-        {busy ? "Changing…" : "Change password"}
+      <button type="submit" disabled={busy} aria-label={busy ? "Changing password" : undefined}>
+        {busy ? <SkeletonLabel className="skeleton-label--wide" /> : "Change password"}
       </button>
     </form>
   );

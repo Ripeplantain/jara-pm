@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Icon } from "@/components/icon";
 import { KobiLogo } from "@/components/shell/kobi-logo";
 
 export const metadata: Metadata = {
@@ -17,7 +18,7 @@ export default function WelcomePage() {
         <div>
           <Link href="/privacy">Privacy</Link>
           <Link href="/terms">Terms</Link>
-          <Link className="landing-nav-cta" href="/signup">Join the beta</Link>
+          <Link className="landing-primary" href="/signup">Join the beta</Link>
         </div>
       </nav>
 
@@ -30,7 +31,7 @@ export default function WelcomePage() {
             that feels as natural as a good notebook.
           </p>
           <div className="landing-actions">
-            <Link className="landing-primary" href="/signup">Join the invite-only beta <span aria-hidden="true">↗</span></Link>
+            <Link className="landing-primary" href="/signup">Join the invite-only beta <Icon name="arrow-up-right" size="sm" /></Link>
             <Link className="landing-secondary" href="/signin">Sign in</Link>
           </div>
           <p className="landing-note">A quiet workspace for teams that want to do their best work.</p>
@@ -38,7 +39,7 @@ export default function WelcomePage() {
         <div className="landing-preview" aria-label="Kobi workspace preview">
           <div className="preview-window-bar"><span /><span /><span /><b>Product workspace</b><small>kobi.app</small></div>
           <div className="preview-content">
-            <div className="preview-sidebar"><KobiLogo size="sm" /><span className="preview-active">Overview</span><span>Boards</span><span>My work</span><span>Activity</span><span className="preview-sidebar-spacer" /><span className="preview-ask">✦ Ask Kobi</span></div>
+            <div className="preview-sidebar"><KobiLogo size="sm" /><span className="preview-active">Overview</span><span>Boards</span><span>My work</span><span>Activity</span><span className="preview-sidebar-spacer" /><span className="preview-ask"><Icon name="sparkles" size="sm" /> Ask Kobi</span></div>
             <div className="preview-board"><small>MONDAY, OCTOBER 11 · PRODUCT</small><h2>Make checkout feel effortless</h2><p className="preview-board-note">The team is focused on reducing friction from first click to first purchase.</p><div className="preview-columns"><div><b>To do <em>3</em></b><i>Clarify pricing copy</i><i>Map the happy path</i></div><div><b>In progress <em>1</em></b><i>Run user interviews</i></div><div><b>Done <em>2</em></b><i>Define activation metric</i></div></div></div>
           </div>
         </div>

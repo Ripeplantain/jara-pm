@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { requestPasswordReset } from "@/app/auth/actions";
+import { SkeletonLabel } from "@/components/shell/skeleton";
 
 export function ForgotPasswordForm() {
   const [email, setEmail] = useState("");
@@ -31,8 +32,8 @@ export function ForgotPasswordForm() {
         <label htmlFor="reset-email">Email</label>
         <input id="reset-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" />
       </p>
-      <button className="auth-submit" type="submit" disabled={pending}>
-        {pending ? "Sending…" : "Send reset link"}
+      <button className="auth-submit" type="submit" disabled={pending} aria-label={pending ? "Sending reset link" : undefined}>
+        {pending ? <SkeletonLabel className="skeleton-label--wide" /> : "Send reset link"}
       </button>
       <p className="auth-switch"><Link href="/signin">Back to sign in</Link></p>
     </form>

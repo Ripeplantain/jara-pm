@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Modal } from "@/components/board/modal";
+import { SkeletonLabel } from "@/components/shell/skeleton";
 import { api, RequestError } from "@/lib/api/browser";
 import type { Label, LabelColor } from "@/lib/types/label";
 import { LABEL_COLORS } from "@/lib/types/label";
@@ -30,6 +31,7 @@ export function WorkspaceSettings({
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [deletingLabel, setDeletingLabel] = useState<Label | null>(null);
   const [exporting, setExporting] = useState(false);
 
   const mayAdmin = canAdminister(workspace.my_role);
@@ -101,8 +103,8 @@ export function WorkspaceSettings({
           </p>
         )}
         {mayAdmin && (
-          <button type="submit" disabled={busy || !name.trim()}>
-            Save
+          <button type="submit" disabled={busy || !name.trim()} aria-label={busy ? "Saving workspace" : undefined}>
+            {busy ? <SkeletonLabel /> : "Save"}
           </button>
         )}
       </form>
@@ -152,8 +154,8 @@ export function WorkspaceSettings({
                 ))}
               </select>
             </div>
-            <button type="submit" disabled={busy || !newLabel.trim()}>
-              Add label
+            <button type="submit" disabled={busy || !newLabel.trim()} aria-label={busy ? "Adding label" : undefined}>
+              {busy ? <SkeletonLabel /> : "Add label"}
             </button>
           </form>
         )}
@@ -191,12 +193,7 @@ export function WorkspaceSettings({
                     <button
                       type="button"
                       disabled={busy}
-                      onClick={() =>
-                        run(async () => {
-                          await api.deleteLabel(label.id);
-                          setLabels((list) => list.filter((l) => l.id !== label.id));
-                        })
-                      }
+                      onClick={() => setDeletingLabel(label)}
                     >
                       Delete
                     </button>
@@ -218,8 +215,8 @@ export function WorkspaceSettings({
         <section className="settings-card danger-zone">
           <h2>Danger zone</h2>
           <p>Download a copy of this workspace before making destructive changes.</p>
-          <button type="button" disabled={exporting} onClick={() => void exportData()}>
-            {exporting ? "Preparing export…" : "Export workspace data"}
+          <button type="button" disabled={exporting} aria-label={exporting ? "Preparing workspace export" : undefined} onClick={() => void exportData()}>
+            {exporting ? <SkeletonLabel className="skeleton-label--wide" /> : "Export workspace data"}
           </button>
           <p>
             Deleting this workspace removes every board, card and label in it, for everyone. It
@@ -264,6 +261,34 @@ export function WorkspaceSettings({
               Delete everything
             </button>
             <button type="button" onClick={() => setDeleting(false)}>
+              Cancel
+            </button>
+          </div>
+        </Modal>
+      )}
+
+      {deletingLabel && (
+        <Modal label="Delete label" onClose={() => setDeletingLabel(null)}>
+          <h2>Delete “{deletingLabel.name}”?</h2>
+          <p>
+            This removes the label from every card in the workspace. The action cannot be undone.
+          </p>
+          <div className="row-actions">
+            <button
+              type="button"
+              className="danger"
+              onClick={() => {
+                const label = deletingLabel;
+                setDeletingLabel(null);
+                void run(async () => {
+                  await api.deleteLabel(label.id);
+                  setLabels((list) => list.filter((item) => item.id !== label.id));
+                });
+              }}
+            >
+              Delete label
+            </button>
+            <button type="button" onClick={() => setDeletingLabel(null)}>
               Cancel
             </button>
           </div>

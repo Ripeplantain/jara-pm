@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Modal } from "@/components/board/modal";
 import { Avatar } from "@/components/shell/avatar";
+import { SkeletonLabel } from "@/components/shell/skeleton";
 import { api, RequestError } from "@/lib/api/browser";
 import type { User } from "@/lib/types/auth";
 import type { Invite, Member, Role, Workspace } from "@/lib/types/workspace";
@@ -39,6 +40,7 @@ export function MembersView({
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [removing, setRemoving] = useState<Member | null>(null);
+  const [revoking, setRevoking] = useState<Invite | null>(null);
 
   const myRole = workspace.my_role;
   const mayManage = canAdminister(myRole);
@@ -160,8 +162,8 @@ export function MembersView({
             </select>
             <p className="field-hint">{ROLE_DESCRIPTION[role]}</p>
           </div>
-          <button type="submit" disabled={busy || !email.trim()}>
-            {busy ? "Sending…" : "Invite"}
+          <button type="submit" disabled={busy || !email.trim()} aria-label={busy ? "Sending invitation" : undefined}>
+            {busy ? <SkeletonLabel /> : "Invite"}
           </button>
         </form>
       ) : (
@@ -259,7 +261,7 @@ export function MembersView({
                   <button type="button" disabled={busy} onClick={() => resend(inviteRow)}>
                     Resend
                   </button>
-                  <button type="button" disabled={busy} onClick={() => revoke(inviteRow)}>
+                  <button type="button" disabled={busy} onClick={() => setRevoking(inviteRow)}>
                     Revoke
                   </button>
                 </li>
@@ -296,6 +298,32 @@ export function MembersView({
               {removing.user_id === me.id ? "Leave workspace" : "Remove"}
             </button>
             <button type="button" onClick={() => setRemoving(null)}>
+              Cancel
+            </button>
+          </div>
+        </Modal>
+      )}
+
+      {revoking && (
+        <Modal label="Revoke invitation" onClose={() => setRevoking(null)}>
+          <h2>Revoke this invitation?</h2>
+          <p>
+            {revoking.email} will no longer be able to use the current invitation link. You can
+            invite them again later.
+          </p>
+          <div className="row-actions">
+            <button
+              type="button"
+              className="danger"
+              onClick={() => {
+                const invite = revoking;
+                setRevoking(null);
+                void revoke(invite);
+              }}
+            >
+              Revoke invitation
+            </button>
+            <button type="button" onClick={() => setRevoking(null)}>
               Cancel
             </button>
           </div>

@@ -1,5 +1,5 @@
-import { PageSkeleton } from "@/components/shell/skeleton";
+import { MyWorkSkeleton } from "@/components/shell/skeleton";
 
 export default function Loading() {
-  return <PageSkeleton title="My work" />;
+  return <MyWorkSkeleton />;
 }

@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { Icon } from "@/components/icon";
+import { Skeleton } from "@/components/shell/skeleton";
 import { api } from "@/lib/api/browser";
 import { shortAgo } from "@/lib/dates";
 import type { Notification } from "@/lib/types/activity";
@@ -64,7 +66,7 @@ export function NotificationBell({ initialUnread }: { initialUnread: number }) {
     <div className="bell" ref={root}>
       <button
         type="button"
-        className="bell-button"
+        className={unread > 0 ? "bell-button has-unread" : "bell-button"}
         aria-expanded={open}
         aria-haspopup="dialog"
         aria-label={unread > 0 ? `Notifications, ${unread} unread` : "Notifications"}
@@ -73,7 +75,7 @@ export function NotificationBell({ initialUnread }: { initialUnread: number }) {
           return !v;
         })}
       >
-        <span aria-hidden="true">🔔</span>
+        <Icon name="bell" />
         {unread > 0 && (
           <span className="bell-count" aria-hidden="true">
             {unread > 9 ? "9+" : unread}
@@ -91,7 +93,7 @@ export function NotificationBell({ initialUnread }: { initialUnread: number }) {
               </button>
             )}
           </div>
-          {items === null && <p className="muted">Loading…</p>}
+          {items === null && <Skeleton rows={3} className="skeleton-block--compact" label="Loading notifications" />}
           {loadError && (
             <p className="notification-error" role="alert">
               Could not load notifications. Close and open this panel to retry.

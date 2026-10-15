@@ -1,3 +1,4 @@
+import { Icon } from "@/components/icon";
 import { Avatar } from "@/components/shell/avatar";
 import { dueState, shortDate } from "@/lib/dates";
 import type { Card } from "@/lib/types/board";
@@ -27,7 +28,7 @@ export function CardFace({ card }: { card: Card }) {
         <p className="card-badges">
           {card.priority !== "none" && (
             <span className={`priority priority-${card.priority}`}>
-              <span aria-hidden="true">●</span> {card.priority}
+              <span className="priority-dot" aria-hidden="true" /> {card.priority}
             </span>
           )}
           {card.due_date && (
@@ -46,12 +47,12 @@ export function CardFace({ card }: { card: Card }) {
               className={`chip${card.checklist_done === card.checklist_total ? " complete" : ""}`}
               title="Checklist"
             >
-              ☑ {card.checklist_done}/{card.checklist_total}
+              <Icon name="square-check" size="sm" /> {card.checklist_done}/{card.checklist_total}
             </span>
           )}
           {card.comment_count > 0 && (
             <span className="chip" title={`${card.comment_count} comments`}>
-              💬 {card.comment_count}
+              <Icon name="message-square" size="sm" /> {card.comment_count}
             </span>
           )}
           {card.estimate !== null && (

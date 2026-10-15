@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Icon } from "@/components/icon";
 import type { WorkspaceOverview } from "@/lib/types/analytics";
 
 export function DashboardBriefing({ overview }: { overview: WorkspaceOverview }) {
@@ -13,11 +14,11 @@ export function DashboardBriefing({ overview }: { overview: WorkspaceOverview })
   return (
     <section className="dashboard-grid" aria-label="Workspace briefing">
       <article className="briefing-card">
-        <div className="briefing-kicker"><span aria-hidden="true">✦</span> Kobi briefing</div>
+        <div className="briefing-kicker"><Icon name="sparkles" size="sm" /> Kobi briefing</div>
         <h2>{message}</h2>
         <p>Based on assigned work, due dates and your workspace activity.</p>
         <Link href={overview.my_open_cards ? "/my-work" : "/members"} className="inline-action">
-          {overview.my_open_cards ? "Open my work" : "Invite a teammate"} <span aria-hidden="true">↗</span>
+          {overview.my_open_cards ? "Open my work" : "Invite a teammate"} <Icon name="arrow-up-right" size="sm" />
         </Link>
       </article>
       <div className="briefing-side">

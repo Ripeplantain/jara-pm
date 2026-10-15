@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { Icon } from "@/components/icon";
 import type { BoardActions } from "@/components/board/actions";
 import type { Column } from "@/lib/types/board";
 
@@ -33,7 +34,7 @@ export function ColumnSettings({ column, actions }: { column: Column; actions: B
         aria-label={`Settings for column ${column.title}`}
         onClick={() => setOpen((v) => !v)}
       >
-        <span aria-hidden="true">⋯</span>
+        <Icon name="ellipsis" size="sm" />
       </button>
       {open && (
         <div className="column-menu" role="menu">

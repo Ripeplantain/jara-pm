@@ -1,3 +1,5 @@
+import { DashboardSkeleton } from "@/components/shell/skeleton";
+
 export default function Loading() {
-  return <main className="simple-state" role="status"><p>Loading your workspace…</p></main>;
+  return <DashboardSkeleton />;
 }

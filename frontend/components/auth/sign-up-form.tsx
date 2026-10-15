@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { registerAction, type RegisterResult } from "@/app/signup/actions";
+import { SkeletonLabel } from "@/components/shell/skeleton";
 
 export function SignUpForm({ inviteToken }: { inviteToken?: string }) {
   const router = useRouter();
@@ -73,8 +74,8 @@ export function SignUpForm({ inviteToken }: { inviteToken?: string }) {
           <span id="password-error" className="field-error" role="alert">{errors.password}</span>
         )}
       </p>
-      <button className="auth-submit" type="submit" disabled={pending}>
-        {pending ? "Creating account…" : "Create account"}
+      <button className="auth-submit" type="submit" disabled={pending} aria-label={pending ? "Creating account" : undefined}>
+        {pending ? <SkeletonLabel className="skeleton-label--wide" /> : "Create account"}
       </button>
       <p className="auth-switch">
         Already registered? <Link href="/signin">Sign in</Link>

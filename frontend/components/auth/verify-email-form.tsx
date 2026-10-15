@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { resendVerification, verifyEmail } from "@/app/auth/actions";
+import { SkeletonLabel } from "@/components/shell/skeleton";
 
 export function VerifyEmailForm({ token }: { token: string | null }) {
   const [email, setEmail] = useState("");
@@ -45,8 +46,8 @@ export function VerifyEmailForm({ token }: { token: string | null }) {
       {message && <p className="auth-success" role="status">{message}</p>}
       {error && <p className="auth-error" role="alert">{error}</p>}
       {token ? (
-        <button className="auth-submit" type="button" onClick={verify} disabled={pending}>
-          {pending ? "Verifying…" : "Verify email"}
+        <button className="auth-submit" type="button" onClick={verify} disabled={pending} aria-label={pending ? "Verifying email" : undefined}>
+          {pending ? <SkeletonLabel className="skeleton-label--wide" /> : "Verify email"}
         </button>
       ) : (
         <>
@@ -56,8 +57,8 @@ export function VerifyEmailForm({ token }: { token: string | null }) {
               <label htmlFor="verification-email">Email</label>
               <input id="verification-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" />
             </p>
-            <button className="auth-submit" type="submit" disabled={pending}>
-              {pending ? "Sending…" : "Send verification link"}
+            <button className="auth-submit" type="submit" disabled={pending} aria-label={pending ? "Sending verification link" : undefined}>
+              {pending ? <SkeletonLabel className="skeleton-label--wide" /> : "Send verification link"}
             </button>
           </form>
         </>

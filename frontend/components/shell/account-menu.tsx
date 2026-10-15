@@ -3,12 +3,14 @@
 import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
+import { Modal } from "@/components/board/modal";
 import { Avatar } from "@/components/shell/avatar";
 import { ThemeToggle } from "@/components/shell/theme-toggle";
 import type { User } from "@/lib/types/auth";
 
 export function AccountMenu({ user }: { user: User }) {
   const [open, setOpen] = useState(false);
+  const [confirmingSignOut, setConfirmingSignOut] = useState(false);
   const root = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -51,10 +53,32 @@ export function AccountMenu({ user }: { user: User }) {
           <Link href="/settings/workspace" role="menuitem" onClick={() => setOpen(false)}>
             Workspace settings
           </Link>
-          <button type="button" role="menuitem" onClick={() => signOut({ callbackUrl: "/signin" })}>
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => {
+              setOpen(false);
+              setConfirmingSignOut(true);
+            }}
+          >
             Sign out
           </button>
         </div>
+      )}
+
+      {confirmingSignOut && (
+        <Modal label="Sign out" onClose={() => setConfirmingSignOut(false)}>
+          <h2>Sign out?</h2>
+          <p>You will need to sign in again to access your workspaces.</p>
+          <div className="row-actions">
+            <button type="button" onClick={() => void signOut({ callbackUrl: "/signin" })}>
+              Sign out
+            </button>
+            <button type="button" onClick={() => setConfirmingSignOut(false)}>
+              Cancel
+            </button>
+          </div>
+        </Modal>
       )}
     </div>
   );

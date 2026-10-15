@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useRef, useState } from "react";
+import { Icon } from "@/components/icon";
+import { SkeletonLabel } from "@/components/shell/skeleton";
 import { api, RequestError } from "@/lib/api/browser";
 import type { AiResponse, AppliedChange, ChatMessage, PendingAction } from "@/lib/types/ai";
 import type { Board } from "@/lib/types/board";
@@ -89,7 +91,9 @@ export function AiPanel({ boardId, onBoard, onChanges, onConfirm }: Props) {
     <aside className="ai-panel" aria-labelledby="ai-title">
       <header className="ai-header">
         <div className="ai-heading">
-          <span className="ai-icon" aria-hidden="true">✦</span>
+          <span className="ai-icon">
+            <Icon name="sparkles" />
+          </span>
           <div>
             <h2 id="ai-title">Ask Kobi</h2>
             <p className="ai-subtitle">Work with this board using natural language.</p>
@@ -100,13 +104,15 @@ export function AiPanel({ boardId, onBoard, onChanges, onConfirm }: Props) {
       <div ref={logRef} className="ai-log" role="log" aria-live="polite" tabIndex={0}>
         {entries.length === 0 && (
           <div className="ai-empty">
-            <div className="ai-empty-icon" aria-hidden="true">✧</div>
+            <div className="ai-empty-icon">
+              <Icon name="sparkle" size="lg" />
+            </div>
             <strong>What would you like to do?</strong>
             <p className="ai-hint">Ask Kobi to organize cards, rename columns, move work forward, or create a board.</p>
             <div className="ai-suggestions" aria-label="Suggested prompts">
               {SUGGESTIONS.map((suggestion) => (
                 <button key={suggestion} type="button" onClick={() => void send(suggestion)}>
-                  {suggestion}<span aria-hidden="true">↗</span>
+                  {suggestion}<Icon name="arrow-up-right" size="sm" />
                 </button>
               ))}
             </div>
@@ -115,7 +121,9 @@ export function AiPanel({ boardId, onBoard, onChanges, onConfirm }: Props) {
         {entries.map((entry, i) => (
           <article key={i} className={`ai-msg ${entry.role}${entry.error ? " error" : ""}`}>
             <div className="ai-msg-head">
-              <span className={`ai-avatar ${entry.role}`} aria-hidden="true">{entry.role === "user" ? "You" : "✦"}</span>
+              <span className={`ai-avatar ${entry.role}`} aria-hidden="true">
+                {entry.role === "user" ? "You" : <Icon name="sparkles" size="sm" />}
+              </span>
               <strong>{entry.role === "user" ? "You" : "Assistant"}</strong>
               {entry.error && <span className="ai-error-label">Needs attention</span>}
             </div>
@@ -127,7 +135,7 @@ export function AiPanel({ boardId, onBoard, onChanges, onConfirm }: Props) {
                   {entry.changes.map((c, j) => (
                     <li key={j}>
                       <span>{c.summary}</span>
-                      {c.kind === "create_board" && <Link href={`/boards/${c.board_id}`}>Open board <span aria-hidden="true">↗</span></Link>}
+                      {c.kind === "create_board" && <Link href={`/boards/${c.board_id}`}>Open board <Icon name="arrow-up-right" size="sm" /></Link>}
                     </li>
                   ))}
                 </ul>
@@ -171,9 +179,11 @@ export function AiPanel({ boardId, onBoard, onChanges, onConfirm }: Props) {
           </article>
         ))}
         {busy && (
-          <p className="ai-thinking" role="status">
-            <span className="ai-avatar assistant" aria-hidden="true">✦</span>
-            Thinking<span className="ai-thinking-dots" aria-hidden="true">…</span>
+          <p className="ai-thinking" role="status" aria-label="Kobi is thinking">
+            <span className="ai-avatar assistant" aria-hidden="true">
+              <Icon name="sparkles" size="sm" />
+            </span>
+            <SkeletonLabel className="skeleton-label--thinking" />
           </p>
         )}
       </div>
@@ -208,7 +218,7 @@ export function AiPanel({ boardId, onBoard, onChanges, onConfirm }: Props) {
           <span id="ai-input-help">Shift + Enter for a new line</span>
           <span className="ai-count" aria-live="polite">{text.length}/2000</span>
           <button className="ai-send" type="submit" disabled={busy || !text.trim()}>
-            Send <span aria-hidden="true">↗</span>
+            Send <Icon name="arrow-up-right" size="sm" />
           </button>
         </div>
       </form>

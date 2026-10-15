@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { resetPassword } from "@/app/auth/actions";
+import { SkeletonLabel } from "@/components/shell/skeleton";
 
 export function ResetPasswordForm({ token }: { token: string }) {
   const [password, setPassword] = useState("");
@@ -37,7 +38,9 @@ export function ResetPasswordForm({ token }: { token: string }) {
       {error && <p className="auth-error" role="alert">{error}</p>}
       <p className="auth-field"><label htmlFor="new-password">New password</label><input id="new-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} minLength={8} maxLength={128} required autoComplete="new-password" /></p>
       <p className="auth-field"><label htmlFor="confirm-password">Confirm password</label><input id="confirm-password" type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} minLength={8} maxLength={128} required autoComplete="new-password" /></p>
-      <button className="auth-submit" type="submit" disabled={pending}>{pending ? "Updating…" : "Update password"}</button>
+      <button className="auth-submit" type="submit" disabled={pending} aria-label={pending ? "Updating password" : undefined}>
+        {pending ? <SkeletonLabel className="skeleton-label--wide" /> : "Update password"}
+      </button>
     </form>
   );
 }

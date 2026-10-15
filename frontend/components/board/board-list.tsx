@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
+import { Icon } from "@/components/icon";
 import { Modal } from "@/components/board/modal";
+import { SkeletonLabel } from "@/components/shell/skeleton";
 import { api, RequestError } from "@/lib/api/browser";
 import type { BoardStat } from "@/lib/types/analytics";
 import type { BoardTemplate } from "@/lib/types/board";
@@ -54,7 +56,7 @@ export function BoardList({
         }
         onClick={() => toggleFavorite(board)}
       >
-        <span aria-hidden="true">{board.is_favorite ? "★" : "☆"}</span>
+        <Icon name="star" filled={board.is_favorite} />
       </button>
       <Link href={`/boards/${board.board_id}`} className="board-card-link">
         <span className="board-card-kicker">{board.is_favorite ? "Favourite board" : "Board"}</span>
@@ -144,8 +146,8 @@ export function BoardList({
               placeholder="e.g. Q3 roadmap"
               onChange={(e) => setTitle(e.target.value)}
             />
-            <button type="submit" disabled={busy || !title.trim()}>
-              Create
+            <button type="submit" disabled={busy || !title.trim()} aria-label={busy ? "Creating board" : undefined}>
+              {busy ? <SkeletonLabel /> : "Create"}
             </button>
             <button type="button" onClick={() => setPicking(true)} disabled={busy}>
               Use a template

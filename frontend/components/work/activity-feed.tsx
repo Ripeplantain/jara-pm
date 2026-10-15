@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Avatar } from "@/components/shell/avatar";
+import { SkeletonLabel } from "@/components/shell/skeleton";
 import { api, RequestError } from "@/lib/api/browser";
 import { longDateTime } from "@/lib/dates";
 import type { Activity } from "@/lib/types/activity";
@@ -131,9 +132,10 @@ export function ActivityFeed({
         <button
           type="button"
           disabled={busy}
+          aria-label={busy ? "Loading older activity" : "Load older activity"}
           onClick={() => load(boardId, actorId, entries[entries.length - 1].id)}
         >
-          {busy ? "Loading…" : "Load older"}
+          {busy ? <SkeletonLabel className="skeleton-label--wide" /> : "Load older"}
         </button>
       )}
     </>

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { Icon } from "@/components/icon";
 import { api } from "@/lib/api/browser";
 import type { CardHit } from "@/lib/types/board";
 
@@ -56,7 +57,7 @@ export function GlobalSearch({ workspaceId }: { workspaceId: number }) {
   return (
     <>
       <button type="button" className="sidebar-search-trigger" onClick={() => setOpen(true)}>
-        <span aria-hidden="true">⌕</span><span>Search workspace</span><kbd>⌘K</kbd>
+        <Icon name="search" size="sm" /><span>Search workspace</span><kbd>⌘K</kbd>
       </button>
       {open && (
         <div className="command-backdrop" role="presentation" onMouseDown={() => setOpen(false)}>

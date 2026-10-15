@@ -2,7 +2,9 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { Icon } from "@/components/icon";
 import { api, RequestError } from "@/lib/api/browser";
+import { SkeletonLabel } from "@/components/shell/skeleton";
 import type { Workspace } from "@/lib/types/workspace";
 
 /** Switches the active workspace and remembers it, or creates a new one. */
@@ -76,8 +78,8 @@ export function WorkspaceSwitcher({
       >
         <span className="switcher-name">{active.name}</span>
         <span className={`role-chip role-${active.my_role}`}>{active.my_role}</span>
-        <span aria-hidden="true" className="chevron">
-          ▾
+        <span className="chevron">
+          <Icon name="chevron-down" size="sm" />
         </span>
       </button>
 
@@ -95,8 +97,8 @@ export function WorkspaceSwitcher({
                 >
                   <span>{workspace.name}</span>
                   {workspace.id === active.id && (
-                    <span aria-hidden="true" className="tick">
-                      ✓
+                    <span className="tick">
+                      <Icon name="check" size="sm" />
                     </span>
                   )}
                 </button>
@@ -116,8 +118,8 @@ export function WorkspaceSwitcher({
                 placeholder="e.g. Platform team"
               />
               <div className="row-actions">
-                <button type="submit" disabled={busy || !name.trim()}>
-                  {busy ? "Creating…" : "Create"}
+                <button type="submit" disabled={busy || !name.trim()} aria-label={busy ? "Creating workspace" : undefined}>
+                  {busy ? <SkeletonLabel /> : "Create"}
                 </button>
                 <button type="button" onClick={() => setCreating(false)}>
                   Cancel

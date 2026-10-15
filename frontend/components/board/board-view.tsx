@@ -22,6 +22,7 @@ import type { BoardActions } from "@/components/board/actions";
 import { AiPanel } from "@/components/ai/ai-panel";
 import { GenerateCardsDialog } from "@/components/ai/generate-cards-dialog";
 import { AddForm } from "@/components/board/add-form";
+import { Icon } from "@/components/icon";
 import { CardDrawer } from "@/components/board/card-drawer";
 import { ColumnDeleteDialog } from "@/components/board/column-delete-dialog";
 import type { DeleteChoice } from "@/components/board/column-delete-dialog";
@@ -296,7 +297,7 @@ export function BoardView({ initial, members, labels, sprints: initialSprints, r
       <div className="board-heading">
         <div className="board-heading-main">
           <Link className="back-link" href="/">
-            <span aria-hidden="true">←</span> All boards
+            <Icon name="arrow-left" size="sm" /> All boards
           </Link>
           <h1>
             {canWrite ? (
@@ -320,7 +321,7 @@ export function BoardView({ initial, members, labels, sprints: initialSprints, r
         <div className="board-stats" aria-label="Board statistics">
           {canWrite && board.columns.length > 0 && (
             <button type="button" className="stat-pill" onClick={() => setGenerating(true)}>
-              <span aria-hidden="true">✦</span> Generate cards
+              <Icon name="sparkles" size="sm" /> Generate cards
             </button>
           )}
           <Link className="stat-pill" href={`/boards/${board.id}/insights`}>
@@ -387,7 +388,7 @@ export function BoardView({ initial, members, labels, sprints: initialSprints, r
               <option value="assignee">Assignee</option>
             </select>
           </label>
-          <span className="muted">Keyboard users can move cards with the ↑ and ↓ controls.</span>
+          <span className="muted">Keyboard users can move cards with the up and down controls.</span>
         </div>
       </div>
 
