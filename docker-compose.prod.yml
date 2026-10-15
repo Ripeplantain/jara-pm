@@ -35,5 +35,7 @@ services:
       AUTH_SECRET: ${AUTH_SECRET:?set AUTH_SECRET in .env}
       NEXTAUTH_URL: ${AUTH_URL:-http://localhost:3000}
       BACKEND_INTERNAL_URL: ${BACKEND_INTERNAL_URL:-http://backend:8000}
+    ports: !override
+      - "127.0.0.1:3000:3000"
     volumes: !reset []
     restart: unless-stopped
