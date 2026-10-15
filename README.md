@@ -149,6 +149,20 @@ docker compose run --rm --no-deps frontend sh -c 'npx next typegen && npm run ty
 There are no frontend tests yet. Backend tests use a temporary SQLite database per test and a fake
 LLM client; none call a real provider.
 
+### Git hook
+
+Enable the versioned pre-push hook once per checkout:
+
+```sh
+./scripts/install-hooks.sh
+```
+
+Before every push, the hook runs backend tests and Ruff, frontend type generation/typecheck/lint,
+and production builds. With Docker running, it builds both production images. Without Docker, it
+uses the same host fallbacks as `scripts/verify.sh`, runs the frontend production build and backend
+Python compilation, and warns that Docker image builds were skipped. The push is blocked if an
+available check fails; CI still validates the production images.
+
 ## How it fits together
 
 - The browser never talks to FastAPI or the database. Server components and a same-origin proxy
