@@ -10,7 +10,11 @@ RUN python -m venv /venv && /venv/bin/pip install -r requirements.txt
 
 # --- dev ---
 FROM python:3.13-slim AS dev
-ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+# Tool caches go outside /app: the source is a bind mount owned by the host user, and in CI that
+# uid differs from `app`, so writing .ruff_cache/.pytest_cache into it fails with EACCES.
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 \
+    RUFF_CACHE_DIR=/tmp/ruff-cache \
+    PYTEST_ADDOPTS="-o cache_dir=/tmp/pytest-cache"
 WORKDIR /app
 COPY requirements.txt requirements-dev.txt ./
 RUN pip install --no-cache-dir -r requirements-dev.txt

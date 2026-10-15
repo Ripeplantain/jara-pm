@@ -33,6 +33,12 @@ jobs:
       - name: Create CI Compose environment
         run: cp .env.example .env
 
+      # docker-compose.yml bind-mounts ./backend and ./frontend into the dev images, which run as
+      # uid 1000 (`app`, `node`). The runner's checkout is uid 1001, so tsc's tsbuildinfo, Next's
+      # generated next-env.d.ts and anything else written into the mount would fail with EACCES.
+      - name: Let the dev containers write to the mounted source
+        run: sudo chown -R 1000:1000 backend frontend
+
       - name: Run backend tests and lint
         run: >-
           docker compose run --rm --no-deps backend
