@@ -6,14 +6,24 @@ they return a pending confirmation for the user.
 
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import date, datetime
 from typing import Annotated, Any
 
 from pydantic import BaseModel, Field, StringConstraints, ValidationError, model_validator
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models import Board, Card, Column, Note, NoteVisibility, Priority, User, WorkspaceMember
+from app.models import (
+    Board,
+    Card,
+    Column,
+    GoalState,
+    Note,
+    NoteVisibility,
+    Priority,
+    User,
+    WorkspaceMember,
+)
 from app.schemas.ai import AppliedChange, PendingAction
 from app.schemas.boards import (
     MAX_BATCH_CARDS,
@@ -24,11 +34,14 @@ from app.schemas.boards import (
     Description,
     Position,
 )
+from app.schemas.goals import GoalDetail, GoalTitle, LinkType, MilestoneTitle
 from app.schemas.notes import BlockText, BlockType, Indent, NoteTitle
 from app.services import ai_proposals, permissions
 from app.services import analytics as analytics_svc
 from app.services import boards as svc
 from app.services import card_details as detail_svc
+from app.services import goals as goals_svc
+from app.services import habits as habits_svc
 from app.services import labels as label_svc
 from app.services import notes as notes_svc
 from app.services import search as search_svc
@@ -257,6 +270,10 @@ class PageBlockSpec(_Args):
 
 
 MAX_AI_BLOCKS = 100
+MAX_AI_MILESTONES = 10
+
+_IsoDate = date
+"""A goal's dates are calendar days, so the model sends an ISO date, not a timestamp."""
 
 
 class SearchPagesArgs(_Args):
@@ -281,6 +298,52 @@ class AppendPageArgs(_Args):
 
 class ArchivePageArgs(_Args):
     note_id: int
+
+
+class ListGoalsArgs(_Args):
+    include_archived: bool = Field(False, description="Include archived goals")
+
+
+class GoalProgressArgs(_Args):
+    goal_id: int
+
+
+class CreateGoalArgs(_Args):
+    title: GoalTitle
+    detail: GoalDetail = ""
+    target_date: _IsoDate | None = Field(None, description="ISO date, e.g. 2026-12-01")
+    milestones: list[MilestoneTitle] = Field(
+        default_factory=list, max_length=MAX_AI_MILESTONES, description="Ordered step titles"
+    )
+
+
+class AddMilestoneArgs(_Args):
+    goal_id: int
+    title: MilestoneTitle
+    target_date: _IsoDate | None = None
+
+
+class LinkGoalWorkArgs(_Args):
+    goal_id: int
+    target_type: LinkType = Field(description="board, sprint or card")
+    target_id: int
+    milestone_id: int | None = Field(
+        None, description="Attach the link to one of the goal's milestones instead of the goal"
+    )
+
+
+class SetGoalStateArgs(_Args):
+    goal_id: int
+    state: GoalState = Field(description="active, achieved or archived")
+
+
+class ListHabitsArgs(_Args):
+    pass
+
+
+class CheckInHabitArgs(_Args):
+    habit_id: int
+    done: bool = Field(True, description="False unticks today")
 
 
 class DeleteCardArgs(_Args):
@@ -828,6 +891,192 @@ def _archive_page(ctx: ToolContext, a: ArchivePageArgs) -> ToolResult:
     )
 
 
+# --- goals and habits -------------------------------------------------------------------------
+#
+# Both are workspace-scoped while the chat is board-scoped, so the workspace comes from the
+# board the chat is open on, exactly as the page tools do.
+#
+# There is no tool that deletes a goal: archiving one is reversible and runs immediately, which
+# is stricter than the confirmation rule requires. And there is no tool that reads anyone
+# else's habits - not because the prompt says so, but because `services/habits.py` filters on
+# the acting user, so a habit somebody else owns is a 404 to the assistant too.
+
+
+def _iso(value: Any) -> str | None:
+    """Tool results are JSON, so a date goes out as a string."""
+    return value.isoformat() if value is not None else None
+
+
+def _goal_data(goal: dict) -> dict:
+    """The numbers plus the ids the model needs to act, and no prose."""
+    return {
+        "goal_id": goal["id"],
+        "title": goal["title"],
+        "state": goal["state"],
+        "percent": goal["percent"],
+        "cards_done": goal["cards_done"],
+        "cards_total": goal["cards_total"],
+        # False means nothing is linked yet, so 0% is "unmeasured", not "no progress".
+        "has_evidence": goal["has_evidence"],
+        "target_date": _iso(goal["target_date"]),
+    }
+
+
+def _goal_change(ctx: ToolContext, kind: str, goal: dict, summary: str) -> AppliedChange:
+    return _change(ctx, kind, summary, goal_id=goal["id"])
+
+
+def _list_goals(ctx: ToolContext, a: ListGoalsArgs) -> ToolResult:
+    goals = goals_svc.views(ctx.db, ctx.user, ctx.workspace_id(), a.include_archived)
+    return ToolResult({"ok": True, "goals": [_goal_data(goal) for goal in goals]})
+
+
+def _goal_progress(ctx: ToolContext, a: GoalProgressArgs) -> ToolResult:
+    goal = goals_svc.view_for(ctx.db, ctx.user, a.goal_id)
+    return ToolResult(
+        {
+            "ok": True,
+            **_goal_data(goal),
+            "note": "Progress is computed from the linked cards that sit in a done column. "
+            "Report these numbers rather than estimating your own.",
+            "milestones": [
+                {
+                    "milestone_id": milestone["id"],
+                    "title": milestone["title"],
+                    "percent": milestone["percent"],
+                    "cards_done": milestone["cards_done"],
+                    "cards_total": milestone["cards_total"],
+                    "target_date": _iso(milestone["target_date"]),
+                    "links": [
+                        {
+                            "target_type": link["target_type"],
+                            "target_id": link["target_id"],
+                            "title": link["target_title"],
+                            "board_id": link["board_id"],
+                        }
+                        for link in milestone["links"]
+                    ],
+                }
+                for milestone in goal["milestones"]
+            ],
+            "links": [
+                {
+                    "target_type": link["target_type"],
+                    "target_id": link["target_id"],
+                    "title": link["target_title"],
+                    "board_id": link["board_id"],
+                }
+                for link in goal["links"]
+            ],
+            "unresolved_links": goal["unresolved_links"],
+        }
+    )
+
+
+def _create_goal(ctx: ToolContext, a: CreateGoalArgs) -> ToolResult:
+    created = goals_svc.create_goal(
+        ctx.db,
+        ctx.user,
+        ctx.workspace_id(),
+        title=a.title,
+        detail=a.detail,
+        target_date=a.target_date,
+        milestones=list(a.milestones),
+    )
+    goal = goals_svc.view(ctx.db, created)
+    return ToolResult(
+        {
+            "ok": True,
+            **_goal_data(goal),
+            "milestone_ids": [milestone["id"] for milestone in goal["milestones"]],
+            "note": "The goal has no progress until work is linked to it with link_goal_work.",
+        },
+        change=_goal_change(ctx, "create_goal", goal, f"Set the goal “{goal['title']}”"),
+    )
+
+
+def _add_goal_milestone(ctx: ToolContext, a: AddMilestoneArgs) -> ToolResult:
+    goal = goals_svc.view(
+        ctx.db, goals_svc.add_milestone(ctx.db, ctx.user, a.goal_id, a.title, a.target_date)
+    )
+    return ToolResult(
+        {"ok": True, **_goal_data(goal), "milestone_ids": [m["id"] for m in goal["milestones"]]},
+        change=_goal_change(
+            ctx,
+            "add_goal_milestone",
+            goal,
+            f"Added the milestone “{a.title}” to “{goal['title']}”",
+        ),
+    )
+
+
+def _link_goal_work(ctx: ToolContext, a: LinkGoalWorkArgs) -> ToolResult:
+    goal = goals_svc.view(
+        ctx.db,
+        goals_svc.add_link(
+            ctx.db, ctx.user, a.goal_id, a.target_type, a.target_id, a.milestone_id
+        ),
+    )
+    return ToolResult(
+        {"ok": True, **_goal_data(goal)},
+        change=_goal_change(
+            ctx,
+            "link_goal_work",
+            goal,
+            f"Linked a {a.target_type} to the goal “{goal['title']}”",
+        ),
+    )
+
+
+def _set_goal_state(ctx: ToolContext, a: SetGoalStateArgs) -> ToolResult:
+    goal = goals_svc.view(
+        ctx.db, goals_svc.update_goal(ctx.db, ctx.user, a.goal_id, state=a.state.value)
+    )
+    said = {
+        GoalState.ACTIVE: "Reopened",
+        GoalState.ACHIEVED: "Marked achieved",
+        GoalState.ARCHIVED: "Archived",
+    }[a.state]
+    return ToolResult(
+        {"ok": True, **_goal_data(goal)},
+        change=_goal_change(ctx, "set_goal_state", goal, f"{said} the goal “{goal['title']}”"),
+    )
+
+
+def _habit_data(habit: dict) -> dict:
+    return {
+        "habit_id": habit["id"],
+        "name": habit["name"],
+        "schedule": habit["schedule"],
+        "done_today": habit["done_today"],
+        "due_today": habit["due_today"],
+        "current_streak": habit["current_streak"],
+        "streak_unit": habit["streak_unit"],
+        "week_done": habit["week_done"],
+        "week_target": habit["week_target"],
+    }
+
+
+def _list_habits(ctx: ToolContext, _a: ListHabitsArgs) -> ToolResult:
+    habits = habits_svc.views(ctx.db, ctx.user, ctx.workspace_id())
+    return ToolResult({"ok": True, "habits": [_habit_data(habit) for habit in habits]})
+
+
+def _check_in_habit(ctx: ToolContext, a: CheckInHabitArgs) -> ToolResult:
+    habits_svc.set_checkin(ctx.db, ctx.user, a.habit_id, None, a.done)
+    habit = habits_svc.view_for(ctx.db, ctx.user, a.habit_id)
+    verb = "Ticked off" if a.done else "Unticked"
+    return ToolResult(
+        {"ok": True, **_habit_data(habit)},
+        change=_change(
+            ctx,
+            "check_in_habit",
+            f"{verb} “{habit['name']}” for today",
+            habit_id=habit["id"],
+        ),
+    )
+
+
 def _awaiting(summary: str) -> dict[str, Any]:
     return {
         "ok": True,
@@ -939,6 +1188,55 @@ TOOLS: dict[str, Tool] = {
             "delete a page from here.",
             ArchivePageArgs,
             _archive_page,
+        ),
+        Tool(
+            "list_goals",
+            "List this workspace's goals with the progress their linked work adds up to.",
+            ListGoalsArgs,
+            _list_goals,
+        ),
+        Tool(
+            "goal_progress",
+            "Read one goal in detail: its milestones, what each one links to, and the card "
+            "counts behind every percentage. Use this to answer how a goal is going.",
+            GoalProgressArgs,
+            _goal_progress,
+        ),
+        Tool(
+            "create_goal",
+            "Set a NEW goal for this workspace, optionally with its first milestones. A goal "
+            "has no progress until work is linked to it.",
+            CreateGoalArgs,
+            _create_goal,
+        ),
+        Tool("add_goal_milestone", "Add a milestone to an existing goal.", AddMilestoneArgs, _add_goal_milestone),
+        Tool(
+            "link_goal_work",
+            "Point a goal, or one of its milestones, at a board, a sprint or a card. This is "
+            "what makes a goal's progress measurable: progress is the share of linked cards in "
+            "a done column.",
+            LinkGoalWorkArgs,
+            _link_goal_work,
+        ),
+        Tool(
+            "set_goal_state",
+            "Mark a goal achieved, archive it, or reopen it. Archiving is reversible; there is "
+            "no way to delete a goal from here.",
+            SetGoalStateArgs,
+            _set_goal_state,
+        ),
+        Tool(
+            "list_habits",
+            "List the user's own habits in this workspace with their streaks and whether each "
+            "is still due today. Habits are personal: these are never anyone else's.",
+            ListHabitsArgs,
+            _list_habits,
+        ),
+        Tool(
+            "check_in_habit",
+            "Tick off one of the user's habits for today, or untick it with done false.",
+            CheckInHabitArgs,
+            _check_in_habit,
         ),
         Tool(
             DRAFT_CARDS,

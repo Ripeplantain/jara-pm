@@ -8,6 +8,9 @@ export interface Activity {
   card_id: number | null;
   actor_id: number | null;
   actor: User | null;
+  /** The subject when it is neither a board nor a card: "note" or "goal". */
+  entity_type: string | null;
+  entity_id: number | null;
   action: string;
   summary: string;
   created_at: string;

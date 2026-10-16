@@ -13,6 +13,8 @@ import type {
   Priority,
 } from "@/lib/types/board";
 import type { ChecklistItem, Comment } from "@/lib/types/card-detail";
+import type { Goal, GoalHit, GoalLinkType, GoalPatch } from "@/lib/types/goal";
+import type { Habit, HabitPatch, HabitSchedule } from "@/lib/types/habit";
 import type { Label } from "@/lib/types/label";
 import type {
   Note,
@@ -76,6 +78,7 @@ function query(params: Record<string, string | number | boolean | undefined | nu
 export interface SearchResults {
   cards: CardHit[];
   notes: NoteHit[];
+  goals: GoalHit[];
 }
 
 /** The fields a new page may be created with. */
@@ -265,6 +268,56 @@ export const api = {
   ) => request<Note>("PATCH", `/note-blocks/${blockId}`, patch),
   /** A card's backlinks: pages that embed it, and that this user can see. */
   notesForCard: (cardId: number) => request<NoteSummary[]>("GET", `/cards/${cardId}/notes`),
+
+  // --- habits -------------------------------------------------------------------------------
+  // Personal: every one of these reaches the signed-in user's own habits and nobody else's,
+  // because the backend filters on the caller rather than taking a user id.
+  listHabits: (workspaceId: number, includeArchived = false) =>
+    request<Habit[]>(
+      "GET",
+      `/workspaces/${workspaceId}/habits${query({ include_archived: includeArchived || undefined })}`,
+    ),
+  createHabit: (
+    workspaceId: number,
+    body: { name: string; detail?: string; schedule?: HabitSchedule; target_per_week?: number; color?: string },
+  ) => request<Habit>("POST", `/workspaces/${workspaceId}/habits`, body),
+  updateHabit: (id: number, patch: HabitPatch) => request<Habit>("PATCH", `/habits/${id}`, patch),
+  archiveHabit: (id: number) => request<Habit>("POST", `/habits/${id}/archive`),
+  unarchiveHabit: (id: number) => request<Habit>("POST", `/habits/${id}/unarchive`),
+  deleteHabit: (id: number) => request<void>("DELETE", `/habits/${id}`),
+  /** Idempotent: `on_date` omitted means today, and `done: false` unticks the day. */
+  setCheckin: (id: number, body: { on_date?: string; done?: boolean } = {}) =>
+    request<Habit>("PUT", `/habits/${id}/checkins`, body),
+
+  // --- goals --------------------------------------------------------------------------------
+  // Every response is the whole goal, because its progress is recomputed from the board on
+  // each read and a milestone or link change moves it.
+  listGoals: (workspaceId: number, includeArchived = false) =>
+    request<Goal[]>(
+      "GET",
+      `/workspaces/${workspaceId}/goals${query({ include_archived: includeArchived || undefined })}`,
+    ),
+  getGoal: (id: number) => request<Goal>("GET", `/goals/${id}`),
+  createGoal: (
+    workspaceId: number,
+    body: { title: string; detail?: string; starts_on?: string | null; target_date?: string | null; milestones?: string[] },
+  ) => request<Goal>("POST", `/workspaces/${workspaceId}/goals`, body),
+  updateGoal: (id: number, patch: GoalPatch) => request<Goal>("PATCH", `/goals/${id}`, patch),
+  deleteGoal: (id: number) => request<void>("DELETE", `/goals/${id}`),
+  addMilestone: (
+    goalId: number,
+    body: { title: string; target_date?: string | null; position?: number },
+  ) => request<Goal>("POST", `/goals/${goalId}/milestones`, body),
+  updateMilestone: (
+    id: number,
+    patch: { title?: string; target_date?: string | null; position?: number },
+  ) => request<Goal>("PATCH", `/goal-milestones/${id}`, patch),
+  deleteMilestone: (id: number) => request<Goal>("DELETE", `/goal-milestones/${id}`),
+  addGoalLink: (
+    goalId: number,
+    body: { target_type: GoalLinkType; target_id: number; milestone_id?: number | null },
+  ) => request<Goal>("POST", `/goals/${goalId}/links`, body),
+  removeGoalLink: (id: number) => request<Goal>("DELETE", `/goal-links/${id}`),
 
   // --- sprints ------------------------------------------------------------------------------
   listSprints: (boardId: number) => request<Sprint[]>("GET", `/boards/${boardId}/sprints`),

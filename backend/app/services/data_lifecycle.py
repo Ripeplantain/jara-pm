@@ -9,6 +9,8 @@ from app.models import (
     Activity,
     Board,
     Column,
+    Goal,
+    Habit,
     Label,
     Note,
     Notification,
@@ -52,6 +54,26 @@ def export_workspace(db: Session, user: User, workspace_id: int) -> dict:
             )
             .options(selectinload(Note.blocks))
             .order_by(Note.id)
+        )
+    )
+    goals = list(
+        db.scalars(
+            select(Goal)
+            .where(Goal.workspace_id == workspace_id)
+            .options(selectinload(Goal.milestones), selectinload(Goal.links))
+            .order_by(Goal.id)
+        )
+    )
+    # Habits are personal, so an export carries the exporter's own and nobody else's - the same
+    # line `note_visibility_filter` draws for a private page. Their progress is left out on
+    # purpose: a streak is derived from the check-ins below, so exporting it would duplicate
+    # the log and could disagree with it.
+    habits = list(
+        db.scalars(
+            select(Habit)
+            .where(Habit.workspace_id == workspace_id, Habit.user_id == user.id)
+            .options(selectinload(Habit.checkins))
+            .order_by(Habit.id)
         )
     )
     sprints = list(
@@ -143,6 +165,52 @@ def export_workspace(db: Session, user: User, workspace_id: int) -> dict:
                 ],
             }
             for note in notes
+        ],
+        "goals": [
+            {
+                "id": goal.id,
+                "title": goal.title,
+                "detail": goal.detail,
+                "state": goal.state,
+                "starts_on": goal.starts_on,
+                "target_date": goal.target_date,
+                "created_by_id": goal.created_by_id,
+                "created_at": goal.created_at,
+                "achieved_at": goal.achieved_at,
+                "milestones": [
+                    {
+                        "id": milestone.id,
+                        "title": milestone.title,
+                        "target_date": milestone.target_date,
+                        "position": milestone.position,
+                    }
+                    for milestone in goal.milestones
+                ],
+                "links": [
+                    {
+                        "id": link.id,
+                        "milestone_id": link.milestone_id,
+                        "target_type": link.target_type,
+                        "target_id": link.target_id,
+                    }
+                    for link in goal.links
+                ],
+            }
+            for goal in goals
+        ],
+        "habits": [
+            {
+                "id": habit.id,
+                "name": habit.name,
+                "detail": habit.detail,
+                "schedule": habit.schedule,
+                "target_per_week": habit.target_per_week,
+                "color": habit.color,
+                "created_at": habit.created_at,
+                "archived_at": habit.archived_at,
+                "checkins": [checkin.on_date for checkin in habit.checkins],
+            }
+            for habit in habits
         ],
         "sprints": [
             {

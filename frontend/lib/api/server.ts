@@ -3,6 +3,8 @@ import { backendFetch } from "@/lib/api/client";
 import type { Notification } from "@/lib/types/activity";
 import type { WorkspaceOverview } from "@/lib/types/analytics";
 import type { Board, BoardSummary, BoardTemplate, CardHit } from "@/lib/types/board";
+import type { Goal } from "@/lib/types/goal";
+import type { Habit } from "@/lib/types/habit";
 import type { Label } from "@/lib/types/label";
 import type { Note, NoteSummary } from "@/lib/types/note";
 import type { Workspace } from "@/lib/types/workspace";
@@ -59,3 +61,15 @@ export const listNotes = (token: string, workspaceId: number, includeArchived = 
 
 export const getNote = (token: string, id: number) =>
   backendFetch<Note>(`/api/notes/${id}`, { token });
+
+export const listHabits = (token: string, workspaceId: number, includeArchived = false) =>
+  backendFetch<Habit[]>(
+    `/api/workspaces/${workspaceId}/habits${includeArchived ? "?include_archived=true" : ""}`,
+    { token },
+  );
+
+export const listGoals = (token: string, workspaceId: number, includeArchived = false) =>
+  backendFetch<Goal[]>(
+    `/api/workspaces/${workspaceId}/goals${includeArchived ? "?include_archived=true" : ""}`,
+    { token },
+  );

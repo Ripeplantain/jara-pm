@@ -1843,6 +1843,114 @@ dialog.draft-dialog { width: min(44rem, calc(100% - 2rem)); max-width: 44rem; }
   .block-actions { transition: none; }
 }
 
+/* --- Habits and goals -------------------------------------------------------------------------
+   Tokens only, no literal colours, so the dark theme needs no override of its own: it redefines
+   the tokens and these rules follow. Habit colours come from the shared tint-* palette, which
+   is why a habit card sets --tint rather than a colour of its own. */
+
+.habits-bar-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }
+.habits-bar-actions p { margin: 0; font-size: 0.82rem; }
+
+.habit-list, .goal-list { display: flex; flex-direction: column; gap: var(--space-3); margin: 0; padding: 0; list-style: none; }
+.habit-card, .goal-card { padding: var(--space-4); border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface); }
+.habit-card { border-left: 3px solid var(--tint, var(--brand)); }
+
+.habit-head, .goal-head { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: var(--space-3); }
+.habit-identity h2, .goal-identity h2 { margin: 0 0 0.2rem; font-size: 1rem; letter-spacing: -0.01em; }
+.habit-meta, .goal-meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); margin: 0; color: var(--ink-faint); font-size: 0.78rem; }
+.habit-meta > span + span::before, .goal-meta > span + span::before { margin-right: var(--space-2); content: "·"; }
+.habit-streak { display: inline-flex; align-items: center; gap: 0.25rem; color: var(--tint-ink, var(--ink-soft)); font-weight: 700; }
+.habit-detail, .goal-detail { margin: var(--space-2) 0 0; color: var(--ink-soft); font-size: 0.84rem; }
+
+.habit-actions { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 0.2rem; }
+.habit-actions button { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.35rem 0.5rem; border: 1px solid transparent; border-radius: var(--radius-sm); color: var(--ink-soft); background: transparent; }
+.habit-actions button:hover:not(:disabled) { border-color: var(--line); color: var(--ink); background: var(--surface-muted); }
+.habit-actions button:disabled { opacity: 0.4; }
+.habit-today { border-color: var(--line) !important; color: var(--ink) !important; font-size: 0.8rem; font-weight: 700; }
+.habit-today.done { border-color: transparent !important; color: var(--tint-ink, var(--brand-dark)) !important; background: var(--tint-soft, var(--brand-soft)) !important; }
+
+/* The check-in grid: weeks across, weekdays down. Every cell is a button, because backfilling
+   yesterday has to work from the keyboard. */
+.habit-grid { display: flex; gap: 0.2rem; margin-top: var(--space-3); }
+.habit-grid-days, .habit-grid-week { display: grid; grid-auto-flow: row; grid-template-rows: repeat(7, 1.05rem); gap: 0.2rem; }
+.habit-grid-days span { display: flex; align-items: center; justify-content: center; width: 1.05rem; color: var(--ink-faint); font-size: 0.6rem; }
+.habit-cell { display: flex; align-items: center; justify-content: center; width: 1.05rem; min-height: 1.05rem; padding: 0; border: 1px solid var(--line); border-radius: 3px; color: var(--ink-faint); background: var(--surface-muted); font-size: 0.6rem; line-height: 1; }
+.habit-cell.ticked { border-color: transparent; color: var(--tint-ink, var(--brand-dark)); background: var(--tint-soft, var(--brand-soft)); }
+.habit-cell:disabled { opacity: 0.35; }
+
+.habit-form, .goal-form { display: flex; flex-direction: column; gap: var(--space-3); margin: var(--space-3) 0 0; padding: var(--space-3); border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface-muted); }
+.habit-form-row, .goal-form-dates { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+.habit-form-row > label { flex: 1 1 10rem; }
+.habit-form-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+
+/* Goals: the bar and its numbers are always together - a bar on its own invites guessing. */
+.goal-progress { display: flex; flex: 0 1 16rem; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+.goal-progress > strong { font-size: 1.1rem; font-variant-numeric: tabular-nums; }
+.goal-progress .progress { flex: 1 1 7rem; }
+.goal-counts { color: var(--ink-faint); font-size: 0.76rem; white-space: nowrap; }
+.goal-state { padding: 0.1rem 0.4rem; border-radius: 6px; background: var(--surface-muted); font-size: 0.68rem; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; }
+.goal-state.state-achieved { color: var(--success); background: color-mix(in srgb, var(--success) 14%, var(--surface)); }
+.goal-state.state-archived { color: var(--ink-faint); }
+.goal-warning { color: var(--danger); }
+.goal-no-evidence { margin: var(--space-3) 0 0; font-size: 0.82rem; }
+
+.goal-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); margin-top: var(--space-3); }
+.goal-actions button { padding: 0.3rem 0.55rem; border: 1px solid var(--line); border-radius: var(--radius-sm); color: var(--ink-soft); background: var(--surface); font-size: 0.78rem; }
+.goal-actions button:hover:not(:disabled) { color: var(--ink); background: var(--surface-muted); }
+.goal-actions .goal-danger:hover:not(:disabled) { border-color: var(--danger); color: var(--danger); }
+.milestone-add { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.milestone-add input { flex: 1 1 10rem; min-width: 8rem; }
+
+.milestone-list { display: flex; flex-direction: column; gap: var(--space-3); margin: var(--space-4) 0 0; padding: 0; list-style: none; }
+.milestone { padding-top: var(--space-3); border-top: 1px solid var(--line); }
+.milestone-head { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+.milestone-percent { min-width: 2.6rem; color: var(--ink-soft); font-size: 0.82rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.milestone-identity { flex: 1 1 10rem; min-width: 0; }
+.milestone-identity strong { display: block; font-size: 0.9rem; }
+.milestone-meta { color: var(--ink-faint); font-size: 0.76rem; }
+.milestone-actions { display: inline-flex; align-items: center; gap: 0.2rem; }
+.milestone-actions button { display: inline-flex; align-items: center; padding: 0.25rem 0.4rem; border: 1px solid transparent; border-radius: var(--radius-sm); color: var(--ink-soft); background: transparent; font-size: 0.76rem; }
+.milestone-actions button:hover:not(:disabled) { border-color: var(--line); color: var(--ink); background: var(--surface-muted); }
+.milestone-actions button:disabled { opacity: 0.4; }
+.milestone-bar { max-width: 22rem; margin-top: var(--space-2); }
+
+.goal-links { display: flex; flex-wrap: wrap; gap: var(--space-2); margin: var(--space-2) 0 0; padding: 0; list-style: none; }
+.goal-link { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.15rem 0.4rem; border: 1px solid var(--line); border-radius: 6px; background: var(--surface-muted); font-size: 0.76rem; }
+.goal-link.dead { color: var(--ink-faint); text-decoration: line-through; }
+.goal-link-type { color: var(--ink-faint); font-size: 0.64rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; }
+.goal-link button { display: inline-flex; align-items: center; padding: 0.1rem; border: 0; border-radius: 4px; color: var(--ink-faint); background: transparent; }
+.goal-link button:hover:not(:disabled) { color: var(--danger); }
+.goal-direct-links { margin-top: var(--space-4); }
+
+.goal-link-picker { margin-top: var(--space-4); padding: var(--space-3); border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); }
+.goal-link-targets { display: inline-flex; gap: 0.2rem; margin-bottom: var(--space-2); }
+.goal-link-targets button { padding: 0.25rem 0.55rem; border: 1px solid var(--line); border-radius: var(--radius-sm); color: var(--ink-soft); background: var(--surface); font-size: 0.76rem; text-transform: capitalize; }
+.goal-link-targets button[aria-pressed="true"] { color: var(--ink); background: var(--surface-muted); font-weight: 700; }
+
+/* The dashboard pair: goals on the left, today's habits on the right, stacking on narrow. */
+.dashboard-split { display: grid; grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr)); gap: var(--space-6); margin-bottom: var(--space-8); }
+.dashboard-goal-list, .dashboard-habit-list { display: flex; flex-direction: column; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+.dashboard-goal { display: grid; gap: 0.25rem; padding: var(--space-2) var(--space-3); border: 1px solid var(--line); border-radius: var(--radius-sm); color: var(--ink); background: var(--surface); }
+.dashboard-goal:hover { background: var(--surface-muted); }
+.dashboard-goal-title { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); font-weight: 600; }
+.dashboard-goal-bar { display: flex; align-items: center; gap: var(--space-2); }
+.dashboard-goal-bar em { color: var(--ink-soft); font-size: 0.74rem; font-style: normal; font-weight: 800; font-variant-numeric: tabular-nums; }
+.dashboard-goal-meta { color: var(--ink-faint); font-size: 0.74rem; }
+
+.dashboard-habits p.muted { margin: 0 0 var(--space-2); font-size: 0.8rem; }
+.dashboard-habit-list li { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-3); border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); }
+.dashboard-habit-name { flex: 1 1 auto; min-width: 0; overflow: hidden; font-size: 0.88rem; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
+.dashboard-habit-meta { color: var(--ink-faint); font-size: 0.74rem; white-space: nowrap; }
+.habit-tick { display: inline-flex; flex: 0 0 auto; align-items: center; justify-content: center; width: 1.6rem; min-height: 1.6rem; padding: 0; border: 1px solid var(--line); border-radius: 999px; color: var(--ink-soft); background: var(--surface-muted); }
+.habit-tick.done { border-color: transparent; color: var(--tint-ink, var(--brand-dark)); background: var(--tint-soft, var(--brand-soft)); }
+.habit-tick:disabled { opacity: 0.5; }
+
+@media (max-width: 640px) {
+  .habit-grid { overflow-x: auto; }
+  .goal-progress { flex: 1 1 100%; }
+  .habit-actions { width: 100%; }
+}
+
 /* --- Display type ----------------------------------------------------------------------------
    Fraunces carries headings and brand moments; every control, label and card face stays in the
    UI sans so dense columns remain legible. This block comes last so it wins over the per-section

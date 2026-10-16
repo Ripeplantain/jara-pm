@@ -22,8 +22,11 @@ class AppliedChange(BaseModel):
     board_id: int
     column_id: int | None = None
     card_id: int | None = None
-    # Set when the change was to a page rather than to the board the chat is open on.
+    # Set when the change was to a page, a goal or a habit rather than to the board the chat is
+    # open on. Each surface carries its own id so the UI knows where to send the user.
     note_id: int | None = None
+    goal_id: int | None = None
+    habit_id: int | None = None
 
 
 class PendingAction(BaseModel):

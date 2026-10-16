@@ -19,6 +19,9 @@ from app.util.time import as_utc, now
 DUE_SOON_DAYS = 7
 THROUGHPUT_WEEKS = 8
 STALE_DAYS = 14
+DASHBOARD_GOALS = 8
+"""Goals on the dashboard. Each one's progress reads the board, so this is a real ceiling on
+how much work the landing page does; the goals page shows the rest."""
 
 
 def _live_cards(db: Session, board_id: int) -> list[Card]:
@@ -256,7 +259,14 @@ def workspace_overview(db: Session, user: User, workspace_id: int) -> dict:
             })
 
     mine = search_svc.my_cards(db, user, workspace_id)
+    from app.services import goals as goal_svc
+    from app.services import habits as habit_svc
     from app.services import notifications as notification_svc
+
+    # The two productivity surfaces beside the board. Habits are the caller's own - the service
+    # filters on them - so this part of the dashboard is personal even though the rest is not.
+    habits = habit_svc.views(db, user, workspace_id)
+    goals = goal_svc.views(db, user, workspace_id)[:DASHBOARD_GOALS]
 
     notification_svc.sync_ai_signals(db, user, workspace_id, signals[:20])
     return {
@@ -272,4 +282,7 @@ def workspace_overview(db: Session, user: User, workspace_id: int) -> dict:
         "recent_activity": activity_svc.for_workspace(db, user, workspace_id, limit=10),
         "signals": signals[:20],
         "active_sprints": active_sprints,
+        "my_habits": habits,
+        "habits_due_today": sum(1 for habit in habits if habit["due_today"]),
+        "goals": goals,
     }

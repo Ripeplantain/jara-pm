@@ -3,6 +3,8 @@ from typing import Literal
 from pydantic import BaseModel
 
 from app.schemas.activity import ActivityOut
+from app.schemas.goals import GoalOut
+from app.schemas.habits import HabitOut
 
 
 class ColumnStat(BaseModel):
@@ -76,7 +78,11 @@ class SprintHealth(BaseModel):
 
 
 class WorkspaceOverview(BaseModel):
-    """Everything the dashboard shows, in one response."""
+    """Everything the dashboard shows, in one response.
+
+    `my_habits` is the one personal part: the service filters it to the caller, so two members
+    reading the same workspace see the same boards and different habits.
+    """
 
     workspace_id: int
     boards: list[BoardStat]
@@ -86,3 +92,6 @@ class WorkspaceOverview(BaseModel):
     recent_activity: list[ActivityOut]
     signals: list[WorkspaceSignal]
     active_sprints: list[SprintHealth]
+    my_habits: list[HabitOut] = []
+    habits_due_today: int = 0
+    goals: list[GoalOut] = []

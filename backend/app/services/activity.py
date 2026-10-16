@@ -34,6 +34,11 @@ NOTE_MOVED = "note.moved"
 NOTE_ARCHIVED = "note.archived"
 NOTE_UNARCHIVED = "note.unarchived"
 NOTE_DELETED = "note.deleted"
+GOAL_CREATED = "goal.created"
+GOAL_UPDATED = "goal.updated"
+GOAL_ACHIEVED = "goal.achieved"
+GOAL_ARCHIVED = "goal.archived"
+GOAL_DELETED = "goal.deleted"
 
 NOTE = "note"
 """`entity_type` for a row whose subject is a note rather than a board or a card.
@@ -41,6 +46,13 @@ NOTE = "note"
 Private notes never reach here at all: the activity feed is readable by every member of the
 workspace and rows are never edited or filtered after the fact, so the only safe way to keep
 a private page private is to write no history for it. `services/notes.py` decides that.
+"""
+
+GOAL = "goal"
+"""`entity_type` for a row about a goal.
+
+A goal is ordinary workspace data, so unlike a note it is always logged. Habits are the other
+way round: they are personal, so nothing in `services/habits.py` reaches this module at all.
 """
 
 

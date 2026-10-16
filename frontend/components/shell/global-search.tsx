@@ -5,18 +5,22 @@ import { useEffect, useRef, useState } from "react";
 import { Icon } from "@/components/icon";
 import { api } from "@/lib/api/browser";
 import type { SearchResults } from "@/lib/api/browser";
+import { shortDate } from "@/lib/dates";
+import { STATE_LABELS } from "@/lib/types/goal";
 import { noteTitle } from "@/lib/types/note";
 
 const ACTIONS = [
   { label: "Open boards", detail: "Browse every board in this workspace", href: "/" },
   { label: "Open notes", detail: "Browse the workspace's pages and docs", href: "/notes" },
+  { label: "Open goals", detail: "See what the boards are working towards", href: "/goals" },
+  { label: "Open habits", detail: "Check in on your own habits", href: "/habits" },
   { label: "Open my work", detail: "See cards assigned to you", href: "/my-work" },
   { label: "View activity", detail: "Review the workspace timeline", href: "/activity" },
   { label: "Manage members", detail: "Invite people and update roles", href: "/members" },
   { label: "Workspace settings", detail: "Update labels and workspace preferences", href: "/settings/workspace" },
 ] as const;
 
-const EMPTY: SearchResults = { cards: [], notes: [] };
+const EMPTY: SearchResults = { cards: [], notes: [], goals: [] };
 
 export function GlobalSearch({ workspaceId }: { workspaceId: number }) {
   const [open, setOpen] = useState(false);
@@ -67,7 +71,7 @@ export function GlobalSearch({ workspaceId }: { workspaceId: number }) {
         <div className="command-backdrop" role="presentation" onMouseDown={() => setOpen(false)}>
           <section className="command-panel" role="dialog" aria-modal="true" aria-label="Search workspace" onMouseDown={(e) => e.stopPropagation()}>
             <form onSubmit={search}>
-              <label htmlFor="global-search">Search cards and pages</label>
+              <label htmlFor="global-search">Search cards, pages and goals</label>
               <input id="global-search" ref={input} value={query} placeholder="Try a title or keyword…" onChange={(e) => setQuery(e.target.value)} />
             </form>
             {actionResults.length > 0 && (
@@ -113,12 +117,33 @@ export function GlobalSearch({ workspaceId }: { workspaceId: number }) {
                 </ul>
               </div>
             )}
+            {query.trim() && results.goals.length > 0 && (
+              <div className="command-section">
+                <p className="menu-label">Goals</p>
+                <ul className="command-results">
+                  {results.goals.map((goal) => (
+                    <li key={goal.id}>
+                      <Link href="/goals" onClick={() => setOpen(false)}>
+                        <strong>{goal.title}</strong>
+                        <span>
+                          {STATE_LABELS[goal.state]}
+                          {goal.target_date ? ` · by ${shortDate(goal.target_date)}` : ""}
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
             {error && <p className="search-error" role="alert">{error}</p>}
             {!error &&
               query.trim() &&
               actionResults.length === 0 &&
               results.cards.length === 0 &&
-              results.notes.length === 0 && <p className="muted">No matching actions, cards or pages.</p>}
+              results.notes.length === 0 &&
+              results.goals.length === 0 && (
+                <p className="muted">No matching actions, cards, pages or goals.</p>
+              )}
             <p className="command-hint">Press Esc to close · Enter to search</p>
           </section>
         </div>

@@ -13,6 +13,8 @@ from app.routers import (
     ai,
     auth,
     boards,
+    goals,
+    habits,
     health,
     notes,
     notifications,
@@ -104,5 +106,7 @@ app.include_router(boards.router, prefix="/api")
 app.include_router(workspaces.router, prefix="/api")
 app.include_router(sprints.router, prefix="/api")
 app.include_router(notes.router, prefix="/api")
+app.include_router(habits.router, prefix="/api")
+app.include_router(goals.router, prefix="/api")
 app.include_router(notifications.router, prefix="/api")
 app.include_router(ai.router, prefix="/api")

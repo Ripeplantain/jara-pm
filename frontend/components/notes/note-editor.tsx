@@ -3,8 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { BlockRow } from "@/components/notes/block-row";
 import type { Draft } from "@/components/notes/block-row";
-import { EmbedPicker } from "@/components/notes/embed-picker";
-import type { EmbedChoice } from "@/components/notes/embed-picker";
+import { WorkPicker } from "@/components/work-picker";
+import type { WorkChoice } from "@/components/work-picker";
 import { SlashMenu } from "@/components/notes/slash-menu";
 import type { MenuChoice } from "@/components/notes/slash-menu";
 import { api, RequestError } from "@/lib/api/browser";
@@ -280,7 +280,7 @@ export function NoteEditor({
     pendingFocus.current = { key: draft.key, caret: 0 };
   }
 
-  function insertEmbed(index: number, choice: EmbedChoice) {
+  function insertEmbed(index: number, choice: WorkChoice) {
     setPicker(null);
     const created = blank({
       type: choice.cardId ? "card_embed" : "board_embed",
@@ -331,7 +331,7 @@ export function NoteEditor({
                   onClose={() => setMenuKey(null)}
                 />
               ) : picker?.key === draft.key ? (
-                <EmbedPicker
+                <WorkPicker
                   workspaceId={workspaceId}
                   target={picker.target}
                   onPick={(choice) => insertEmbed(index, choice)}

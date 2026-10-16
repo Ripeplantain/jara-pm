@@ -524,3 +524,178 @@ def test_the_context_lists_visible_pages_only(client, scene, use_llm):
     system = fake.calls[-1][0]["content"]
     assert "Team page" in system
     assert "Owner's private" not in system
+
+
+# --- goals and habits (phases 22-23) ----------------------------------------------------------
+
+
+def test_the_assistant_sets_a_goal_and_links_work_to_it(client, scene, use_llm):
+    fake = use_llm(
+        call("create_goal", title="Ship the beta", milestones=["Close the bugs"]),
+        say("Set up."),
+    )
+    res = ask(client, scene["owner"], scene["board"]["id"], "Set a goal for the beta")
+    assert res.status_code == 200
+    created = tool_results(fake)[0]
+    goal_id, milestone_id = created["goal_id"], created["milestone_ids"][0]
+    # Nothing is linked yet, so the model is told there is no evidence rather than 0% progress.
+    assert created["has_evidence"] is False
+    assert res.json()["changes"][0]["goal_id"] == goal_id
+
+    fake = use_llm(
+        call(
+            "link_goal_work",
+            goal_id=goal_id,
+            target_type="card",
+            target_id=scene["card"]["id"],
+            milestone_id=milestone_id,
+        ),
+        say("Linked."),
+    )
+    ask(client, scene["owner"], scene["board"]["id"], "Link the card")
+    linked = tool_results(fake)[0]
+    assert (linked["cards_total"], linked["percent"]) == (1, 0)
+
+    goal = client.get(f"/api/goals/{goal_id}", headers=scene["owner"]).json()
+    assert goal["milestones"][0]["links"][0]["target_id"] == scene["card"]["id"]
+
+
+def test_the_assistant_reads_progress_from_the_board_not_from_the_model(client, scene, use_llm):
+    """The numbers come from the same rollup the UI reads, and move only when a card moves."""
+    wid = scene["board"]["workspace_id"]
+    goal = client.post(
+        f"/api/workspaces/{wid}/goals", json={"title": "Done things"}, headers=scene["owner"]
+    ).json()
+    client.post(
+        f"/api/goals/{goal['id']}/links",
+        json={"target_type": "card", "target_id": scene["card"]["id"]},
+        headers=scene["owner"],
+    )
+    client.patch(f"/api/columns/{scene['done']['id']}", json={"is_done": True}, headers=scene["owner"])
+    client.post(
+        f"/api/cards/{scene['card']['id']}/move",
+        json={"column_id": scene["done"]["id"]},
+        headers=scene["owner"],
+    )
+
+    fake = use_llm(call("goal_progress", goal_id=goal["id"]), say("All done."))
+    ask(client, scene["owner"], scene["board"]["id"], "How is the goal going?")
+    read = tool_results(fake)[0]
+    assert (read["percent"], read["cards_done"], read["cards_total"]) == (100, 1, 1)
+    assert read["links"][0]["title"] == "Fix it"
+    assert read["links"][0]["board_id"] == scene["board"]["id"]
+
+
+def test_the_assistant_archives_a_goal_but_cannot_delete_one(client, scene, use_llm):
+    from app.ai.tools import TOOLS
+
+    assert not [name for name in TOOLS if "goal" in name and "delete" in name]
+    wid = scene["board"]["workspace_id"]
+    goal = client.post(
+        f"/api/workspaces/{wid}/goals", json={"title": "Old plan"}, headers=scene["owner"]
+    ).json()
+    fake = use_llm(call("set_goal_state", goal_id=goal["id"], state="archived"), say("Archived."))
+    ask(client, scene["owner"], scene["board"]["id"], "Archive it")
+    assert tool_results(fake)[0]["state"] == "archived"
+    # Reversible: it is off the list but still there.
+    assert client.get(f"/api/goals/{goal['id']}", headers=scene["owner"]).status_code == 200
+
+
+def test_a_viewer_cannot_write_a_goal_through_the_assistant(client, scene, use_llm):
+    fake = use_llm(call("create_goal", title="Nope"), say("I cannot."))
+    res = ask(client, scene["viewer"], scene["board"]["id"], "Set a goal")
+    assert res.status_code == 200
+    assert "assistant cannot do this" in tool_results(fake)[0]["error"]
+    assert res.json()["changes"] == []
+
+
+def test_a_viewer_can_read_goals_through_the_assistant(client, scene, use_llm):
+    wid = scene["board"]["workspace_id"]
+    client.post(
+        f"/api/workspaces/{wid}/goals", json={"title": "Team goal"}, headers=scene["owner"]
+    )
+    fake = use_llm(call("list_goals"), say("One goal."))
+    assert ask(client, scene["viewer"], scene["board"]["id"], "What are the goals?").status_code == 200
+    assert [g["title"] for g in tool_results(fake)[0]["goals"]] == ["Team goal"]
+
+
+def test_the_assistant_cannot_link_a_goal_to_work_it_cannot_see(client, scene, use_llm, register_and_login):
+    outsider = auth(register_and_login("outsider@example.com"))
+    elsewhere = client.post(
+        "/api/boards", json={"title": "Elsewhere", "columns": ["Todo"]}, headers=outsider
+    ).json()
+    wid = scene["board"]["workspace_id"]
+    goal = client.post(
+        f"/api/workspaces/{wid}/goals", json={"title": "Mine"}, headers=scene["owner"]
+    ).json()
+    fake = use_llm(
+        call("link_goal_work", goal_id=goal["id"], target_type="board", target_id=elsewhere["id"]),
+        say("I cannot find that board."),
+    )
+    ask(client, scene["owner"], scene["board"]["id"], "Link the other board")
+    assert "not found" in tool_results(fake)[0]["error"].lower()
+    assert client.get(f"/api/goals/{goal['id']}", headers=scene["owner"]).json()["links"] == []
+
+
+def test_an_unknown_goal_id_is_an_error_the_model_can_read(client, scene, use_llm):
+    fake = use_llm(call("goal_progress", goal_id=9_999), say("No such goal."))
+    assert ask(client, scene["owner"], scene["board"]["id"], "How is goal 9999?").status_code == 200
+    assert "Goal not found" in tool_results(fake)[0]["error"]
+
+
+def test_the_context_lists_goals_by_id_so_the_model_need_not_guess(client, scene, use_llm):
+    wid = scene["board"]["workspace_id"]
+    goal = client.post(
+        f"/api/workspaces/{wid}/goals",
+        json={"title": "Reach 100 teams", "target_date": "2026-12-01"},
+        headers=scene["owner"],
+    ).json()
+    fake = use_llm(say("Noted."))
+    ask(client, scene["owner"], scene["board"]["id"], "What are we working towards?")
+    system = fake.calls[-1][0]["content"]
+    assert f'"goal_id": {goal["id"]}' in system
+    assert "Reach 100 teams" in system
+    # Progress is not in the context: it is read on demand, from the board.
+    assert '"percent"' not in system
+
+
+def test_the_assistant_checks_in_the_users_own_habit(client, scene, use_llm):
+    wid = scene["board"]["workspace_id"]
+    habit = client.post(
+        f"/api/workspaces/{wid}/habits", json={"name": "Write every day"}, headers=scene["owner"]
+    ).json()
+    fake = use_llm(call("list_habits"), call("check_in_habit", habit_id=habit["id"]), say("Ticked."))
+    res = ask(client, scene["owner"], scene["board"]["id"], "Tick off my writing habit")
+    assert res.status_code == 200
+    listed, ticked = tool_results(fake)
+    assert listed["habits"][0]["due_today"] is True
+    assert (ticked["done_today"], ticked["current_streak"]) == (True, 1)
+    assert res.json()["changes"][0]["habit_id"] == habit["id"]
+
+
+def test_the_assistant_cannot_reach_someone_elses_habits(client, scene, use_llm):
+    """Not because the prompt says so: the service filters on the acting user."""
+    wid = scene["board"]["workspace_id"]
+    mine = client.post(
+        f"/api/workspaces/{wid}/habits", json={"name": "Owner's habit"}, headers=scene["owner"]
+    ).json()
+    fake = use_llm(
+        call("list_habits"), call("check_in_habit", habit_id=mine["id"]), say("I cannot see it.")
+    )
+    ask(client, scene["viewer"], scene["board"]["id"], "What are the habits?")
+    listed, attempted = tool_results(fake)
+    assert listed["habits"] == []
+    assert "Habit not found" in attempted["error"]
+    # And the owner's habit is untouched.
+    assert client.get(f"/api/habits/{mine['id']}", headers=scene["owner"]).json()["done_today"] is False
+
+
+def test_habits_are_not_in_the_board_context(client, scene, use_llm):
+    """A habit has nothing to do with the board, and the context is sent on every message."""
+    wid = scene["board"]["workspace_id"]
+    client.post(
+        f"/api/workspaces/{wid}/habits", json={"name": "Secret ritual"}, headers=scene["owner"]
+    )
+    fake = use_llm(say("Hello."))
+    ask(client, scene["owner"], scene["board"]["id"], "hi")
+    assert "Secret ritual" not in fake.calls[-1][0]["content"]

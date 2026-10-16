@@ -7,7 +7,7 @@ cards, planning, insights, and an AI assistant that understands all of it.
 This file is the memory of the [Ralph loop](../PROMPT.md). One iteration = the first unchecked
 task. Tick it when `./scripts/verify.sh` prints `VERIFY: PASS`.
 
-**Status: phases 0-14 shipped; SaaS MVP tasks 15.1-15.6, 16.1-16.6, 17.1-17.6, 18.1-18.4, and 19.1-19.4 are complete, as are phases 20 and 21.1-21.7 (notes). The open tasks are 18.5 (external security review) and 19.5 (final launch verification). The visual redesign workstream is tracked separately in [docs/UI-REDESIGN-TODO.md](UI-REDESIGN-TODO.md).**
+**Status: phases 0-14 shipped; SaaS MVP tasks 15.1-15.6, 16.1-16.6, 17.1-17.6, 18.1-18.4, and 19.1-19.4 are complete, as are phase 20, 21.1-21.7 (notes), 22.1-22.3 (habits) and 23.1-23.3 (goals). The open tasks are 18.5 (external security review) and 19.5 (final launch verification). The visual redesign workstream is tracked separately in [docs/UI-REDESIGN-TODO.md](UI-REDESIGN-TODO.md).**
 
 ---
 
@@ -652,15 +652,117 @@ overflow, not with axe or a screen reader. A pre-existing hydration-attribute mi
 `/boards/[id]` was observed and confirmed to predate this phase (it reproduces with the card-drawer
 change stashed); it is unrelated to notes and is left alone.
 
-## Phase 22 - Habits (outline, not started)
+## Phase 22 - Habits
 
-- [ ] 22.1 `habits` and `habit_checkins`, user-scoped and private by default, with a schedule
-  (daily, weekly, n times per week).
-- [ ] 22.2 Check-in endpoints and streak calculation, derived rather than stored.
-- [ ] 22.3 A check-in grid on `/habits`, plus today's habits on the dashboard.
+- [x] 22.1 `habits` and `habit_checkins` (migration `0020`), user-scoped and private, with a
+  schedule (daily, weekly, n times per week).
+- [x] 22.2 Check-in endpoints and streak calculation, derived rather than stored.
+- [x] 22.3 A check-in grid on `/habits`, plus today's habits on the dashboard.
 
-## Phase 23 - Goals and progress (outline, not started)
+### Notes
 
-- [ ] 23.1 `goals` and `goal_milestones`, workspace-scoped, each linked to boards, sprints or cards.
-- [ ] 23.2 Progress rolled up from real card and sprint state rather than hand-entered.
-- [ ] 23.3 A goals page, and goal progress on the workspace dashboard.
+- 22.1: **a habit is personal, full stop.** It hangs off a workspace like everything else, but
+  `permissions.require_habit` compares `user_id` and nothing else, so somebody else's habit is a
+  404 - to an admin and to the owner as well. There is deliberately no `visibility` column: a
+  habit nobody else may read needs no sharing rule to get wrong, and no endpoint takes a user id.
+- 22.1: the consequence, as for a private page, is that **a habit writes no activity and sends no
+  notification**. Both surfaces are workspace-visible and their rows are never filtered after the
+  fact, so the only safe thing is to write nothing. Nothing in `services/habits.py` imports
+  `activity` or `notifications`, and a test asserts both stay empty.
+- 22.1: membership is the only role requirement, so a viewer keeps their own habits in a workspace
+  they can only read - the same reasoning that lets a viewer favourite a board.
+- 22.1: a check-in is the presence of a row for one date, so ticking a day is idempotent and
+  unticking it deletes the row. The table is a log of what was done, not a grid of what was not.
+- 22.2: streaks are a pure function of a set of dates (`habits.progress`), computed on every read
+  over the last `STREAK_WINDOW_DAYS` (365). Two decisions are in the tests: **today being unticked
+  does not break a streak** - it anchors on yesterday until today is done, and a weekly streak on
+  last week until this week's target is met - and **backfilling a day repairs the streak it belongs
+  to**, which a stored counter could not do. A daily streak counts days, a weekly one counts weeks.
+- 22.2: one query serves a whole page of habits (`_checkin_dates`), because the list is read on
+  `/habits` and again on the dashboard.
+- 22.3: the grid is five weeks of real buttons, each with its own accessible name, so backfilling
+  yesterday works from the keyboard. Cells for future days are disabled and the API refuses them.
+- 22.3: habits are deliberately **not** in the AI's board context - they have nothing to do with the
+  board the chat is open on - but `list_habits` and `check_in_habit` reach the acting user's own.
+
+## Phase 23 - Goals and progress
+
+- [x] 23.1 `goals`, `goal_milestones` and `goal_links` (migration `0021`), workspace-scoped, each
+  linked to boards, sprints or cards.
+- [x] 23.2 Progress rolled up from real card and sprint state rather than hand-entered.
+- [x] 23.3 A goals page, and goal progress on the workspace dashboard.
+
+### Notes
+
+- 23.1: a goal is ordinary workspace data - every member reads it, a member writes it, an admin is
+  not required - so there is no visibility rule here, and every change is in the activity feed
+  under `entity_type: "goal"`. `ActivityOut` now exposes `entity_type`/`entity_id`, which
+  migration `0019` had already added for exactly this.
+- 23.1: `GoalLink.target_id` is a plain integer rather than a foreign key, like `Activity.card_id`
+  and `NoteLink.target_id`, so a deleted card drops out of a goal's rollup instead of cascading
+  into the goal. A link that no longer resolves is reported as `unresolved_links`, never counted.
+  An archived card is treated the same way: off the board, out of the rollup.
+- 23.1: there is no unique constraint across `(goal_id, milestone_id, target_type, target_id)`
+  because SQLite treats NULL `milestone_id`s as distinct, which would miss the goal-level
+  duplicates it most needs to catch. `services/goals.add_link` rejects a duplicate instead, in one
+  place, for both cases.
+- 23.2: **progress is never stored.** Each milestone is one group, the goal's own direct links are
+  one more, a group's percentage is its done cards over its total cards, and the goal's percentage
+  is the mean of its groups - equal weight, so a milestone with three cards counts as much as one
+  with thirty. A step is a step. "Done" is `completed_at`, which only a done column sets, so a goal
+  cannot claim progress the board does not show.
+- 23.2: a goal with nothing linked reports `has_evidence: false` rather than 0%, and the UI shows a
+  dash. Unmeasured and unstarted are different claims. Milestones with no links do not count as
+  evidence either.
+- 23.2: marking a goal achieved is a person's decision and does not freeze the number - the board
+  keeps speaking. `achieved_at` is cleared if the goal is reopened, so the date always belongs to
+  the state it is shown with.
+- 23.3: every goal mutation returns the whole goal, because any of them can move the rollup; the UI
+  replaces its copy with what came back instead of adjusting a percentage locally.
+- 23.3: the dashboard shows at most `DASHBOARD_GOALS` (8) goals, since each one's progress reads the
+  board and the landing page is the most latency-sensitive screen in the app.
+- 23.x, agreed before implementation: goals and the caller's own habits are in the workspace export
+  (an admin's export carries their habits, not yours); goals are in workspace search, which now
+  answers `{cards, notes, goals}`; and the assistant has eight new tools - `list_goals`,
+  `goal_progress`, `create_goal`, `add_goal_milestone`, `link_goal_work`, `set_goal_state`,
+  `list_habits`, `check_in_habit`. There is **no tool that deletes a goal**: `set_goal_state`
+  archives one reversibly, which is stricter than the confirmation rule requires, as with pages.
+- The frontend's card/board embed picker became `components/work-picker.tsx` and learned sprints,
+  since a goal link and a page embed ask the same question. Two Lucide icons (`target`, `flame`)
+  were added to the bundled subset with `npm run icons:build`.
+
+### Verification, 2026-10-16
+
+`./scripts/verify.sh` -> `VERIFY: PASS`, through Docker (the daemon was up, so the compose path ran
+rather than the host fallback): **371 backend tests** (300 before this work), Ruff, frontend ESLint
+and TypeScript. The production frontend build succeeds and emits `/habits` and `/goals` among its
+routes. `bash scripts/migration-check.sh` passes against a disposable database at **29 tables** (24
+before these phases). Migrations `0020` and `0021` were also applied to the running dev database by
+restarting the backend container, which left its existing users, board and cards untouched.
+
+**Browser smoke, headless Chrome over CDP against the dev stack, 28 of 28 checks.** The script is
+in the session scratchpad rather than the repo; what it covered:
+
+| | Check | Result |
+|---|---|---|
+| 1-2 | Sign in; `/habits` renders with its empty state and New habit control | ok |
+| 3 | A habit is created and shows its schedule and a zero streak | ok |
+| 4-5 | The grid is 35 real buttons, each with an accessible name; future days are disabled | ok |
+| 6-7 | Ticking today sets the streak to one day and the cell reads as pressed | ok |
+| 8 | Backfilling yesterday from the grid extends the streak to two days | ok |
+| 9-10 | Streak and both ticks survive a reload; the page says nothing is due | ok |
+| 11-12 | `/goals` renders its empty state; a goal is created with its milestones | ok |
+| 13 | An unlinked goal shows a dash, not 0% | ok |
+| 14-16 | The work picker finds a card; linking it gives the goal evidence and a measurable 0%; the link row names the card and links to it on its board | ok |
+| 17 | The milestone with no links still reads as unstarted | ok |
+| 18-19 | **Moving the card into the done column moves the goal**: the milestone reads 100%, the empty one 0%, the goal 50% | ok |
+| 20-22 | The dashboard shows the goal's progress and today's habits, and a habit unticks from there | ok |
+| 23-24 | Goals and Habits are in the sidebar; workspace search returns the goal under its own heading | ok |
+| 25 | Every control on `/goals` has an accessible name | ok |
+| 26-28 | No horizontal overflow at 375px on `/habits`, on `/goals`, or on `/goals` in dark mode | ok |
+
+**Not verified.** There is still no frontend rendering test framework, so the two new pages are
+covered by the browser smoke above rather than by a repeatable test in the repo. Accessibility was
+checked for accessible names, the keyboard path through the grid and narrow-screen overflow, not
+with axe or a screen reader. No live LLM was called: the eight new AI tools are covered by the
+scripted fake only.

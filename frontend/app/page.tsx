@@ -3,6 +3,8 @@ import Link from "next/link";
 import { AppShell } from "@/components/shell/app-shell";
 import { BoardList } from "@/components/board/board-list";
 import { DashboardBriefing } from "@/components/dashboard/dashboard-briefing";
+import { DashboardGoals } from "@/components/dashboard/dashboard-goals";
+import { DashboardHabits } from "@/components/dashboard/dashboard-habits";
 import { ApiError } from "@/lib/api/client";
 import { getOverview, listTemplates } from "@/lib/api/server";
 import { getOnboardingStatus } from "@/lib/api/server";
@@ -75,6 +77,13 @@ export default async function Home() {
         </section>
 
         <DashboardBriefing overview={overview} />
+
+        {/* The two productivity surfaces beside the board: what the team is working towards,
+            and what the signed-in user said they would do every day. */}
+        <div className="dashboard-split">
+          <DashboardGoals goals={overview.goals} />
+          <DashboardHabits initial={overview.my_habits} />
+        </div>
 
         <BoardList
           boards={overview.boards}

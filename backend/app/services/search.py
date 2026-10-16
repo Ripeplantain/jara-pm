@@ -10,7 +10,18 @@ from datetime import datetime
 from sqlalchemy import or_, select
 from sqlalchemy.orm import Session, selectinload
 
-from app.models import Board, Card, CardLabel, Column, Note, NoteBlock, Priority, User
+from app.models import (
+    Board,
+    Card,
+    CardLabel,
+    Column,
+    Goal,
+    GoalState,
+    Note,
+    NoteBlock,
+    Priority,
+    User,
+)
 from app.services import permissions
 from app.services.boards import _my_workspace_ids, board_for
 
@@ -157,3 +168,35 @@ def note_excerpt(note: Note, q: str, width: int = 160) -> str:
         end = start + width
         return f"{'…' if start else ''}{text[start:end].strip()}{'…' if end < len(text) else ''}"
     return ""
+
+
+# --- goals ------------------------------------------------------------------------------------
+
+
+def search_goals(db: Session, user: User, workspace_id: int, q: str, limit: int = 50) -> list[Goal]:
+    """Goals whose title or detail matches, soonest target first.
+
+    A goal is workspace-visible, so there is no visibility filter here - membership, checked
+    once by `require_workspace`, is the whole rule. Archived goals stay out of search, the way
+    archived cards do. Progress is deliberately not computed for a search hit: the rollup reads
+    the board, and a result row only needs somewhere to go.
+    """
+    permissions.require_workspace(db, user, workspace_id)
+    if not q.strip():
+        return []
+    pattern = _like(q.strip())
+    return list(
+        db.scalars(
+            select(Goal)
+            .where(
+                Goal.workspace_id == workspace_id,
+                Goal.state != GoalState.ARCHIVED.value,
+                or_(
+                    Goal.title.like(pattern, escape="\\"),
+                    Goal.detail.like(pattern, escape="\\"),
+                ),
+            )
+            .order_by(Goal.target_date.is_(None), Goal.target_date, Goal.id)
+            .limit(min(limit, 200))
+        )
+    )

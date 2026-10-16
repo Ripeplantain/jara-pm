@@ -18,6 +18,8 @@ from app.models import (
     Board,
     Card,
     Column,
+    Goal,
+    Habit,
     Note,
     NoteVisibility,
     User,
@@ -158,3 +160,37 @@ def require_note(db: Session, user: User, note_id: int, minimum: WorkspaceRole =
     if not access.at_least(minimum):
         raise Forbidden(f"This action needs {_WHAT_IT_TAKES[minimum]} in this workspace")
     return access
+
+
+# --- habits and goals -------------------------------------------------------------------------
+
+
+def require_habit(db: Session, user: User, habit_id: int) -> Access:
+    """A habit is its owner's alone, so there is no role to check - only who you are.
+
+    Everyone else gets `NotFound`, including an admin and the workspace owner: a `Forbidden`
+    would confirm that the habit exists, which is the same reasoning `require_note` applies to
+    somebody else's private page. There is no `minimum` parameter because a habit affects
+    nobody else, so membership is the whole requirement - exactly like favouriting a board.
+    """
+    habit = db.get(Habit, habit_id)
+    if habit is None:
+        raise NotFound("Habit")
+    try:
+        access = require_workspace(db, user, habit.workspace_id)
+    except NotFound:
+        raise NotFound("Habit") from None
+    if habit.user_id != user.id:
+        raise NotFound("Habit")
+    return access
+
+
+def require_goal(db: Session, user: User, goal_id: int, minimum: WorkspaceRole = VIEWER) -> Access:
+    """A goal is ordinary workspace data: every member reads it, `minimum` decides who writes."""
+    goal = db.get(Goal, goal_id)
+    if goal is None:
+        raise NotFound("Goal")
+    try:
+        return require_workspace(db, user, goal.workspace_id, minimum)
+    except NotFound:
+        raise NotFound("Goal") from None

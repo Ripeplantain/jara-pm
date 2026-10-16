@@ -11,6 +11,7 @@ from app.schemas.ai import WorkspaceAiRequest, WorkspaceAiResponse
 from app.schemas.analytics import WorkspaceOverview
 from app.schemas.boards import CardHit, CardOut
 from app.schemas.data_lifecycle import WorkspaceExport
+from app.schemas.goals import GoalHit
 from app.schemas.labels import LabelCreate, LabelOut, LabelUpdate
 from app.schemas.notes import NoteHit
 from app.schemas.workspaces import (
@@ -201,7 +202,7 @@ def workspace_activity(
 
 @router.get("/workspaces/{workspace_id}/search", response_model=WorkspaceSearchResults)
 def search_workspace(workspace_id: int, q: str, user: CurrentUser, db: DbSession, limit: int = 50):
-    """Cards and pages across the whole workspace. An empty query returns nothing.
+    """Cards, pages and goals across the whole workspace. An empty query returns nothing.
 
     Someone else's private page never appears here: `search_notes` composes the same visibility
     filter every other note read does.
@@ -214,6 +215,10 @@ def search_workspace(workspace_id: int, q: str, user: CurrentUser, db: DbSession
                 excerpt=search_svc.note_excerpt(note, q),
             )
             for note in search_svc.search_notes(db, user, workspace_id, q, limit)
+        ],
+        goals=[
+            GoalHit.model_validate(goal, from_attributes=True)
+            for goal in search_svc.search_goals(db, user, workspace_id, q, limit)
         ],
     )
 

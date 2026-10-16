@@ -1,5 +1,7 @@
 /** Mirror backend/app/schemas/analytics.py. */
 import type { Activity } from "@/lib/types/activity";
+import type { Goal } from "@/lib/types/goal";
+import type { Habit } from "@/lib/types/habit";
 
 export interface ColumnStat {
   column_id: number;
@@ -78,4 +80,8 @@ export interface WorkspaceOverview {
   recent_activity: Activity[];
   signals: WorkspaceSignal[];
   active_sprints: SprintHealth[];
+  /** The one personal part of the overview: the signed-in user's own habits. */
+  my_habits: Habit[];
+  habits_due_today: number;
+  goals: Goal[];
 }
