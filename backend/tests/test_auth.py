@@ -1,3 +1,4 @@
+import logging
 from datetime import UTC, datetime, timedelta
 
 import jwt
@@ -11,6 +12,7 @@ from app.db import get_engine
 from app.models import Board, Card, Column, User, WorkspaceMember
 from app.models.user import AVATAR_COLORS
 from app.services import auth as auth_service
+from app.services import email as email_service
 from tests.conftest import TEST_JWT_SECRET, session_for
 
 CREDS = {"email": "a@example.com", "password": "correct-horse"}
@@ -348,3 +350,28 @@ def test_account_lifecycle_migration_preserves_child_rows(client):
         assert conn.execute(text("select count(*) from boards")).scalar_one() == 1
         assert conn.execute(text("select count(*) from columns")).scalar_one() == 1
         assert conn.execute(text("select count(*) from cards")).scalar_one() == 1
+
+
+def test_dev_email_sink_logs_links_only_outside_production(monkeypatch):
+    """The sink prints lifecycle links locally, and is refused when APP_ENV is production."""
+    monkeypatch.setenv("RESEND_API_KEY", "re_test_key")
+    monkeypatch.setenv("RESEND_FROM_EMAIL", "noreply@example.com")
+
+    monkeypatch.delenv("EMAIL_DEV_LOG", raising=False)
+    monkeypatch.setenv("APP_ENV", "development")
+    assert isinstance(email_service.get_email_sender(), email_service.ResendEmailSender)
+
+    monkeypatch.setenv("EMAIL_DEV_LOG", "true")
+    assert isinstance(email_service.get_email_sender(), email_service.LoggingEmailSender)
+
+    monkeypatch.setenv("APP_ENV", "production")
+    assert isinstance(email_service.get_email_sender(), email_service.ResendEmailSender)
+
+
+def test_dev_email_sink_writes_the_reset_link(monkeypatch, caplog):
+    monkeypatch.setenv("EMAIL_DEV_LOG", "true")
+    monkeypatch.setenv("APP_ENV", "development")
+    monkeypatch.setenv("AUTH_URL", "http://localhost:3000")
+    with caplog.at_level(logging.WARNING, logger="app.services.email"):
+        email_service.send_password_reset("a@example.com", "token-abc")
+    assert "http://localhost:3000/reset-password?token=token-abc" in caplog.text

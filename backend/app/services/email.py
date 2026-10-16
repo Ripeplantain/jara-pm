@@ -48,9 +48,26 @@ class DisabledEmailSender:
         return None
 
 
+@dataclass
+class LoggingEmailSender:
+    """Development sink that writes the message, link included, to the backend log.
+
+    Resend only delivers from a verified domain, so no local address can receive a real
+    message until DNS is in place. This keeps the reset, verification and invitation
+    flows completable locally by printing the link the provider would have sent. It
+    deliberately exposes lifecycle tokens, which is why `get_email_sender` never
+    selects it outside development.
+    """
+
+    def send(self, *, to: str, subject: str, html: str, text: str) -> None:
+        logger.warning("dev email sink: to=%s subject=%s | %s", to, subject, text)
+
+
 def get_email_sender() -> EmailSender:
     key = config.resend_api_key()
     sender = config.resend_from_email()
+    if config.email_dev_log() and config.app_environment() != "production":
+        return LoggingEmailSender()
     if not key or not sender:
         return DisabledEmailSender()
     return ResendEmailSender(key, sender, config.resend_reply_to())

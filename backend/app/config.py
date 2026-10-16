@@ -36,6 +36,15 @@ def resend_reply_to() -> str | None:
     return os.environ.get("RESEND_REPLY_TO") or None
 
 
+def email_dev_log() -> bool:
+    """Write transactional messages to the backend log instead of calling the provider.
+
+    The message carries its own verification, reset or invitation link, so this is a local
+    development aid only; `services/email.py` refuses it outside development.
+    """
+    return os.environ.get("EMAIL_DEV_LOG", "false").lower() in {"1", "true", "yes"}
+
+
 # --- AI assistant (any OpenAI-compatible endpoint; OpenRouter by default) ---------------------
 
 DEFAULT_LLM_BASE_URL = "https://openrouter.ai/api/v1"

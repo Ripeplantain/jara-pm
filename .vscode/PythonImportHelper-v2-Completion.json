@@ -4082,6 +4082,14 @@
         "documentation": {}
     },
     {
+        "label": "email",
+        "importPath": "app.services",
+        "description": "app.services",
+        "isExtraImport": true,
+        "detail": "app.services",
+        "documentation": {}
+    },
+    {
         "label": "auth",
         "importPath": "app.services",
         "description": "app.services",
@@ -14718,7 +14726,16 @@
         "kind": 6,
         "importPath": "backend.app.services.email",
         "description": "backend.app.services.email",
-        "peekOfCode": "class DisabledEmailSender:\n    \"\"\"Local/test sink. It intentionally does not expose lifecycle tokens in responses or logs.\"\"\"\n    def send(self, *, to: str, subject: str, html: str, text: str) -> None:\n        return None\ndef get_email_sender() -> EmailSender:\n    key = config.resend_api_key()\n    sender = config.resend_from_email()\n    if not key or not sender:\n        return DisabledEmailSender()\n    return ResendEmailSender(key, sender, config.resend_reply_to())",
+        "peekOfCode": "class DisabledEmailSender:\n    \"\"\"Local/test sink. It intentionally does not expose lifecycle tokens in responses or logs.\"\"\"\n    def send(self, *, to: str, subject: str, html: str, text: str) -> None:\n        return None\n@dataclass\nclass LoggingEmailSender:\n    \"\"\"Development sink that writes the message, link included, to the backend log.\n    Resend only delivers from a verified domain, so no local address can receive a real\n    message until DNS is in place. This keeps the reset, verification and invitation\n    flows completable locally by printing the link the provider would have sent. It",
+        "detail": "backend.app.services.email",
+        "documentation": {}
+    },
+    {
+        "label": "LoggingEmailSender",
+        "kind": 6,
+        "importPath": "backend.app.services.email",
+        "description": "backend.app.services.email",
+        "peekOfCode": "class LoggingEmailSender:\n    \"\"\"Development sink that writes the message, link included, to the backend log.\n    Resend only delivers from a verified domain, so no local address can receive a real\n    message until DNS is in place. This keeps the reset, verification and invitation\n    flows completable locally by printing the link the provider would have sent. It\n    deliberately exposes lifecycle tokens, which is why `get_email_sender` never\n    selects it outside development.\n    \"\"\"\n    def send(self, *, to: str, subject: str, html: str, text: str) -> None:\n        logger.warning(\"dev email sink: to=%s subject=%s | %s\", to, subject, text)",
         "detail": "backend.app.services.email",
         "documentation": {}
     },
@@ -14727,7 +14744,7 @@
         "kind": 2,
         "importPath": "backend.app.services.email",
         "description": "backend.app.services.email",
-        "peekOfCode": "def get_email_sender() -> EmailSender:\n    key = config.resend_api_key()\n    sender = config.resend_from_email()\n    if not key or not sender:\n        return DisabledEmailSender()\n    return ResendEmailSender(key, sender, config.resend_reply_to())\ndef send_verification(email: str, token: str) -> None:\n    url = f\"{config.app_url()}/verify-email?token={token}\"\n    get_email_sender().send(\n        to=email,",
+        "peekOfCode": "def get_email_sender() -> EmailSender:\n    key = config.resend_api_key()\n    sender = config.resend_from_email()\n    if config.email_dev_log() and config.app_environment() != \"production\":\n        return LoggingEmailSender()\n    if not key or not sender:\n        return DisabledEmailSender()\n    return ResendEmailSender(key, sender, config.resend_reply_to())\ndef send_verification(email: str, token: str) -> None:\n    url = f\"{config.app_url()}/verify-email?token={token}\"",
         "detail": "backend.app.services.email",
         "documentation": {}
     },
@@ -16365,7 +16382,7 @@
         "kind": 2,
         "importPath": "backend.app.config",
         "description": "backend.app.config",
-        "peekOfCode": "def app_url() -> str:\n    return (os.environ.get(\"AUTH_URL\") or os.environ.get(\"FRONTEND_ORIGIN\") or \"http://localhost:3000\").rstrip(\"/\")\ndef resend_api_key() -> str | None:\n    return os.environ.get(\"RESEND_API_KEY\") or None\ndef resend_from_email() -> str | None:\n    return os.environ.get(\"RESEND_FROM_EMAIL\") or None\ndef resend_reply_to() -> str | None:\n    return os.environ.get(\"RESEND_REPLY_TO\") or None\n# --- AI assistant (any OpenAI-compatible endpoint; OpenRouter by default) ---------------------\nDEFAULT_LLM_BASE_URL = \"https://openrouter.ai/api/v1\"",
+        "peekOfCode": "def app_url() -> str:\n    return (os.environ.get(\"AUTH_URL\") or os.environ.get(\"FRONTEND_ORIGIN\") or \"http://localhost:3000\").rstrip(\"/\")\ndef resend_api_key() -> str | None:\n    return os.environ.get(\"RESEND_API_KEY\") or None\ndef resend_from_email() -> str | None:\n    return os.environ.get(\"RESEND_FROM_EMAIL\") or None\ndef resend_reply_to() -> str | None:\n    return os.environ.get(\"RESEND_REPLY_TO\") or None\ndef email_dev_log() -> bool:\n    \"\"\"Write transactional messages to the backend log instead of calling the provider.",
         "detail": "backend.app.config",
         "documentation": {}
     },
@@ -16374,7 +16391,7 @@
         "kind": 2,
         "importPath": "backend.app.config",
         "description": "backend.app.config",
-        "peekOfCode": "def resend_api_key() -> str | None:\n    return os.environ.get(\"RESEND_API_KEY\") or None\ndef resend_from_email() -> str | None:\n    return os.environ.get(\"RESEND_FROM_EMAIL\") or None\ndef resend_reply_to() -> str | None:\n    return os.environ.get(\"RESEND_REPLY_TO\") or None\n# --- AI assistant (any OpenAI-compatible endpoint; OpenRouter by default) ---------------------\nDEFAULT_LLM_BASE_URL = \"https://openrouter.ai/api/v1\"\nDEFAULT_LLM_MODEL = \"nvidia/nemotron-3-super-120b-a12b:free\"\nAI_MAX_TOOL_ITERATIONS = 8",
+        "peekOfCode": "def resend_api_key() -> str | None:\n    return os.environ.get(\"RESEND_API_KEY\") or None\ndef resend_from_email() -> str | None:\n    return os.environ.get(\"RESEND_FROM_EMAIL\") or None\ndef resend_reply_to() -> str | None:\n    return os.environ.get(\"RESEND_REPLY_TO\") or None\ndef email_dev_log() -> bool:\n    \"\"\"Write transactional messages to the backend log instead of calling the provider.\n    The message carries its own verification, reset or invitation link, so this is a local\n    development aid only; `services/email.py` refuses it outside development.",
         "detail": "backend.app.config",
         "documentation": {}
     },
@@ -16383,7 +16400,7 @@
         "kind": 2,
         "importPath": "backend.app.config",
         "description": "backend.app.config",
-        "peekOfCode": "def resend_from_email() -> str | None:\n    return os.environ.get(\"RESEND_FROM_EMAIL\") or None\ndef resend_reply_to() -> str | None:\n    return os.environ.get(\"RESEND_REPLY_TO\") or None\n# --- AI assistant (any OpenAI-compatible endpoint; OpenRouter by default) ---------------------\nDEFAULT_LLM_BASE_URL = \"https://openrouter.ai/api/v1\"\nDEFAULT_LLM_MODEL = \"nvidia/nemotron-3-super-120b-a12b:free\"\nAI_MAX_TOOL_ITERATIONS = 8\nAI_MAX_DRAFT_ITERATIONS = 3\ndef ai_monthly_action_limit() -> int:",
+        "peekOfCode": "def resend_from_email() -> str | None:\n    return os.environ.get(\"RESEND_FROM_EMAIL\") or None\ndef resend_reply_to() -> str | None:\n    return os.environ.get(\"RESEND_REPLY_TO\") or None\ndef email_dev_log() -> bool:\n    \"\"\"Write transactional messages to the backend log instead of calling the provider.\n    The message carries its own verification, reset or invitation link, so this is a local\n    development aid only; `services/email.py` refuses it outside development.\n    \"\"\"\n    return os.environ.get(\"EMAIL_DEV_LOG\", \"false\").lower() in {\"1\", \"true\", \"yes\"}",
         "detail": "backend.app.config",
         "documentation": {}
     },
@@ -16392,7 +16409,16 @@
         "kind": 2,
         "importPath": "backend.app.config",
         "description": "backend.app.config",
-        "peekOfCode": "def resend_reply_to() -> str | None:\n    return os.environ.get(\"RESEND_REPLY_TO\") or None\n# --- AI assistant (any OpenAI-compatible endpoint; OpenRouter by default) ---------------------\nDEFAULT_LLM_BASE_URL = \"https://openrouter.ai/api/v1\"\nDEFAULT_LLM_MODEL = \"nvidia/nemotron-3-super-120b-a12b:free\"\nAI_MAX_TOOL_ITERATIONS = 8\nAI_MAX_DRAFT_ITERATIONS = 3\ndef ai_monthly_action_limit() -> int:\n    return max(1, int(os.environ.get(\"AI_MONTHLY_ACTION_LIMIT\", \"500\")))\ndef llm_api_key() -> str | None:",
+        "peekOfCode": "def resend_reply_to() -> str | None:\n    return os.environ.get(\"RESEND_REPLY_TO\") or None\ndef email_dev_log() -> bool:\n    \"\"\"Write transactional messages to the backend log instead of calling the provider.\n    The message carries its own verification, reset or invitation link, so this is a local\n    development aid only; `services/email.py` refuses it outside development.\n    \"\"\"\n    return os.environ.get(\"EMAIL_DEV_LOG\", \"false\").lower() in {\"1\", \"true\", \"yes\"}\n# --- AI assistant (any OpenAI-compatible endpoint; OpenRouter by default) ---------------------\nDEFAULT_LLM_BASE_URL = \"https://openrouter.ai/api/v1\"",
+        "detail": "backend.app.config",
+        "documentation": {}
+    },
+    {
+        "label": "email_dev_log",
+        "kind": 2,
+        "importPath": "backend.app.config",
+        "description": "backend.app.config",
+        "peekOfCode": "def email_dev_log() -> bool:\n    \"\"\"Write transactional messages to the backend log instead of calling the provider.\n    The message carries its own verification, reset or invitation link, so this is a local\n    development aid only; `services/email.py` refuses it outside development.\n    \"\"\"\n    return os.environ.get(\"EMAIL_DEV_LOG\", \"false\").lower() in {\"1\", \"true\", \"yes\"}\n# --- AI assistant (any OpenAI-compatible endpoint; OpenRouter by default) ---------------------\nDEFAULT_LLM_BASE_URL = \"https://openrouter.ai/api/v1\"\nDEFAULT_LLM_MODEL = \"nvidia/nemotron-3-super-120b-a12b:free\"\nAI_MAX_TOOL_ITERATIONS = 8",
         "detail": "backend.app.config",
         "documentation": {}
     },
@@ -18931,6 +18957,24 @@
         "importPath": "backend.tests.test_auth",
         "description": "backend.tests.test_auth",
         "peekOfCode": "def test_account_lifecycle_migration_preserves_child_rows(client):\n    client.post(\"/api/auth/register\", json=CREDS)\n    with session_for() as db:\n        user = db.scalar(sa.select(User).where(User.email == CREDS[\"email\"]))\n        membership = db.scalar(\n            sa.select(WorkspaceMember).where(WorkspaceMember.user_id == user.id)\n        )\n        board = Board(\n            workspace_id=membership.workspace_id,\n            created_by_id=user.id,",
+        "detail": "backend.tests.test_auth",
+        "documentation": {}
+    },
+    {
+        "label": "test_dev_email_sink_logs_links_only_outside_production",
+        "kind": 2,
+        "importPath": "backend.tests.test_auth",
+        "description": "backend.tests.test_auth",
+        "peekOfCode": "def test_dev_email_sink_logs_links_only_outside_production(monkeypatch):\n    \"\"\"The sink prints lifecycle links locally, and is refused when APP_ENV is production.\"\"\"\n    monkeypatch.setenv(\"RESEND_API_KEY\", \"re_test_key\")\n    monkeypatch.setenv(\"RESEND_FROM_EMAIL\", \"noreply@example.com\")\n    monkeypatch.delenv(\"EMAIL_DEV_LOG\", raising=False)\n    monkeypatch.setenv(\"APP_ENV\", \"development\")\n    assert isinstance(email_service.get_email_sender(), email_service.ResendEmailSender)\n    monkeypatch.setenv(\"EMAIL_DEV_LOG\", \"true\")\n    assert isinstance(email_service.get_email_sender(), email_service.LoggingEmailSender)\n    monkeypatch.setenv(\"APP_ENV\", \"production\")",
+        "detail": "backend.tests.test_auth",
+        "documentation": {}
+    },
+    {
+        "label": "test_dev_email_sink_writes_the_reset_link",
+        "kind": 2,
+        "importPath": "backend.tests.test_auth",
+        "description": "backend.tests.test_auth",
+        "peekOfCode": "def test_dev_email_sink_writes_the_reset_link(monkeypatch, caplog):\n    monkeypatch.setenv(\"EMAIL_DEV_LOG\", \"true\")\n    monkeypatch.setenv(\"APP_ENV\", \"development\")\n    monkeypatch.setenv(\"AUTH_URL\", \"http://localhost:3000\")\n    with caplog.at_level(logging.WARNING, logger=\"app.services.email\"):\n        email_service.send_password_reset(\"a@example.com\", \"token-abc\")\n    assert \"http://localhost:3000/reset-password?token=token-abc\" in caplog.text",
         "detail": "backend.tests.test_auth",
         "documentation": {}
     },

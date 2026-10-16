@@ -81,6 +81,7 @@ Fill in `.env`:
 | `RESEND_API_KEY` | Optional during the beta until email flows are enabled; server-side Resend API key |
 | `RESEND_FROM_EMAIL` | Verified Resend sender, for example `Kobi <updates@example.com>` |
 | `RESEND_REPLY_TO` | Optional Reply-To address for transactional messages |
+| `EMAIL_DEV_LOG` | Development only: log verification/reset/invite links instead of sending them. Ignored when `APP_ENV=production` |
 | `DATABASE_PATH`, `FRONTEND_ORIGIN`, `AUTH_URL`, `BACKEND_INTERNAL_URL` | Defaults in `.env.example` work locally |
 
 `.env` is gitignored. Never commit it.
