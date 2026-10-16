@@ -20,6 +20,10 @@ services:
       RESEND_FROM_EMAIL: ${RESEND_FROM_EMAIL:-}
       RESEND_REPLY_TO: ${RESEND_REPLY_TO:-}
       AI_MONTHLY_ACTION_LIMIT: ${AI_MONTHLY_ACTION_LIMIT:-500}
+      POSTHOG_PROJECT_TOKEN: ${POSTHOG_PROJECT_TOKEN:-}
+      POSTHOG_HOST: ${POSTHOG_HOST:-}
+      APP_ENV: ${APP_ENV:-production}
+      APP_RELEASE: ${APP_RELEASE:-}
     volumes: !override
       - db-data:/data
     # Only the frontend server calls the backend (over the compose network): don't publish it.
@@ -29,12 +33,21 @@ services:
   frontend:
     build:
       target: prod
+      # Baked into the client bundle at build time, so changing one needs a rebuild.
+      args:
+        NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN: ${NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN:-}
+        NEXT_PUBLIC_POSTHOG_HOST: ${NEXT_PUBLIC_POSTHOG_HOST:-}
+        NEXT_PUBLIC_POSTHOG_SESSION_REPLAY: ${NEXT_PUBLIC_POSTHOG_SESSION_REPLAY:-false}
     image: jara-pm-frontend:prod
     env_file: !reset []
     environment:
       AUTH_SECRET: ${AUTH_SECRET:?set AUTH_SECRET in .env}
       NEXTAUTH_URL: ${AUTH_URL:-http://localhost:3000}
       BACKEND_INTERNAL_URL: ${BACKEND_INTERNAL_URL:-http://backend:8000}
+      # The Next server reports its own render errors (instrumentation.ts).
+      NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN: ${NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN:-}
+      NEXT_PUBLIC_POSTHOG_HOST: ${NEXT_PUBLIC_POSTHOG_HOST:-}
+      APP_ENV: ${APP_ENV:-production}
     ports: !override
       - "127.0.0.1:3000:3000"
     volumes: !reset []

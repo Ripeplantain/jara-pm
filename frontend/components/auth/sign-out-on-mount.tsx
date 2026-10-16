@@ -1,13 +1,13 @@
 "use client";
 
-import { signOut } from "next-auth/react";
 import { useEffect } from "react";
 import { Skeleton } from "@/components/shell/skeleton";
+import { signOutAndReset } from "@/lib/sign-out";
 
 /** Clears a session the backend no longer accepts, then goes to sign-in. */
 export function SignOutOnMount() {
   useEffect(() => {
-    void signOut({ callbackUrl: "/signin" });
+    void signOutAndReset({ callbackUrl: "/signin" });
   }, []);
   return (
     <main className="simple-state">

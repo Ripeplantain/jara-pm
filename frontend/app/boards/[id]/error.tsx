@@ -1,6 +1,9 @@
 "use client";
 
-export default function BoardError({ reset }: { error: Error; reset: () => void }) {
+import { useReportedError } from "@/components/analytics/use-reported-error";
+
+export default function BoardError({ error, reset }: { error: Error; reset: () => void }) {
+  useReportedError(error, "boards/[id]");
   return (
     <main className="simple-state">
       <h1>Couldn’t load this board</h1>

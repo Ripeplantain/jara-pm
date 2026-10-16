@@ -146,6 +146,22 @@
         "documentation": {}
     },
     {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "field",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
         "label": "Any",
         "importPath": "typing",
         "description": "typing",
@@ -482,6 +498,22 @@
         "documentation": {}
     },
     {
+        "label": "Any",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Protocol",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
         "label": "Session",
         "importPath": "sqlalchemy.orm",
         "description": "sqlalchemy.orm",
@@ -1067,6 +1099,14 @@
     },
     {
         "label": "selectinload",
+        "importPath": "sqlalchemy.orm",
+        "description": "sqlalchemy.orm",
+        "isExtraImport": true,
+        "detail": "sqlalchemy.orm",
+        "documentation": {}
+    },
+    {
+        "label": "Session",
         "importPath": "sqlalchemy.orm",
         "description": "sqlalchemy.orm",
         "isExtraImport": true,
@@ -3722,6 +3762,14 @@
         "documentation": {}
     },
     {
+        "label": "posthog_client",
+        "importPath": "app.services",
+        "description": "app.services",
+        "isExtraImport": true,
+        "detail": "app.services",
+        "documentation": {}
+    },
+    {
         "label": "workspaces",
         "importPath": "app.services",
         "description": "app.services",
@@ -3882,6 +3930,14 @@
         "documentation": {}
     },
     {
+        "label": "posthog_client",
+        "importPath": "app.services",
+        "description": "app.services",
+        "isExtraImport": true,
+        "detail": "app.services",
+        "documentation": {}
+    },
+    {
         "label": "permissions",
         "importPath": "app.services",
         "description": "app.services",
@@ -3939,6 +3995,14 @@
     },
     {
         "label": "errors",
+        "importPath": "app.services",
+        "description": "app.services",
+        "isExtraImport": true,
+        "detail": "app.services",
+        "documentation": {}
+    },
+    {
+        "label": "posthog_client",
         "importPath": "app.services",
         "description": "app.services",
         "isExtraImport": true,
@@ -4075,6 +4139,14 @@
     },
     {
         "label": "permissions",
+        "importPath": "app.services",
+        "description": "app.services",
+        "isExtraImport": true,
+        "detail": "app.services",
+        "documentation": {}
+    },
+    {
+        "label": "posthog_client",
         "importPath": "app.services",
         "description": "app.services",
         "isExtraImport": true,
@@ -5026,6 +5098,22 @@
         "documentation": {}
     },
     {
+        "label": "config",
+        "importPath": "app",
+        "description": "app",
+        "isExtraImport": true,
+        "detail": "app",
+        "documentation": {}
+    },
+    {
+        "label": "config",
+        "importPath": "app",
+        "description": "app",
+        "isExtraImport": true,
+        "detail": "app",
+        "documentation": {}
+    },
+    {
         "label": "models",
         "importPath": "app",
         "description": "app",
@@ -5043,6 +5131,14 @@
     },
     {
         "label": "Iterator",
+        "importPath": "collections.abc",
+        "description": "collections.abc",
+        "isExtraImport": true,
+        "detail": "collections.abc",
+        "documentation": {}
+    },
+    {
+        "label": "AsyncIterator",
         "importPath": "collections.abc",
         "description": "collections.abc",
         "isExtraImport": true,
@@ -6276,6 +6372,14 @@
     },
     {
         "label": "select",
+        "importPath": "sqlalchemy",
+        "description": "sqlalchemy",
+        "isExtraImport": true,
+        "detail": "sqlalchemy",
+        "documentation": {}
+    },
+    {
+        "label": "event",
         "importPath": "sqlalchemy",
         "description": "sqlalchemy",
         "isExtraImport": true,
@@ -8366,6 +8470,22 @@
         "documentation": {}
     },
     {
+        "label": "metrics",
+        "importPath": "app.services.metrics",
+        "description": "app.services.metrics",
+        "isExtraImport": true,
+        "detail": "app.services.metrics",
+        "documentation": {}
+    },
+    {
+        "label": "metrics",
+        "importPath": "app.services.metrics",
+        "description": "app.services.metrics",
+        "isExtraImport": true,
+        "detail": "app.services.metrics",
+        "documentation": {}
+    },
+    {
         "label": "snapshot",
         "importPath": "app.services.product_analytics",
         "description": "app.services.product_analytics",
@@ -8640,6 +8760,14 @@
         "documentation": {}
     },
     {
+        "label": "deque",
+        "importPath": "collections",
+        "description": "collections",
+        "isExtraImport": true,
+        "detail": "collections",
+        "documentation": {}
+    },
+    {
         "label": "hashlib",
         "kind": 6,
         "isExtraImport": true,
@@ -8898,6 +9026,22 @@
         "documentation": {}
     },
     {
+        "label": "lru_cache",
+        "importPath": "functools",
+        "description": "functools",
+        "isExtraImport": true,
+        "detail": "functools",
+        "documentation": {}
+    },
+    {
+        "label": "lru_cache",
+        "importPath": "functools",
+        "description": "functools",
+        "isExtraImport": true,
+        "detail": "functools",
+        "documentation": {}
+    },
+    {
         "label": "default_expiry",
         "importPath": "app.models.invite",
         "description": "app.models.invite",
@@ -8914,20 +9058,28 @@
         "documentation": {}
     },
     {
-        "label": "lru_cache",
-        "importPath": "functools",
-        "description": "functools",
-        "isExtraImport": true,
-        "detail": "functools",
-        "documentation": {}
-    },
-    {
         "label": "uuid",
         "kind": 6,
         "isExtraImport": true,
         "importPath": "uuid",
         "description": "uuid",
         "detail": "uuid",
+        "documentation": {}
+    },
+    {
+        "label": "asynccontextmanager",
+        "importPath": "contextlib",
+        "description": "contextlib",
+        "isExtraImport": true,
+        "detail": "contextlib",
+        "documentation": {}
+    },
+    {
+        "label": "contextmanager",
+        "importPath": "contextlib",
+        "description": "contextlib",
+        "isExtraImport": true,
+        "detail": "contextlib",
         "documentation": {}
     },
     {
@@ -9080,6 +9232,30 @@
         "description": "app.services.abuse",
         "isExtraImport": true,
         "detail": "app.services.abuse",
+        "documentation": {}
+    },
+    {
+        "label": "capture_exception",
+        "importPath": "app.services.posthog_client",
+        "description": "app.services.posthog_client",
+        "isExtraImport": true,
+        "detail": "app.services.posthog_client",
+        "documentation": {}
+    },
+    {
+        "label": "DisabledSink",
+        "importPath": "app.services.posthog_client",
+        "description": "app.services.posthog_client",
+        "isExtraImport": true,
+        "detail": "app.services.posthog_client",
+        "documentation": {}
+    },
+    {
+        "label": "PostHogSink",
+        "importPath": "app.services.posthog_client",
+        "description": "app.services.posthog_client",
+        "isExtraImport": true,
+        "detail": "app.services.posthog_client",
         "documentation": {}
     },
     {
@@ -9300,14 +9476,6 @@
         "documentation": {}
     },
     {
-        "label": "contextmanager",
-        "importPath": "contextlib",
-        "description": "contextlib",
-        "isExtraImport": true,
-        "detail": "contextlib",
-        "documentation": {}
-    },
-    {
         "label": "pytest",
         "kind": 6,
         "isExtraImport": true,
@@ -9430,6 +9598,14 @@
     },
     {
         "label": "TEST_JWT_SECRET",
+        "importPath": "tests.conftest",
+        "description": "tests.conftest",
+        "isExtraImport": true,
+        "detail": "tests.conftest",
+        "documentation": {}
+    },
+    {
+        "label": "session_for",
         "importPath": "tests.conftest",
         "description": "tests.conftest",
         "isExtraImport": true,
@@ -12247,7 +12423,7 @@
         "kind": 2,
         "importPath": "backend.app.routers.workspaces",
         "description": "backend.app.routers.workspaces",
-        "peekOfCode": "def workspace_ai(workspace_id: int, body: WorkspaceAiRequest, user: CurrentUser, db: DbSession):\n    ai_usage.reserve(db, user, workspace_id)\n    from time import monotonic\n    started = monotonic()\n    try:\n        result = ai_briefing.answer_workspace_question(db, user, workspace_id, body.question)\n    except Exception:\n        ai_usage.record_completion(db, workspace_id, started, 0, error=True)\n        raise\n    ai_usage.record_completion(db, workspace_id, started, 0)",
+        "peekOfCode": "def workspace_ai(workspace_id: int, body: WorkspaceAiRequest, user: CurrentUser, db: DbSession):\n    ai_usage.reserve(db, user, workspace_id)\n    from time import monotonic\n    started = monotonic()\n    try:\n        result = ai_briefing.answer_workspace_question(db, user, workspace_id, body.question)\n    except Exception:\n        ai_usage.record_completion(db, workspace_id, started, 0, error=True, user=user)\n        raise\n    ai_usage.record_completion(db, workspace_id, started, 0, user=user)",
         "detail": "backend.app.routers.workspaces",
         "documentation": {}
     },
@@ -13057,7 +13233,7 @@
         "kind": 6,
         "importPath": "backend.app.schemas.health",
         "description": "backend.app.schemas.health",
-        "peekOfCode": "class HealthResponse(BaseModel):\n    status: Literal[\"ok\"]\nclass MetricsResponse(BaseModel):\n    requests: int\n    request_errors: int\n    auth_failures: int\n    rate_limited: int\n    email_failures: int\n    avg_duration_ms: float\n    weekly_active_workspaces: int",
+        "peekOfCode": "class HealthResponse(BaseModel):\n    status: Literal[\"ok\"]\nclass MetricsResponse(BaseModel):\n    requests: int\n    request_errors: int\n    auth_failures: int\n    rate_limited: int\n    email_failures: int\n    analytics_failures: int\n    avg_duration_ms: float",
         "detail": "backend.app.schemas.health",
         "documentation": {}
     },
@@ -13066,7 +13242,7 @@
         "kind": 6,
         "importPath": "backend.app.schemas.health",
         "description": "backend.app.schemas.health",
-        "peekOfCode": "class MetricsResponse(BaseModel):\n    requests: int\n    request_errors: int\n    auth_failures: int\n    rate_limited: int\n    email_failures: int\n    avg_duration_ms: float\n    weekly_active_workspaces: int\n    onboarding_completed: int\n    board_created: int",
+        "peekOfCode": "class MetricsResponse(BaseModel):\n    requests: int\n    request_errors: int\n    auth_failures: int\n    rate_limited: int\n    email_failures: int\n    analytics_failures: int\n    avg_duration_ms: float\n    weekly_active_workspaces: int\n    onboarding_completed: int",
         "detail": "backend.app.schemas.health",
         "documentation": {}
     },
@@ -13966,7 +14142,7 @@
         "kind": 2,
         "importPath": "backend.app.services.ai_usage",
         "description": "backend.app.services.ai_usage",
-        "peekOfCode": "def record_completion(\n    db: Session,\n    workspace_id: int,\n    started: float,\n    provider_calls: int,\n    error: bool = False,\n) -> None:\n    row = _row(db, workspace_id)\n    row.provider_calls += provider_calls\n    row.latency_ms_total += (monotonic() - started) * 1000",
+        "peekOfCode": "def record_completion(\n    db: Session,\n    workspace_id: int,\n    started: float,\n    provider_calls: int,\n    error: bool = False,\n    *,\n    user: User | None = None,\n) -> None:\n    \"\"\"`user` is optional only so the counters still work without one; pass it where it is",
         "detail": "backend.app.services.ai_usage",
         "documentation": {}
     },
@@ -14056,7 +14232,7 @@
         "kind": 2,
         "importPath": "backend.app.services.auth",
         "description": "backend.app.services.auth",
-        "peekOfCode": "def authenticate(db: Session, email: str, password: str) -> User | None:\n    \"\"\"Same failure for an unknown email, a wrong password and a deactivated account.\"\"\"\n    user = db.scalar(select(User).where(User.email == email))\n    ok = verify_password(password, user.password_hash if user else None)\n    if not ok or user is None or not user.is_active:\n        return None\n    if not user.email_verified and config.require_email_verification():\n        return None\n    return user\ndef update_profile(",
+        "peekOfCode": "def authenticate(db: Session, email: str, password: str) -> User | None:\n    \"\"\"Same failure for an unknown email, a wrong password and a deactivated account.\"\"\"\n    user = db.scalar(select(User).where(User.email == email))\n    ok = verify_password(password, user.password_hash if user else None)\n    if not ok or user is None or not user.is_active:\n        return None\n    if not user.email_verified and config.require_email_verification():\n        return None\n    posthog_client.capture_now(\n        \"user_signed_in\", distinct_id=posthog_client.user_distinct_id(user.id)",
         "detail": "backend.app.services.auth",
         "documentation": {}
     },
@@ -15091,7 +15267,7 @@
         "kind": 6,
         "importPath": "backend.app.services.metrics",
         "description": "backend.app.services.metrics",
-        "peekOfCode": "class Metrics:\n    def __init__(self) -> None:\n        self._lock = Lock()\n        self._values = {\n            \"requests\": 0,\n            \"request_errors\": 0,\n            \"auth_failures\": 0,\n            \"rate_limited\": 0,\n            \"email_failures\": 0,\n            \"duration_ms_total\": 0.0,",
+        "peekOfCode": "class Metrics:\n    def __init__(self) -> None:\n        self._lock = Lock()\n        self._values = {\n            \"requests\": 0,\n            \"request_errors\": 0,\n            \"auth_failures\": 0,\n            \"rate_limited\": 0,\n            \"email_failures\": 0,\n            \"analytics_failures\": 0,",
         "detail": "backend.app.services.metrics",
         "documentation": {}
     },
@@ -15588,6 +15764,123 @@
         "description": "backend.app.services.permissions",
         "peekOfCode": "_WHAT_IT_TAKES = {\n    VIEWER: \"read access\",\n    MEMBER: \"a member role\",\n    ADMIN: \"an admin role\",\n    OWNER: \"the workspace owner role\",\n}\n@dataclass(frozen=True)\nclass Access:\n    \"\"\"The answer to \"may this user do this here?\", plus the context the caller needs next.\"\"\"\n    user: User",
         "detail": "backend.app.services.permissions",
+        "documentation": {}
+    },
+    {
+        "label": "AnalyticsSink",
+        "kind": 6,
+        "importPath": "backend.app.services.posthog_client",
+        "description": "backend.app.services.posthog_client",
+        "peekOfCode": "class AnalyticsSink(Protocol):\n    def capture(self, event_name: str, *, distinct_id: str, properties: dict[str, Any]) -> None: ...\n    def capture_exception(self, exc: BaseException, *, properties: dict[str, Any]) -> None: ...\n    def shutdown(self) -> None: ...\n@dataclass\nclass PostHogSink:\n    \"\"\"The only production adapter. It holds one client for the whole process: the SDK batches\n    on a background thread, so building a client per call would leak threads.\"\"\"\n    client: Any\n    def capture(self, event_name: str, *, distinct_id: str, properties: dict[str, Any]) -> None:",
+        "detail": "backend.app.services.posthog_client",
+        "documentation": {}
+    },
+    {
+        "label": "PostHogSink",
+        "kind": 6,
+        "importPath": "backend.app.services.posthog_client",
+        "description": "backend.app.services.posthog_client",
+        "peekOfCode": "class PostHogSink:\n    \"\"\"The only production adapter. It holds one client for the whole process: the SDK batches\n    on a background thread, so building a client per call would leak threads.\"\"\"\n    client: Any\n    def capture(self, event_name: str, *, distinct_id: str, properties: dict[str, Any]) -> None:\n        try:\n            self.client.capture(event_name, distinct_id=distinct_id, properties=properties)\n        except Exception:\n            metrics.increment(\"analytics_failures\")\n            logger.warning(\"posthog capture failed for %s\", event_name, exc_info=True)",
+        "detail": "backend.app.services.posthog_client",
+        "documentation": {}
+    },
+    {
+        "label": "DisabledSink",
+        "kind": 6,
+        "importPath": "backend.app.services.posthog_client",
+        "description": "backend.app.services.posthog_client",
+        "peekOfCode": "class DisabledSink:\n    \"\"\"Local and test sink, used whenever no project token is configured. It keeps the last few\n    events in memory so `POSTHOG_PROJECT_TOKEN` stays genuinely optional while a developer can\n    still see what would have been sent. Bounded, so it cannot grow into a leak.\"\"\"\n    captured: deque[tuple[str, str, dict[str, Any]]] = field(\n        default_factory=lambda: deque(maxlen=50)\n    )\n    def capture(self, event_name: str, *, distinct_id: str, properties: dict[str, Any]) -> None:\n        self.captured.append((event_name, distinct_id, properties))\n    def capture_exception(self, exc: BaseException, *, properties: dict[str, Any]) -> None:",
+        "detail": "backend.app.services.posthog_client",
+        "documentation": {}
+    },
+    {
+        "label": "user_distinct_id",
+        "kind": 2,
+        "importPath": "backend.app.services.posthog_client",
+        "description": "backend.app.services.posthog_client",
+        "peekOfCode": "def user_distinct_id(user_id: int) -> str:\n    \"\"\"The person key for one account. The frontend builds the same string from the same id,\n    so a server event and a browser event land on one person; changing the shape splits them.\"\"\"\n    return f\"user:{user_id}\"\ndef workspace_distinct_id(workspace_id: int) -> str:\n    \"\"\"For workspace-scoped events with no acting user. Paired with `person=False` so these do\n    not create person profiles for things that are not people.\"\"\"\n    return f\"workspace:{workspace_id}\"\nclass AnalyticsSink(Protocol):\n    def capture(self, event_name: str, *, distinct_id: str, properties: dict[str, Any]) -> None: ...",
+        "detail": "backend.app.services.posthog_client",
+        "documentation": {}
+    },
+    {
+        "label": "workspace_distinct_id",
+        "kind": 2,
+        "importPath": "backend.app.services.posthog_client",
+        "description": "backend.app.services.posthog_client",
+        "peekOfCode": "def workspace_distinct_id(workspace_id: int) -> str:\n    \"\"\"For workspace-scoped events with no acting user. Paired with `person=False` so these do\n    not create person profiles for things that are not people.\"\"\"\n    return f\"workspace:{workspace_id}\"\nclass AnalyticsSink(Protocol):\n    def capture(self, event_name: str, *, distinct_id: str, properties: dict[str, Any]) -> None: ...\n    def capture_exception(self, exc: BaseException, *, properties: dict[str, Any]) -> None: ...\n    def shutdown(self) -> None: ...\n@dataclass\nclass PostHogSink:",
+        "detail": "backend.app.services.posthog_client",
+        "documentation": {}
+    },
+    {
+        "label": "get_sink",
+        "kind": 2,
+        "importPath": "backend.app.services.posthog_client",
+        "description": "backend.app.services.posthog_client",
+        "peekOfCode": "def get_sink() -> AnalyticsSink:\n    \"\"\"One sink per process. Cached because constructing the real client starts a thread.\"\"\"\n    token = config.posthog_project_token()\n    if not token:\n        return DisabledSink()\n    super_properties: dict[str, Any] = {\"environment\": config.app_environment()}\n    release = config.app_release()\n    if release:\n        super_properties[\"$app_version\"] = release\n    try:",
+        "detail": "backend.app.services.posthog_client",
+        "documentation": {}
+    },
+    {
+        "label": "shutdown",
+        "kind": 2,
+        "importPath": "backend.app.services.posthog_client",
+        "description": "backend.app.services.posthog_client",
+        "peekOfCode": "def shutdown() -> None:\n    \"\"\"Flush anything still queued, on application shutdown.\"\"\"\n    get_sink().shutdown()\ndef reset_sink() -> None:\n    \"\"\"Drop the cached sink so a changed environment takes effect. Used by tests.\"\"\"\n    get_sink.cache_clear()\ndef capture(\n    db: Session,\n    event_name: str,\n    *,",
+        "detail": "backend.app.services.posthog_client",
+        "documentation": {}
+    },
+    {
+        "label": "reset_sink",
+        "kind": 2,
+        "importPath": "backend.app.services.posthog_client",
+        "description": "backend.app.services.posthog_client",
+        "peekOfCode": "def reset_sink() -> None:\n    \"\"\"Drop the cached sink so a changed environment takes effect. Used by tests.\"\"\"\n    get_sink.cache_clear()\ndef capture(\n    db: Session,\n    event_name: str,\n    *,\n    distinct_id: str,\n    properties: dict[str, Any] | None = None,\n    person: bool = True,",
+        "detail": "backend.app.services.posthog_client",
+        "documentation": {}
+    },
+    {
+        "label": "capture",
+        "kind": 2,
+        "importPath": "backend.app.services.posthog_client",
+        "description": "backend.app.services.posthog_client",
+        "peekOfCode": "def capture(\n    db: Session,\n    event_name: str,\n    *,\n    distinct_id: str,\n    properties: dict[str, Any] | None = None,\n    person: bool = True,\n) -> None:\n    \"\"\"Queue a product event. It is sent when `db` commits and dropped if `db` rolls back.\"\"\"\n    # The queue only has the rollback guarantee while a transaction is there to carry it: on an",
+        "detail": "backend.app.services.posthog_client",
+        "documentation": {}
+    },
+    {
+        "label": "capture_now",
+        "kind": 2,
+        "importPath": "backend.app.services.posthog_client",
+        "description": "backend.app.services.posthog_client",
+        "peekOfCode": "def capture_now(\n    event_name: str,\n    *,\n    distinct_id: str,\n    properties: dict[str, Any] | None = None,\n) -> None:\n    \"\"\"Send an event that no transaction covers, such as a successful sign-in.\"\"\"\n    get_sink().capture(event_name, distinct_id=distinct_id, properties=dict(properties or {}))\ndef capture_exception(exc: BaseException, *, properties: dict[str, Any] | None = None) -> None:\n    \"\"\"Report an unhandled exception. Sent immediately: the request is already failing.\"\"\"",
+        "detail": "backend.app.services.posthog_client",
+        "documentation": {}
+    },
+    {
+        "label": "capture_exception",
+        "kind": 2,
+        "importPath": "backend.app.services.posthog_client",
+        "description": "backend.app.services.posthog_client",
+        "peekOfCode": "def capture_exception(exc: BaseException, *, properties: dict[str, Any] | None = None) -> None:\n    \"\"\"Report an unhandled exception. Sent immediately: the request is already failing.\"\"\"\n    get_sink().capture_exception(exc, properties=dict(properties or {}))\n@event.listens_for(Session, \"after_commit\")\ndef _send_pending(session: Session) -> None:\n    sink = get_sink()\n    for event_name, distinct_id, properties in session.info.pop(_PENDING, []):\n        sink.capture(event_name, distinct_id=distinct_id, properties=properties)\n@event.listens_for(Session, \"after_soft_rollback\")\ndef _drop_pending(session: Session, _previous_transaction: Any) -> None:",
+        "detail": "backend.app.services.posthog_client",
+        "documentation": {}
+    },
+    {
+        "label": "logger",
+        "kind": 5,
+        "importPath": "backend.app.services.posthog_client",
+        "description": "backend.app.services.posthog_client",
+        "peekOfCode": "logger = logging.getLogger(__name__)\n# Key under which queued events wait on `Session.info` until the session commits.\n_PENDING = \"posthog_pending\"\ndef user_distinct_id(user_id: int) -> str:\n    \"\"\"The person key for one account. The frontend builds the same string from the same id,\n    so a server event and a browser event land on one person; changing the shape splits them.\"\"\"\n    return f\"user:{user_id}\"\ndef workspace_distinct_id(workspace_id: int) -> str:\n    \"\"\"For workspace-scoped events with no acting user. Paired with `person=False` so these do\n    not create person profiles for things that are not people.\"\"\"",
+        "detail": "backend.app.services.posthog_client",
+        "documentation": {}
+    },
+    {
+        "label": "_PENDING",
+        "kind": 5,
+        "importPath": "backend.app.services.posthog_client",
+        "description": "backend.app.services.posthog_client",
+        "peekOfCode": "_PENDING = \"posthog_pending\"\ndef user_distinct_id(user_id: int) -> str:\n    \"\"\"The person key for one account. The frontend builds the same string from the same id,\n    so a server event and a browser event land on one person; changing the shape splits them.\"\"\"\n    return f\"user:{user_id}\"\ndef workspace_distinct_id(workspace_id: int) -> str:\n    \"\"\"For workspace-scoped events with no acting user. Paired with `person=False` so these do\n    not create person profiles for things that are not people.\"\"\"\n    return f\"workspace:{workspace_id}\"\nclass AnalyticsSink(Protocol):",
+        "detail": "backend.app.services.posthog_client",
         "documentation": {}
     },
     {
@@ -16108,7 +16401,7 @@
         "kind": 2,
         "importPath": "backend.app.config",
         "description": "backend.app.config",
-        "peekOfCode": "def ai_monthly_action_limit() -> int:\n    return max(1, int(os.environ.get(\"AI_MONTHLY_ACTION_LIMIT\", \"500\")))\ndef llm_api_key() -> str | None:\n    return os.environ.get(\"LLM_API_KEY\") or None\ndef llm_model() -> str:\n    return os.environ.get(\"LLM_MODEL\") or DEFAULT_LLM_MODEL\ndef llm_base_url() -> str:\n    return os.environ.get(\"LLM_BASE_URL\") or DEFAULT_LLM_BASE_URL",
+        "peekOfCode": "def ai_monthly_action_limit() -> int:\n    return max(1, int(os.environ.get(\"AI_MONTHLY_ACTION_LIMIT\", \"500\")))\ndef llm_api_key() -> str | None:\n    return os.environ.get(\"LLM_API_KEY\") or None\ndef llm_model() -> str:\n    return os.environ.get(\"LLM_MODEL\") or DEFAULT_LLM_MODEL\ndef llm_base_url() -> str:\n    return os.environ.get(\"LLM_BASE_URL\") or DEFAULT_LLM_BASE_URL\n# --- Observability (PostHog) ------------------------------------------------------------------\nDEFAULT_POSTHOG_HOST = \"https://us.i.posthog.com\"",
         "detail": "backend.app.config",
         "documentation": {}
     },
@@ -16117,7 +16410,7 @@
         "kind": 2,
         "importPath": "backend.app.config",
         "description": "backend.app.config",
-        "peekOfCode": "def llm_api_key() -> str | None:\n    return os.environ.get(\"LLM_API_KEY\") or None\ndef llm_model() -> str:\n    return os.environ.get(\"LLM_MODEL\") or DEFAULT_LLM_MODEL\ndef llm_base_url() -> str:\n    return os.environ.get(\"LLM_BASE_URL\") or DEFAULT_LLM_BASE_URL",
+        "peekOfCode": "def llm_api_key() -> str | None:\n    return os.environ.get(\"LLM_API_KEY\") or None\ndef llm_model() -> str:\n    return os.environ.get(\"LLM_MODEL\") or DEFAULT_LLM_MODEL\ndef llm_base_url() -> str:\n    return os.environ.get(\"LLM_BASE_URL\") or DEFAULT_LLM_BASE_URL\n# --- Observability (PostHog) ------------------------------------------------------------------\nDEFAULT_POSTHOG_HOST = \"https://us.i.posthog.com\"\ndef posthog_project_token() -> str | None:\n    \"\"\"The project's write-only ingestion token. A personal API key is never read here.\"\"\"",
         "detail": "backend.app.config",
         "documentation": {}
     },
@@ -16126,7 +16419,7 @@
         "kind": 2,
         "importPath": "backend.app.config",
         "description": "backend.app.config",
-        "peekOfCode": "def llm_model() -> str:\n    return os.environ.get(\"LLM_MODEL\") or DEFAULT_LLM_MODEL\ndef llm_base_url() -> str:\n    return os.environ.get(\"LLM_BASE_URL\") or DEFAULT_LLM_BASE_URL",
+        "peekOfCode": "def llm_model() -> str:\n    return os.environ.get(\"LLM_MODEL\") or DEFAULT_LLM_MODEL\ndef llm_base_url() -> str:\n    return os.environ.get(\"LLM_BASE_URL\") or DEFAULT_LLM_BASE_URL\n# --- Observability (PostHog) ------------------------------------------------------------------\nDEFAULT_POSTHOG_HOST = \"https://us.i.posthog.com\"\ndef posthog_project_token() -> str | None:\n    \"\"\"The project's write-only ingestion token. A personal API key is never read here.\"\"\"\n    return os.environ.get(\"POSTHOG_PROJECT_TOKEN\") or None\ndef posthog_host() -> str:",
         "detail": "backend.app.config",
         "documentation": {}
     },
@@ -16135,7 +16428,43 @@
         "kind": 2,
         "importPath": "backend.app.config",
         "description": "backend.app.config",
-        "peekOfCode": "def llm_base_url() -> str:\n    return os.environ.get(\"LLM_BASE_URL\") or DEFAULT_LLM_BASE_URL",
+        "peekOfCode": "def llm_base_url() -> str:\n    return os.environ.get(\"LLM_BASE_URL\") or DEFAULT_LLM_BASE_URL\n# --- Observability (PostHog) ------------------------------------------------------------------\nDEFAULT_POSTHOG_HOST = \"https://us.i.posthog.com\"\ndef posthog_project_token() -> str | None:\n    \"\"\"The project's write-only ingestion token. A personal API key is never read here.\"\"\"\n    return os.environ.get(\"POSTHOG_PROJECT_TOKEN\") or None\ndef posthog_host() -> str:\n    \"\"\"Region-specific ingestion host; EU and US projects are not interchangeable.\"\"\"\n    return (os.environ.get(\"POSTHOG_HOST\") or DEFAULT_POSTHOG_HOST).rstrip(\"/\")",
+        "detail": "backend.app.config",
+        "documentation": {}
+    },
+    {
+        "label": "posthog_project_token",
+        "kind": 2,
+        "importPath": "backend.app.config",
+        "description": "backend.app.config",
+        "peekOfCode": "def posthog_project_token() -> str | None:\n    \"\"\"The project's write-only ingestion token. A personal API key is never read here.\"\"\"\n    return os.environ.get(\"POSTHOG_PROJECT_TOKEN\") or None\ndef posthog_host() -> str:\n    \"\"\"Region-specific ingestion host; EU and US projects are not interchangeable.\"\"\"\n    return (os.environ.get(\"POSTHOG_HOST\") or DEFAULT_POSTHOG_HOST).rstrip(\"/\")\ndef app_environment() -> str:\n    \"\"\"development, staging or production. Reported with every event and exception.\"\"\"\n    return os.environ.get(\"APP_ENV\") or \"development\"\ndef app_release() -> str | None:",
+        "detail": "backend.app.config",
+        "documentation": {}
+    },
+    {
+        "label": "posthog_host",
+        "kind": 2,
+        "importPath": "backend.app.config",
+        "description": "backend.app.config",
+        "peekOfCode": "def posthog_host() -> str:\n    \"\"\"Region-specific ingestion host; EU and US projects are not interchangeable.\"\"\"\n    return (os.environ.get(\"POSTHOG_HOST\") or DEFAULT_POSTHOG_HOST).rstrip(\"/\")\ndef app_environment() -> str:\n    \"\"\"development, staging or production. Reported with every event and exception.\"\"\"\n    return os.environ.get(\"APP_ENV\") or \"development\"\ndef app_release() -> str | None:\n    \"\"\"Release identifier (a git sha or version), when the deployment supplies one.\"\"\"\n    return os.environ.get(\"APP_RELEASE\") or None",
+        "detail": "backend.app.config",
+        "documentation": {}
+    },
+    {
+        "label": "app_environment",
+        "kind": 2,
+        "importPath": "backend.app.config",
+        "description": "backend.app.config",
+        "peekOfCode": "def app_environment() -> str:\n    \"\"\"development, staging or production. Reported with every event and exception.\"\"\"\n    return os.environ.get(\"APP_ENV\") or \"development\"\ndef app_release() -> str | None:\n    \"\"\"Release identifier (a git sha or version), when the deployment supplies one.\"\"\"\n    return os.environ.get(\"APP_RELEASE\") or None",
+        "detail": "backend.app.config",
+        "documentation": {}
+    },
+    {
+        "label": "app_release",
+        "kind": 2,
+        "importPath": "backend.app.config",
+        "description": "backend.app.config",
+        "peekOfCode": "def app_release() -> str | None:\n    \"\"\"Release identifier (a git sha or version), when the deployment supplies one.\"\"\"\n    return os.environ.get(\"APP_RELEASE\") or None",
         "detail": "backend.app.config",
         "documentation": {}
     },
@@ -16180,7 +16509,16 @@
         "kind": 5,
         "importPath": "backend.app.config",
         "description": "backend.app.config",
-        "peekOfCode": "AI_MAX_DRAFT_ITERATIONS = 3\ndef ai_monthly_action_limit() -> int:\n    return max(1, int(os.environ.get(\"AI_MONTHLY_ACTION_LIMIT\", \"500\")))\ndef llm_api_key() -> str | None:\n    return os.environ.get(\"LLM_API_KEY\") or None\ndef llm_model() -> str:\n    return os.environ.get(\"LLM_MODEL\") or DEFAULT_LLM_MODEL\ndef llm_base_url() -> str:\n    return os.environ.get(\"LLM_BASE_URL\") or DEFAULT_LLM_BASE_URL",
+        "peekOfCode": "AI_MAX_DRAFT_ITERATIONS = 3\ndef ai_monthly_action_limit() -> int:\n    return max(1, int(os.environ.get(\"AI_MONTHLY_ACTION_LIMIT\", \"500\")))\ndef llm_api_key() -> str | None:\n    return os.environ.get(\"LLM_API_KEY\") or None\ndef llm_model() -> str:\n    return os.environ.get(\"LLM_MODEL\") or DEFAULT_LLM_MODEL\ndef llm_base_url() -> str:\n    return os.environ.get(\"LLM_BASE_URL\") or DEFAULT_LLM_BASE_URL\n# --- Observability (PostHog) ------------------------------------------------------------------",
+        "detail": "backend.app.config",
+        "documentation": {}
+    },
+    {
+        "label": "DEFAULT_POSTHOG_HOST",
+        "kind": 5,
+        "importPath": "backend.app.config",
+        "description": "backend.app.config",
+        "peekOfCode": "DEFAULT_POSTHOG_HOST = \"https://us.i.posthog.com\"\ndef posthog_project_token() -> str | None:\n    \"\"\"The project's write-only ingestion token. A personal API key is never read here.\"\"\"\n    return os.environ.get(\"POSTHOG_PROJECT_TOKEN\") or None\ndef posthog_host() -> str:\n    \"\"\"Region-specific ingestion host; EU and US projects are not interchangeable.\"\"\"\n    return (os.environ.get(\"POSTHOG_HOST\") or DEFAULT_POSTHOG_HOST).rstrip(\"/\")\ndef app_environment() -> str:\n    \"\"\"development, staging or production. Reported with every event and exception.\"\"\"\n    return os.environ.get(\"APP_ENV\") or \"development\"",
         "detail": "backend.app.config",
         "documentation": {}
     },
@@ -16225,7 +16563,7 @@
         "kind": 5,
         "importPath": "backend.app.main",
         "description": "backend.app.main",
-        "peekOfCode": "logger = logging.getLogger(\"kobi.http\")\n_INVITE_TOKEN_PATH = re.compile(r\"(/api/auth/invites/)[^/]+\")\nMAX_REQUEST_BYTES = 256 * 1024\napp = FastAPI(title=\"Kobi API\")\ndef _error(status_code: int):\n    def handler(_request: Request, exc: Exception) -> JSONResponse:\n        return JSONResponse({\"detail\": str(exc)}, status_code=status_code)\n    return handler\napp.add_exception_handler(service_errors.NotFound, _error(status.HTTP_404_NOT_FOUND))\napp.add_exception_handler(service_errors.Forbidden, _error(status.HTTP_403_FORBIDDEN))",
+        "peekOfCode": "logger = logging.getLogger(\"kobi.http\")\n_INVITE_TOKEN_PATH = re.compile(r\"(/api/auth/invites/)[^/]+\")\nMAX_REQUEST_BYTES = 256 * 1024\n@asynccontextmanager\nasync def lifespan(_app: FastAPI) -> AsyncIterator[None]:\n    yield\n    # Analytics batch on a background thread, so a stopping container has to flush them.\n    posthog_client.shutdown()\napp = FastAPI(title=\"Kobi API\", lifespan=lifespan)\ndef _error(status_code: int):",
         "detail": "backend.app.main",
         "documentation": {}
     },
@@ -16234,7 +16572,7 @@
         "kind": 5,
         "importPath": "backend.app.main",
         "description": "backend.app.main",
-        "peekOfCode": "_INVITE_TOKEN_PATH = re.compile(r\"(/api/auth/invites/)[^/]+\")\nMAX_REQUEST_BYTES = 256 * 1024\napp = FastAPI(title=\"Kobi API\")\ndef _error(status_code: int):\n    def handler(_request: Request, exc: Exception) -> JSONResponse:\n        return JSONResponse({\"detail\": str(exc)}, status_code=status_code)\n    return handler\napp.add_exception_handler(service_errors.NotFound, _error(status.HTTP_404_NOT_FOUND))\napp.add_exception_handler(service_errors.Forbidden, _error(status.HTTP_403_FORBIDDEN))\napp.add_exception_handler(service_errors.Conflict, _error(status.HTTP_409_CONFLICT))",
+        "peekOfCode": "_INVITE_TOKEN_PATH = re.compile(r\"(/api/auth/invites/)[^/]+\")\nMAX_REQUEST_BYTES = 256 * 1024\n@asynccontextmanager\nasync def lifespan(_app: FastAPI) -> AsyncIterator[None]:\n    yield\n    # Analytics batch on a background thread, so a stopping container has to flush them.\n    posthog_client.shutdown()\napp = FastAPI(title=\"Kobi API\", lifespan=lifespan)\ndef _error(status_code: int):\n    def handler(_request: Request, exc: Exception) -> JSONResponse:",
         "detail": "backend.app.main",
         "documentation": {}
     },
@@ -16243,7 +16581,7 @@
         "kind": 5,
         "importPath": "backend.app.main",
         "description": "backend.app.main",
-        "peekOfCode": "MAX_REQUEST_BYTES = 256 * 1024\napp = FastAPI(title=\"Kobi API\")\ndef _error(status_code: int):\n    def handler(_request: Request, exc: Exception) -> JSONResponse:\n        return JSONResponse({\"detail\": str(exc)}, status_code=status_code)\n    return handler\napp.add_exception_handler(service_errors.NotFound, _error(status.HTTP_404_NOT_FOUND))\napp.add_exception_handler(service_errors.Forbidden, _error(status.HTTP_403_FORBIDDEN))\napp.add_exception_handler(service_errors.Conflict, _error(status.HTTP_409_CONFLICT))\napp.add_exception_handler(service_errors.InvalidRequest, _error(422))",
+        "peekOfCode": "MAX_REQUEST_BYTES = 256 * 1024\n@asynccontextmanager\nasync def lifespan(_app: FastAPI) -> AsyncIterator[None]:\n    yield\n    # Analytics batch on a background thread, so a stopping container has to flush them.\n    posthog_client.shutdown()\napp = FastAPI(title=\"Kobi API\", lifespan=lifespan)\ndef _error(status_code: int):\n    def handler(_request: Request, exc: Exception) -> JSONResponse:\n        return JSONResponse({\"detail\": str(exc)}, status_code=status_code)",
         "detail": "backend.app.main",
         "documentation": {}
     },
@@ -16252,7 +16590,7 @@
         "kind": 5,
         "importPath": "backend.app.main",
         "description": "backend.app.main",
-        "peekOfCode": "app = FastAPI(title=\"Kobi API\")\ndef _error(status_code: int):\n    def handler(_request: Request, exc: Exception) -> JSONResponse:\n        return JSONResponse({\"detail\": str(exc)}, status_code=status_code)\n    return handler\napp.add_exception_handler(service_errors.NotFound, _error(status.HTTP_404_NOT_FOUND))\napp.add_exception_handler(service_errors.Forbidden, _error(status.HTTP_403_FORBIDDEN))\napp.add_exception_handler(service_errors.Conflict, _error(status.HTTP_409_CONFLICT))\napp.add_exception_handler(service_errors.InvalidRequest, _error(422))\napp.add_exception_handler(LLMNotConfigured, _error(503))",
+        "peekOfCode": "app = FastAPI(title=\"Kobi API\", lifespan=lifespan)\ndef _error(status_code: int):\n    def handler(_request: Request, exc: Exception) -> JSONResponse:\n        return JSONResponse({\"detail\": str(exc)}, status_code=status_code)\n    return handler\napp.add_exception_handler(service_errors.NotFound, _error(status.HTTP_404_NOT_FOUND))\napp.add_exception_handler(service_errors.Forbidden, _error(status.HTTP_403_FORBIDDEN))\napp.add_exception_handler(service_errors.Conflict, _error(status.HTTP_409_CONFLICT))\napp.add_exception_handler(service_errors.InvalidRequest, _error(422))\napp.add_exception_handler(LLMNotConfigured, _error(503))",
         "detail": "backend.app.main",
         "documentation": {}
     },
@@ -20988,6 +21326,168 @@
         "description": "backend.tests.test_permissions",
         "peekOfCode": "def test_service_functions_reject_a_viewer_directly(shared, client):\n    \"\"\"The AI calls these functions, not the HTTP layer, so they must refuse on their own.\"\"\"\n    board, _ = shared\n    with session_for() as db:\n        viewer = db.scalar(sa.select(User).where(User.email == \"viewer@example.com\"))\n        with pytest.raises(Forbidden):\n            svc.update_board(db, viewer, board[\"id\"], \"Nope\")\n        with pytest.raises(Forbidden):\n            svc.create_column(db, viewer, board[\"id\"], \"Nope\")\n        with pytest.raises(Forbidden):",
         "detail": "backend.tests.test_permissions",
+        "documentation": {}
+    },
+    {
+        "label": "sink",
+        "kind": 2,
+        "importPath": "backend.tests.test_posthog_analytics",
+        "description": "backend.tests.test_posthog_analytics",
+        "peekOfCode": "def sink(monkeypatch):\n    \"\"\"One recording sink for the duration of a test, in place of the cached one.\"\"\"\n    recorder = DisabledSink()\n    monkeypatch.setattr(posthog_client, \"get_sink\", lambda: recorder)\n    return recorder\ndef names(sink: DisabledSink) -> list[str]:\n    return [event for event, _distinct_id, _properties in sink.captured]\ndef event(sink: DisabledSink, name: str) -> tuple[str, str, dict]:\n    matches = [row for row in sink.captured if row[0] == name]\n    assert matches, f\"{name} not captured; got {names(sink)}\"",
+        "detail": "backend.tests.test_posthog_analytics",
+        "documentation": {}
+    },
+    {
+        "label": "names",
+        "kind": 2,
+        "importPath": "backend.tests.test_posthog_analytics",
+        "description": "backend.tests.test_posthog_analytics",
+        "peekOfCode": "def names(sink: DisabledSink) -> list[str]:\n    return [event for event, _distinct_id, _properties in sink.captured]\ndef event(sink: DisabledSink, name: str) -> tuple[str, str, dict]:\n    matches = [row for row in sink.captured if row[0] == name]\n    assert matches, f\"{name} not captured; got {names(sink)}\"\n    return matches[0]\n# --- the sink is optional -------------------------------------------------------------------\ndef test_no_token_means_no_provider(monkeypatch):\n    \"\"\"The whole integration stays off without configuration, rather than failing.\"\"\"\n    monkeypatch.delenv(\"POSTHOG_PROJECT_TOKEN\", raising=False)",
+        "detail": "backend.tests.test_posthog_analytics",
+        "documentation": {}
+    },
+    {
+        "label": "event",
+        "kind": 2,
+        "importPath": "backend.tests.test_posthog_analytics",
+        "description": "backend.tests.test_posthog_analytics",
+        "peekOfCode": "def event(sink: DisabledSink, name: str) -> tuple[str, str, dict]:\n    matches = [row for row in sink.captured if row[0] == name]\n    assert matches, f\"{name} not captured; got {names(sink)}\"\n    return matches[0]\n# --- the sink is optional -------------------------------------------------------------------\ndef test_no_token_means_no_provider(monkeypatch):\n    \"\"\"The whole integration stays off without configuration, rather than failing.\"\"\"\n    monkeypatch.delenv(\"POSTHOG_PROJECT_TOKEN\", raising=False)\n    posthog_client.reset_sink()\n    assert isinstance(posthog_client.get_sink(), DisabledSink)",
+        "detail": "backend.tests.test_posthog_analytics",
+        "documentation": {}
+    },
+    {
+        "label": "test_no_token_means_no_provider",
+        "kind": 2,
+        "importPath": "backend.tests.test_posthog_analytics",
+        "description": "backend.tests.test_posthog_analytics",
+        "peekOfCode": "def test_no_token_means_no_provider(monkeypatch):\n    \"\"\"The whole integration stays off without configuration, rather than failing.\"\"\"\n    monkeypatch.delenv(\"POSTHOG_PROJECT_TOKEN\", raising=False)\n    posthog_client.reset_sink()\n    assert isinstance(posthog_client.get_sink(), DisabledSink)\n    posthog_client.reset_sink()\ndef test_token_builds_the_real_adapter(monkeypatch):\n    monkeypatch.setenv(\"POSTHOG_PROJECT_TOKEN\", \"phc_test_token\")\n    monkeypatch.setenv(\"POSTHOG_HOST\", \"https://eu.i.posthog.com\")\n    monkeypatch.setenv(\"APP_ENV\", \"staging\")",
+        "detail": "backend.tests.test_posthog_analytics",
+        "documentation": {}
+    },
+    {
+        "label": "test_token_builds_the_real_adapter",
+        "kind": 2,
+        "importPath": "backend.tests.test_posthog_analytics",
+        "description": "backend.tests.test_posthog_analytics",
+        "peekOfCode": "def test_token_builds_the_real_adapter(monkeypatch):\n    monkeypatch.setenv(\"POSTHOG_PROJECT_TOKEN\", \"phc_test_token\")\n    monkeypatch.setenv(\"POSTHOG_HOST\", \"https://eu.i.posthog.com\")\n    monkeypatch.setenv(\"APP_ENV\", \"staging\")\n    monkeypatch.setenv(\"APP_RELEASE\", \"abc123\")\n    posthog_client.reset_sink()\n    built = posthog_client.get_sink()\n    assert isinstance(built, PostHogSink)\n    # The environment rides on every event, so staging is never read as production.\n    assert built.client.super_properties == {\"environment\": \"staging\", \"$app_version\": \"abc123\"}",
+        "detail": "backend.tests.test_posthog_analytics",
+        "documentation": {}
+    },
+    {
+        "label": "test_a_broken_provider_is_counted_not_raised",
+        "kind": 2,
+        "importPath": "backend.tests.test_posthog_analytics",
+        "description": "backend.tests.test_posthog_analytics",
+        "peekOfCode": "def test_a_broken_provider_is_counted_not_raised():\n    \"\"\"A PostHog outage must not fail the request that triggered the event.\"\"\"\n    class Broken:\n        def capture(self, *_args, **_kwargs):\n            raise RuntimeError(\"provider down\")\n        def capture_exception(self, *_args, **_kwargs):\n            raise RuntimeError(\"provider down\")\n    before = metrics.snapshot()[\"analytics_failures\"]\n    sink = PostHogSink(Broken())\n    sink.capture(\"board_created\", distinct_id=\"user:1\", properties={})",
+        "detail": "backend.tests.test_posthog_analytics",
+        "documentation": {}
+    },
+    {
+        "label": "test_events_are_sent_only_when_the_session_commits",
+        "kind": 2,
+        "importPath": "backend.tests.test_posthog_analytics",
+        "description": "backend.tests.test_posthog_analytics",
+        "peekOfCode": "def test_events_are_sent_only_when_the_session_commits(sink):\n    with session_for() as db:\n        posthog_client.capture(db, \"board_created\", distinct_id=\"user:1\")\n        assert names(sink) == [], \"sent before commit\"\n        db.commit()\n    assert names(sink) == [\"board_created\"]\ndef test_a_rolled_back_change_sends_nothing(sink):\n    with session_for() as db:\n        posthog_client.capture(db, \"board_created\", distinct_id=\"user:1\")\n        db.rollback()",
+        "detail": "backend.tests.test_posthog_analytics",
+        "documentation": {}
+    },
+    {
+        "label": "test_a_rolled_back_change_sends_nothing",
+        "kind": 2,
+        "importPath": "backend.tests.test_posthog_analytics",
+        "description": "backend.tests.test_posthog_analytics",
+        "peekOfCode": "def test_a_rolled_back_change_sends_nothing(sink):\n    with session_for() as db:\n        posthog_client.capture(db, \"board_created\", distinct_id=\"user:1\")\n        db.rollback()\n        db.commit()\n    assert names(sink) == []\ndef test_a_second_commit_does_not_resend(sink):\n    with session_for() as db:\n        posthog_client.capture(db, \"board_created\", distinct_id=\"user:1\")\n        db.commit()",
+        "detail": "backend.tests.test_posthog_analytics",
+        "documentation": {}
+    },
+    {
+        "label": "test_a_second_commit_does_not_resend",
+        "kind": 2,
+        "importPath": "backend.tests.test_posthog_analytics",
+        "description": "backend.tests.test_posthog_analytics",
+        "peekOfCode": "def test_a_second_commit_does_not_resend(sink):\n    with session_for() as db:\n        posthog_client.capture(db, \"board_created\", distinct_id=\"user:1\")\n        db.commit()\n        db.commit()\n    assert names(sink) == [\"board_created\"]\ndef test_workspace_scoped_events_create_no_person(sink):\n    with session_for() as db:\n        posthog_client.capture(db, \"ai_used\", distinct_id=\"workspace:7\", person=False)\n        db.commit()",
+        "detail": "backend.tests.test_posthog_analytics",
+        "documentation": {}
+    },
+    {
+        "label": "test_workspace_scoped_events_create_no_person",
+        "kind": 2,
+        "importPath": "backend.tests.test_posthog_analytics",
+        "description": "backend.tests.test_posthog_analytics",
+        "peekOfCode": "def test_workspace_scoped_events_create_no_person(sink):\n    with session_for() as db:\n        posthog_client.capture(db, \"ai_used\", distinct_id=\"workspace:7\", person=False)\n        db.commit()\n    _name, distinct_id, properties = event(sink, \"ai_used\")\n    assert distinct_id == \"workspace:7\"\n    assert properties[\"$process_person_profile\"] is False\n# --- the real flows through the API ---------------------------------------------------------\ndef test_registration_and_sign_in_are_captured(client, sink):\n    client.post(\"/api/auth/register\", json={\"email\": \"new@example.com\", \"password\": \"correct-horse\"})",
+        "detail": "backend.tests.test_posthog_analytics",
+        "documentation": {}
+    },
+    {
+        "label": "test_registration_and_sign_in_are_captured",
+        "kind": 2,
+        "importPath": "backend.tests.test_posthog_analytics",
+        "description": "backend.tests.test_posthog_analytics",
+        "peekOfCode": "def test_registration_and_sign_in_are_captured(client, sink):\n    client.post(\"/api/auth/register\", json={\"email\": \"new@example.com\", \"password\": \"correct-horse\"})\n    assert \"user_registered\" in names(sink)\n    _name, distinct_id, properties = event(sink, \"user_registered\")\n    assert distinct_id.startswith(\"user:\")\n    assert properties == {\"invited\": False}\n    client.post(\"/api/auth/login\", json={\"email\": \"new@example.com\", \"password\": \"correct-horse\"})\n    assert \"user_signed_in\" in names(sink)\ndef test_a_rejected_registration_reports_no_signup(client, sink):\n    body = {\"email\": \"dupe@example.com\", \"password\": \"correct-horse\"}",
+        "detail": "backend.tests.test_posthog_analytics",
+        "documentation": {}
+    },
+    {
+        "label": "test_a_rejected_registration_reports_no_signup",
+        "kind": 2,
+        "importPath": "backend.tests.test_posthog_analytics",
+        "description": "backend.tests.test_posthog_analytics",
+        "peekOfCode": "def test_a_rejected_registration_reports_no_signup(client, sink):\n    body = {\"email\": \"dupe@example.com\", \"password\": \"correct-horse\"}\n    client.post(\"/api/auth/register\", json=body)\n    sink.captured.clear()\n    assert client.post(\"/api/auth/register\", json=body).status_code == 409\n    assert names(sink) == [], \"a conflicting registration still reported a signup\"\ndef test_a_failed_sign_in_reports_nothing(client, register_and_login, sink):\n    register_and_login(\"real@example.com\")\n    sink.captured.clear()\n    assert client.post(",
+        "detail": "backend.tests.test_posthog_analytics",
+        "documentation": {}
+    },
+    {
+        "label": "test_a_failed_sign_in_reports_nothing",
+        "kind": 2,
+        "importPath": "backend.tests.test_posthog_analytics",
+        "description": "backend.tests.test_posthog_analytics",
+        "peekOfCode": "def test_a_failed_sign_in_reports_nothing(client, register_and_login, sink):\n    register_and_login(\"real@example.com\")\n    sink.captured.clear()\n    assert client.post(\n        \"/api/auth/login\", json={\"email\": \"real@example.com\", \"password\": \"wrong\"}\n    ).status_code == 401\n    assert names(sink) == []\ndef test_board_and_card_milestones_are_captured(client, register_and_login, sink):\n    token = register_and_login(\"builder@example.com\")\n    auth = {\"Authorization\": f\"Bearer {token}\"}",
+        "detail": "backend.tests.test_posthog_analytics",
+        "documentation": {}
+    },
+    {
+        "label": "test_board_and_card_milestones_are_captured",
+        "kind": 2,
+        "importPath": "backend.tests.test_posthog_analytics",
+        "description": "backend.tests.test_posthog_analytics",
+        "peekOfCode": "def test_board_and_card_milestones_are_captured(client, register_and_login, sink):\n    token = register_and_login(\"builder@example.com\")\n    auth = {\"Authorization\": f\"Bearer {token}\"}\n    board = client.post(\n        \"/api/boards\", json={\"title\": \"Roadmap\", \"columns\": [\"Todo\"]}, headers=auth\n    ).json()\n    column = board[\"columns\"][0]\n    client.post(f\"/api/columns/{column['id']}/cards\", json={\"title\": \"Ship it\"}, headers=auth)\n    assert \"board_created\" in names(sink)\n    assert \"card_created\" in names(sink)",
+        "detail": "backend.tests.test_posthog_analytics",
+        "documentation": {}
+    },
+    {
+        "label": "test_no_event_property_carries_content_or_credentials",
+        "kind": 2,
+        "importPath": "backend.tests.test_posthog_analytics",
+        "description": "backend.tests.test_posthog_analytics",
+        "peekOfCode": "def test_no_event_property_carries_content_or_credentials(client, register_and_login, sink):\n    \"\"\"Card titles, emails, passwords and tokens must never become event properties.\"\"\"\n    token = register_and_login(\"private@example.com\")\n    auth = {\"Authorization\": f\"Bearer {token}\"}\n    board = client.post(\n        \"/api/boards\", json={\"title\": \"Secret plan\", \"columns\": [\"Todo\"]}, headers=auth\n    ).json()\n    column = board[\"columns\"][0]\n    client.post(\n        f\"/api/columns/{column['id']}/cards\",",
+        "detail": "backend.tests.test_posthog_analytics",
+        "documentation": {}
+    },
+    {
+        "label": "test_an_unhandled_exception_is_reported_with_a_redacted_path",
+        "kind": 2,
+        "importPath": "backend.tests.test_posthog_analytics",
+        "description": "backend.tests.test_posthog_analytics",
+        "peekOfCode": "def test_an_unhandled_exception_is_reported_with_a_redacted_path(client, sink, monkeypatch):\n    from app.routers import health\n    def boom(*_args, **_kwargs):\n        raise RuntimeError(\"database on fire\")\n    monkeypatch.setattr(health.metrics, \"snapshot\", boom)\n    token = client.post(\n        \"/api/auth/register\", json={\"email\": \"oops@example.com\", \"password\": \"correct-horse\"}\n    ) and client.post(\n        \"/api/auth/login\", json={\"email\": \"oops@example.com\", \"password\": \"correct-horse\"}\n    ).json()[\"access_token\"]",
+        "detail": "backend.tests.test_posthog_analytics",
+        "documentation": {}
+    },
+    {
+        "label": "test_an_expected_refusal_is_not_an_exception",
+        "kind": 2,
+        "importPath": "backend.tests.test_posthog_analytics",
+        "description": "backend.tests.test_posthog_analytics",
+        "peekOfCode": "def test_an_expected_refusal_is_not_an_exception(client, register_and_login, sink):\n    \"\"\"A 403 or 404 is the application working, and must not pollute error tracking.\"\"\"\n    token = register_and_login(\"viewer@example.com\")\n    sink.captured.clear()\n    assert client.get(\n        \"/api/boards/99999\", headers={\"Authorization\": f\"Bearer {token}\"}\n    ).status_code == 404\n    assert \"$exception\" not in names(sink)\ndef test_an_invite_token_never_reaches_an_exception_property(sink):\n    \"\"\"The path is redacted the same way the HTTP log is.\"\"\"",
+        "detail": "backend.tests.test_posthog_analytics",
+        "documentation": {}
+    },
+    {
+        "label": "test_an_invite_token_never_reaches_an_exception_property",
+        "kind": 2,
+        "importPath": "backend.tests.test_posthog_analytics",
+        "description": "backend.tests.test_posthog_analytics",
+        "peekOfCode": "def test_an_invite_token_never_reaches_an_exception_property(sink):\n    \"\"\"The path is redacted the same way the HTTP log is.\"\"\"\n    from app.main import _safe_path\n    assert _safe_path(\"/api/auth/invites/secret-token-value\") == \"/api/auth/invites/[redacted]\"",
+        "detail": "backend.tests.test_posthog_analytics",
         "documentation": {}
     },
     {

@@ -58,3 +58,28 @@ def llm_model() -> str:
 
 def llm_base_url() -> str:
     return os.environ.get("LLM_BASE_URL") or DEFAULT_LLM_BASE_URL
+
+
+# --- Observability (PostHog) ------------------------------------------------------------------
+
+DEFAULT_POSTHOG_HOST = "https://us.i.posthog.com"
+
+
+def posthog_project_token() -> str | None:
+    """The project's write-only ingestion token. A personal API key is never read here."""
+    return os.environ.get("POSTHOG_PROJECT_TOKEN") or None
+
+
+def posthog_host() -> str:
+    """Region-specific ingestion host; EU and US projects are not interchangeable."""
+    return (os.environ.get("POSTHOG_HOST") or DEFAULT_POSTHOG_HOST).rstrip("/")
+
+
+def app_environment() -> str:
+    """development, staging or production. Reported with every event and exception."""
+    return os.environ.get("APP_ENV") or "development"
+
+
+def app_release() -> str | None:
+    """Release identifier (a git sha or version), when the deployment supplies one."""
+    return os.environ.get("APP_RELEASE") or None

@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { useReportedError } from "@/components/analytics/use-reported-error";
 
-export default function RouteError({ reset }: { error: Error; reset: () => void }) {
+export default function RouteError({ error, reset }: { error: Error; reset: () => void }) {
+  useReportedError(error, "notes/[id]");
   return (
     <main className="simple-state">
       <h1>Couldn’t open this page</h1>

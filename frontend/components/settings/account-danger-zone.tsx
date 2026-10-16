@@ -1,10 +1,10 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { signOut } from "next-auth/react";
 import { useState } from "react";
-import { api, RequestError } from "@/lib/api/browser";
 import { SkeletonLabel } from "@/components/shell/skeleton";
+import { api, RequestError } from "@/lib/api/browser";
+import { signOutAndReset } from "@/lib/sign-out";
 
 export function AccountDangerZone() {
   const router = useRouter();
@@ -18,7 +18,7 @@ export function AccountDangerZone() {
     setError(null);
     try {
       await api.deleteAccount(password);
-      await signOut({ redirect: false });
+      await signOutAndReset({ redirect: false });
       router.push("/signin");
       router.refresh();
     } catch (err) {

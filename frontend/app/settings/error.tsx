@@ -1,6 +1,9 @@
 "use client";
 
-export default function SettingsError({ reset }: { error: Error; reset: () => void }) {
+import { useReportedError } from "@/components/analytics/use-reported-error";
+
+export default function SettingsError({ error, reset }: { error: Error; reset: () => void }) {
+  useReportedError(error, "settings");
   return (
     <main className="simple-state">
       <h1>Couldn’t load settings</h1>

@@ -243,7 +243,7 @@ def workspace_ai(workspace_id: int, body: WorkspaceAiRequest, user: CurrentUser,
     try:
         result = ai_briefing.answer_workspace_question(db, user, workspace_id, body.question)
     except Exception:
-        ai_usage.record_completion(db, workspace_id, started, 0, error=True)
+        ai_usage.record_completion(db, workspace_id, started, 0, error=True, user=user)
         raise
-    ai_usage.record_completion(db, workspace_id, started, 0)
+    ai_usage.record_completion(db, workspace_id, started, 0, user=user)
     return result

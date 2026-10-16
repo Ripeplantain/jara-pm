@@ -17,7 +17,16 @@ CMD ["npm", "run", "dev", "--", "-H", "0.0.0.0", "-p", "3000"]
 # --- production build ---
 FROM deps AS build
 COPY . .
-ENV NEXT_TELEMETRY_DISABLED=1
+# Next.js inlines NEXT_PUBLIC_* into the client bundle at build time, so these have to be
+# present here rather than at run time. All three are public by design: the PostHog project
+# token is write-only ingestion. Privileged secrets stay runtime-only, as below.
+ARG NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN=""
+ARG NEXT_PUBLIC_POSTHOG_HOST=""
+ARG NEXT_PUBLIC_POSTHOG_SESSION_REPLAY="false"
+ENV NEXT_TELEMETRY_DISABLED=1 \
+    NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN=$NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN \
+    NEXT_PUBLIC_POSTHOG_HOST=$NEXT_PUBLIC_POSTHOG_HOST \
+    NEXT_PUBLIC_POSTHOG_SESSION_REPLAY=$NEXT_PUBLIC_POSTHOG_SESSION_REPLAY
 RUN npm run build
 
 # --- prod (last stage) ---

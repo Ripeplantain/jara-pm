@@ -12,6 +12,7 @@ class Metrics:
             "auth_failures": 0,
             "rate_limited": 0,
             "email_failures": 0,
+            "analytics_failures": 0,
             "duration_ms_total": 0.0,
         }
 

@@ -13,6 +13,7 @@ class MetricsResponse(BaseModel):
     auth_failures: int
     rate_limited: int
     email_failures: int
+    analytics_failures: int
     avg_duration_ms: float
     weekly_active_workspaces: int
     onboarding_completed: int

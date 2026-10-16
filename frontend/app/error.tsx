@@ -1,6 +1,9 @@
 "use client";
 
-export default function RootError({ reset }: { error: Error; reset: () => void }) {
+import { useReportedError } from "@/components/analytics/use-reported-error";
+
+export default function RootError({ error, reset }: { error: Error; reset: () => void }) {
+  useReportedError(error, "root");
   return (
     <main className="simple-state">
       <h1>Something went wrong</h1>

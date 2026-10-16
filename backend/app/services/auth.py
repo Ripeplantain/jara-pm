@@ -12,6 +12,7 @@ from app.auth.passwords import hash_password, verify_password
 from app.models import AccountToken, AccountTokenKind, User
 from app.models.user import AVATAR_COLORS, avatar_color_for, display_name_for
 from app.services import email as email_service
+from app.services import posthog_client
 from app.services import workspaces as workspace_service
 from app.services.errors import Forbidden, InvalidRequest
 
@@ -47,6 +48,12 @@ def register_user(db: Session, email: str, password: str, invite_token: str | No
         # A validated invitation link lets the new account join its open invitations.
         workspace_service.accept_open_invites(db, user, commit=False)
         raw_token = _issue_token(db, user, AccountTokenKind.EMAIL_VERIFICATION)
+        posthog_client.capture(
+            db,
+            "user_registered",
+            distinct_id=posthog_client.user_distinct_id(user.id),
+            properties={"invited": invite_token is not None},
+        )
         db.commit()
     except IntegrityError:
         db.rollback()
@@ -63,6 +70,9 @@ def authenticate(db: Session, email: str, password: str) -> User | None:
         return None
     if not user.email_verified and config.require_email_verification():
         return None
+    posthog_client.capture_now(
+        "user_signed_in", distinct_id=posthog_client.user_distinct_id(user.id)
+    )
     return user
 
 

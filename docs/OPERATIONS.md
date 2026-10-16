@@ -52,8 +52,16 @@ storage. Move to PostgreSQL before adding replicas or materially increasing conc
   backup/restore-check failures.
 
 The authenticated `/api/health/metrics` endpoint exposes redacted process counters for request
-errors, auth failures, rate limits, and latency. Workspace AI usage also records monthly actions,
-provider calls, latency and errors without prompts or generated content.
+errors, auth failures, rate limits, latency, and `analytics_failures` (failed sends to PostHog).
+Workspace AI usage also records monthly actions, provider calls, latency and errors without prompts
+or generated content.
+
+Product analytics and error tracking go to PostHog when `POSTHOG_PROJECT_TOKEN` is set; see
+[POSTHOG.md](POSTHOG.md) for the events, the dashboard and the privacy safeguards. Two operational
+notes: the `NEXT_PUBLIC_POSTHOG_*` values are baked into the frontend image at build time, so
+changing one needs a rebuild rather than a restart; and `POSTHOG_HOST` is region-specific, so an EU
+project paired with the US host silently accepts nothing. A PostHog outage never fails a request —
+sends are wrapped, counted in `analytics_failures` and logged.
 
 Rollback is the previous image pair plus the database backup taken before migration. Do not roll
 back the image across an incompatible migration without first restoring the matching backup.

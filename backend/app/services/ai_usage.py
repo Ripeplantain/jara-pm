@@ -45,13 +45,23 @@ def record_completion(
     started: float,
     provider_calls: int,
     error: bool = False,
+    *,
+    user: User | None = None,
 ) -> None:
+    """`user` is optional only so the counters still work without one; pass it where it is
+    known, so AI usage is attributable to a person in funnels rather than to a workspace."""
     row = _row(db, workspace_id)
     row.provider_calls += provider_calls
     row.latency_ms_total += (monotonic() - started) * 1000
     if error:
         row.errors += 1
-    product_analytics.track(db, "ai_used", workspace_id=workspace_id, properties={"provider_calls": provider_calls})
+    product_analytics.track(
+        db,
+        "ai_used",
+        user=user,
+        workspace_id=workspace_id,
+        properties={"provider_calls": provider_calls},
+    )
     db.commit()
 
 

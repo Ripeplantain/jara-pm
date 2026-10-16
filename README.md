@@ -134,7 +134,11 @@ To back up:
 
 See [docs/OPERATIONS.md](docs/OPERATIONS.md) for the staging/production deployment, backup,
 restore, monitoring and rollback runbook. See [docs/AI_MVP.md](docs/AI_MVP.md) for the AI contract,
-confirmation model and evaluation scenarios.
+confirmation model and evaluation scenarios. See [docs/POSTHOG.md](docs/POSTHOG.md) for the
+analytics and error-tracking integration: the events, the privacy safeguards, and how to add one.
+
+Analytics are optional. With no `POSTHOG_PROJECT_TOKEN` the SDKs never initialise and nothing
+leaves the machine.
 
 ## Checks
 

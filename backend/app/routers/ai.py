@@ -38,9 +38,9 @@ def chat(
     try:
         result = run_assistant(db, user, board_id, body.message, body.history, llm)
     except Exception:
-        ai_usage.record_completion(db, board.workspace_id, started, 0, error=True)
+        ai_usage.record_completion(db, board.workspace_id, started, 0, error=True, user=user)
         raise
-    ai_usage.record_completion(db, board.workspace_id, started, result.llm_calls)
+    ai_usage.record_completion(db, board.workspace_id, started, result.llm_calls, user=user)
     return AiResponse(
         reply=result.reply,
         changes=result.changes,
@@ -64,9 +64,9 @@ def draft(
     try:
         result = draft_cards(db, user, board_id, body.text, llm)
     except Exception:
-        ai_usage.record_completion(db, board.workspace_id, started, 0, error=True)
+        ai_usage.record_completion(db, board.workspace_id, started, 0, error=True, user=user)
         raise
-    ai_usage.record_completion(db, board.workspace_id, started, result.llm_calls)
+    ai_usage.record_completion(db, board.workspace_id, started, result.llm_calls, user=user)
     return CardDraftResponse(drafts=result.drafts, note=result.note)
 
 

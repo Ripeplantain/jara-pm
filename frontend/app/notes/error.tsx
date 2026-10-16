@@ -1,6 +1,9 @@
 "use client";
 
-export default function RouteError({ reset }: { error: Error; reset: () => void }) {
+import { useReportedError } from "@/components/analytics/use-reported-error";
+
+export default function RouteError({ error, reset }: { error: Error; reset: () => void }) {
+  useReportedError(error, "notes");
   return (
     <main className="simple-state">
       <h1>Couldn’t load your notes</h1>

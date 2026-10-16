@@ -17,6 +17,8 @@
     "@iconify/react": "^6.0.2",
     "next": "16.4.0",
     "next-auth": "^4.24.15",
+    "posthog-js": "^1.438.12",
+    "posthog-node": "^5.56.1",
     "react": "19.2.8",
     "react-dom": "19.2.8"
   },

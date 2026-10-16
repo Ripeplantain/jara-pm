@@ -1,6 +1,9 @@
 "use client";
 
-export default function OnboardingError({ reset }: { error: Error; reset: () => void }) {
+import { useReportedError } from "@/components/analytics/use-reported-error";
+
+export default function OnboardingError({ error, reset }: { error: Error; reset: () => void }) {
+  useReportedError(error, "onboarding");
   return (
     <main className="simple-state">
       <h1>Couldn’t prepare onboarding</h1>

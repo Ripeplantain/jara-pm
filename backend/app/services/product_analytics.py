@@ -1,4 +1,11 @@
-"""Minimal product analytics without collecting card text, prompts or email content."""
+"""Minimal product analytics without collecting card text, prompts or email content.
+
+Each event is written twice: a row in `product_events`, which backs the seven-day rollup on
+`GET /api/health/metrics`, and a queued PostHog event, which backs the funnels and retention
+reports. Both happen inside the caller's transaction, so a rolled-back change produces
+neither. `services/posthog_client.py` is the only sink; this is the only funnel through which
+product milestones reach it.
+"""
 
 import json
 from datetime import timedelta
@@ -7,6 +14,7 @@ from sqlalchemy import distinct, func, select
 from sqlalchemy.orm import Session
 
 from app.models import ProductEvent, User
+from app.services import posthog_client
 from app.util.time import now
 
 EVENTS = {
@@ -38,6 +46,19 @@ def track(
             workspace_id=workspace_id,
             properties_json=json.dumps(safe_properties),
         )
+    )
+    # Workspace-scoped events (an AI call behind a budget) have no acting user, so they are sent
+    # personless rather than inventing a person profile for a workspace.
+    posthog_client.capture(
+        db,
+        event_name,
+        distinct_id=(
+            posthog_client.user_distinct_id(user.id)
+            if user
+            else posthog_client.workspace_distinct_id(workspace_id or 0)
+        ),
+        properties={**safe_properties, "workspace_id": workspace_id},
+        person=user is not None,
     )
 
 

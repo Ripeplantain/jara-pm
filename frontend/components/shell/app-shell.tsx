@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PostHogIdentity } from "@/components/analytics/posthog-identity";
 import { AccountMenu } from "@/components/shell/account-menu";
 import { Breadcrumbs } from "@/components/shell/breadcrumbs";
 import { NotificationBell } from "@/components/shell/notification-bell";
@@ -31,6 +32,7 @@ export function AppShell({
 }) {
   return (
     <>
+      <PostHogIdentity userId={user.id} />
       <header className="app-header">
         <a className="skip-link" href="#main-content">
           Skip to main content

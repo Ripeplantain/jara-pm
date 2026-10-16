@@ -3,11 +3,14 @@ import os
 import re
 import time
 import uuid
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
 
+from app import config
 from app.ai.llm import LLMError, LLMNotConfigured
 from app.routers import (
     ai,
@@ -23,14 +26,24 @@ from app.routers import (
     workspaces,
 )
 from app.services import errors as service_errors
+from app.services import posthog_client
 from app.services.abuse import bucket_for, limit_for, rate_limiter
 from app.services.metrics import metrics
+from app.services.posthog_client import capture_exception
 
 logger = logging.getLogger("kobi.http")
 _INVITE_TOKEN_PATH = re.compile(r"(/api/auth/invites/)[^/]+")
 MAX_REQUEST_BYTES = 256 * 1024
 
-app = FastAPI(title="Kobi API")
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
+    yield
+    # Analytics batch on a background thread, so a stopping container has to flush them.
+    posthog_client.shutdown()
+
+
+app = FastAPI(title="Kobi API", lifespan=lifespan)
 
 
 def _error(status_code: int):
@@ -73,7 +86,23 @@ async def protection_middleware(request: Request, call_next) -> Response:
                 headers={"Retry-After": "60"},
             )
         else:
-            response = await call_next(request)
+            try:
+                response = await call_next(request)
+            except Exception as exc:
+                # Only genuinely unhandled exceptions reach here: NotFound, Forbidden, Conflict,
+                # InvalidRequest and the LLM errors are turned into responses further in, by the
+                # handlers registered above, so an expected refusal is never reported as a crash.
+                # Re-raised unchanged, so the response the client sees does not change.
+                capture_exception(
+                    exc,
+                    properties={
+                        "method": request.method,
+                        "path": _safe_path(request.url.path),
+                        "request_id": request_id,
+                        "environment": config.app_environment(),
+                    },
+                )
+                raise
     response.headers["X-Request-ID"] = request_id
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
