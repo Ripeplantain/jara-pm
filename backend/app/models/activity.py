@@ -28,6 +28,10 @@ class Activity(Base):
     actor_id: Mapped[int | None] = mapped_column(
         ForeignKey("users.id", ondelete="SET NULL"), default=None
     )
+    # What the row is about when it is not a board or a card: ("note", 12). Nullable and not a
+    # foreign key, for the same reason `board_id` is not - history outlives its subject.
+    entity_type: Mapped[str | None] = mapped_column(String(20), index=True, default=None)
+    entity_id: Mapped[int | None] = mapped_column(default=None)
     # A stable machine name ("card.moved") plus a sentence already written for a human.
     action: Mapped[str] = mapped_column(String(50))
     summary: Mapped[str] = mapped_column(String(500))

@@ -13,6 +13,9 @@ class NotificationOut(BaseModel):
     body: str
     board_id: int | None
     card_id: int | None
+    # Set instead of board/card when the subject is a page: ("note", 12).
+    entity_type: str | None
+    entity_id: int | None
     actor_id: int | None
     read_at: datetime | None
     created_at: datetime

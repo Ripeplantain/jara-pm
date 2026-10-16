@@ -13,7 +13,7 @@ from pydantic import BaseModel, Field, StringConstraints, ValidationError, model
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models import Board, Card, Column, Priority, User, WorkspaceMember
+from app.models import Board, Card, Column, Note, NoteVisibility, Priority, User, WorkspaceMember
 from app.schemas.ai import AppliedChange, PendingAction
 from app.schemas.boards import (
     MAX_BATCH_CARDS,
@@ -24,11 +24,14 @@ from app.schemas.boards import (
     Description,
     Position,
 )
+from app.schemas.notes import BlockText, BlockType, Indent, NoteTitle
 from app.services import ai_proposals, permissions
 from app.services import analytics as analytics_svc
 from app.services import boards as svc
 from app.services import card_details as detail_svc
 from app.services import labels as label_svc
+from app.services import notes as notes_svc
+from app.services import search as search_svc
 from app.services import sprints as sprint_svc
 from app.services import templates as template_svc
 from app.services.errors import Forbidden
@@ -238,6 +241,46 @@ class BatchCardAuthoringArgs(_Args):
 
 class DraftCardsArgs(_Args):
     cards: list[CardDraft] = Field(min_length=1, max_length=MAX_BATCH_CARDS)
+
+
+# Pages. The model writes blocks, not markdown: a todo it adds can be ticked, and a card it
+# embeds is checked against real state by the service before anything is written.
+
+
+class PageBlockSpec(_Args):
+    type: BlockType = "paragraph"
+    text: BlockText = ""
+    checked: bool = Field(False, description="Only meaningful on a todo block")
+    indent: Indent = Field(0, description="Nesting level, 0 is the left margin")
+    ref_card_id: int | None = Field(None, description="Required on a card_embed block")
+    ref_board_id: int | None = Field(None, description="Required on a board_embed block")
+
+
+MAX_AI_BLOCKS = 100
+
+
+class SearchPagesArgs(_Args):
+    q: Annotated[str, StringConstraints(strip_whitespace=True, min_length=2, max_length=100)]
+
+
+class ReadPageArgs(_Args):
+    note_id: int
+
+
+class CreatePageArgs(_Args):
+    title: NoteTitle
+    parent_id: int | None = Field(None, description="Page id to nest this one under")
+    private: bool = Field(False, description="True for a page only this user can see")
+    blocks: list[PageBlockSpec] = Field(default_factory=list, max_length=MAX_AI_BLOCKS)
+
+
+class AppendPageArgs(_Args):
+    note_id: int
+    blocks: list[PageBlockSpec] = Field(min_length=1, max_length=MAX_AI_BLOCKS)
+
+
+class ArchivePageArgs(_Args):
+    note_id: int
 
 
 class DeleteCardArgs(_Args):
@@ -695,6 +738,96 @@ def _delete_board(ctx: ToolContext, _a: DeleteBoardArgs) -> ToolResult:
     return ToolResult(_awaiting(pending.summary), pending=pending)
 
 
+# --- pages ----------------------------------------------------------------------------------
+#
+# Pages are workspace-scoped while the chat is board-scoped, so the workspace comes from the
+# board the chat is open on. There is no tool to delete a page: archiving is reversible and
+# runs immediately, and nothing here can destroy a page, which is stricter than asking for a
+# confirmation. Someone else's private page is invisible to these tools, because they go
+# through the same service functions - and so the same visibility filter - as the UI.
+
+
+def _page_data(note: Note) -> dict[str, Any]:
+    return {
+        "note_id": note.id,
+        "title": note.title or "Untitled",
+        "visibility": note.visibility,
+        "parent_id": note.parent_id,
+        "blocks": len(note.blocks),
+    }
+
+
+def _new_blocks(specs: list[PageBlockSpec]) -> list[notes_svc.NewBlock]:
+    return [notes_svc.NewBlock(**spec.model_dump()) for spec in specs]
+
+
+def _page_change(ctx: ToolContext, kind: str, note: Note, summary: str) -> AppliedChange:
+    return _change(ctx, kind, summary, note_id=note.id)
+
+
+def _search_pages(ctx: ToolContext, a: SearchPagesArgs) -> ToolResult:
+    found = search_svc.search_notes(ctx.db, ctx.user, ctx.workspace_id(), a.q, limit=10)
+    return ToolResult({"ok": True, "pages": [_page_data(note) for note in found]})
+
+
+def _read_page(ctx: ToolContext, a: ReadPageArgs) -> ToolResult:
+    note = notes_svc.note_for(ctx.db, ctx.user, a.note_id)
+    return ToolResult(
+        {
+            "ok": True,
+            **_page_data(note),
+            "body": [
+                {
+                    "block_id": b.id,
+                    "type": b.type,
+                    "text": b.text,
+                    "checked": b.checked,
+                    "indent": b.indent,
+                }
+                for b in note.blocks
+            ],
+        }
+    )
+
+
+def _create_page(ctx: ToolContext, a: CreatePageArgs) -> ToolResult:
+    note = notes_svc.create_note(
+        ctx.db,
+        ctx.user,
+        ctx.workspace_id(),
+        title=a.title,
+        parent_id=a.parent_id,
+        visibility=NoteVisibility.PRIVATE.value if a.private else None,
+        blocks=_new_blocks(a.blocks),
+    )
+    return ToolResult(
+        {"ok": True, **_page_data(note)},
+        change=_page_change(ctx, "create_page", note, f"Created the page “{note.title or 'Untitled'}”"),
+    )
+
+
+def _append_to_page(ctx: ToolContext, a: AppendPageArgs) -> ToolResult:
+    note = notes_svc.add_blocks(ctx.db, ctx.user, a.note_id, _new_blocks(a.blocks))
+    added = len(a.blocks)
+    return ToolResult(
+        {"ok": True, **_page_data(note)},
+        change=_page_change(
+            ctx,
+            "append_to_page",
+            note,
+            f"Added {added} block{'' if added == 1 else 's'} to “{note.title or 'Untitled'}”",
+        ),
+    )
+
+
+def _archive_page(ctx: ToolContext, a: ArchivePageArgs) -> ToolResult:
+    note = notes_svc.archive_note(ctx.db, ctx.user, a.note_id)
+    return ToolResult(
+        {"ok": True, **_page_data(note)},
+        change=_page_change(ctx, "archive_page", note, f"Archived the page “{note.title or 'Untitled'}”"),
+    )
+
+
 def _awaiting(summary: str) -> dict[str, Any]:
     return {
         "ok": True,
@@ -785,6 +918,28 @@ TOOLS: dict[str, Tool] = {
         ),
         Tool("apply_card_authoring", "Internal confirmed card authoring operation.", CardAuthoringArgs, _apply_card_authoring, False),
         Tool("apply_batch_card_authoring", "Internal confirmed batch operation.", BatchCardAuthoringArgs, _apply_batch_authoring, False),
+        Tool(
+            "search_pages",
+            "Find pages (notes and docs) in this workspace by title or body text.",
+            SearchPagesArgs,
+            _search_pages,
+        ),
+        Tool("read_page", "Read one page's blocks.", ReadPageArgs, _read_page),
+        Tool(
+            "create_page",
+            "Write a NEW page in this workspace: meeting notes, a spec, a retro. Use blocks - "
+            "heading2 for sections, todo for tasks, card_embed to point at a card.",
+            CreatePageArgs,
+            _create_page,
+        ),
+        Tool("append_to_page", "Add blocks to the end of an existing page.", AppendPageArgs, _append_to_page),
+        Tool(
+            "archive_page",
+            "Archive a page: it leaves the page tree but can be restored. There is no way to "
+            "delete a page from here.",
+            ArchivePageArgs,
+            _archive_page,
+        ),
         Tool(
             DRAFT_CARDS,
             "Submit the cards drafted from the user's text for their review. Nothing is created until they approve.",

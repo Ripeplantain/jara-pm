@@ -17,6 +17,7 @@ interface NavLink {
 
 const LINKS: NavLink[] = [
   { href: "/", label: "Boards", icon: "layout-grid", exact: true },
+  { href: "/notes", label: "Notes", icon: "file-text" },
   { href: "/my-work", label: "My work", icon: "circle-check" },
   { href: "/activity", label: "Activity", icon: "history" },
   { href: "/members", label: "Members", icon: "users" },

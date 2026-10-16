@@ -17,6 +17,8 @@ const ALLOWED = new Set([
   "labels",
   "me",
   "my-cards",
+  "note-blocks",
+  "notes",
   "notifications",
   "onboarding",
   "sprints",

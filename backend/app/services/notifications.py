@@ -20,6 +20,8 @@ MENTIONED = "card.mentioned"
 COMPLETED = "card.completed"
 COMMENTED = "card.commented"
 AI_SIGNAL = "ai.signal"
+NOTE_MENTIONED = "note.mentioned"
+NOTE_LINKED = "note.linked"
 
 # @ followed by a name, an email, or a dotted handle. Deliberately conservative.
 MENTION = re.compile(r"@([\w.\-+]+(?:@[\w.\-]+)?)")
@@ -35,6 +37,8 @@ def notify(
     body: str = "",
     board_id: int | None = None,
     card_id: int | None = None,
+    entity_type: str | None = None,
+    entity_id: int | None = None,
 ) -> Notification | None:
     """Add one notification, unless it would tell someone about their own action."""
     if recipient_id is None or (actor is not None and recipient_id == actor.id):
@@ -47,6 +51,8 @@ def notify(
         body=body[:500],
         board_id=board_id,
         card_id=card_id,
+        entity_type=entity_type,
+        entity_id=entity_id,
         actor_id=actor.id if actor else None,
     )
     db.add(entry)

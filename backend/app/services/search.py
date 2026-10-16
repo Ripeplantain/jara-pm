@@ -8,9 +8,9 @@ until the numbers say otherwise.
 from datetime import datetime
 
 from sqlalchemy import or_, select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
-from app.models import Board, Card, CardLabel, Column, Priority, User
+from app.models import Board, Card, CardLabel, Column, Note, NoteBlock, Priority, User
 from app.services import permissions
 from app.services.boards import _my_workspace_ids, board_for
 
@@ -105,3 +105,55 @@ def my_cards(db: Session, user: User, workspace_id: int | None = None) -> list[C
         permissions.require_workspace(db, user, workspace_id)
         stmt = stmt.where(Board.workspace_id == workspace_id)
     return list(db.scalars(stmt))
+
+
+# --- notes ------------------------------------------------------------------------------------
+
+
+def search_notes(db: Session, user: User, workspace_id: int, q: str, limit: int = 50) -> list[Note]:
+    """Pages whose title or body matches, most recently edited first.
+
+    Someone else's private page is not filtered out of the results afterwards - the query never
+    selects it, because it composes `permissions.note_visibility_filter`, the same expression
+    every other note read uses.
+    """
+    permissions.require_workspace(db, user, workspace_id)
+    if not q.strip():
+        return []
+    pattern = _like(q.strip())
+    return list(
+        db.scalars(
+            select(Note)
+            .options(selectinload(Note.blocks))
+            .where(
+                Note.workspace_id == workspace_id,
+                Note.archived_at.is_(None),
+                permissions.note_visibility_filter(user),
+                or_(
+                    Note.title.like(pattern, escape="\\"),
+                    Note.id.in_(
+                        select(NoteBlock.note_id).where(
+                            NoteBlock.text.like(pattern, escape="\\")
+                        )
+                    ),
+                ),
+            )
+            .order_by(Note.updated_at.desc(), Note.id)
+            .limit(min(limit, 200))
+        )
+    )
+
+
+def note_excerpt(note: Note, q: str, width: int = 160) -> str:
+    """A readable window around the first match, so a result row shows why it matched."""
+    term = q.strip().lower()
+    if not term:
+        return ""
+    for text in [note.title, *(block.text for block in note.blocks)]:
+        at = text.lower().find(term)
+        if at < 0:
+            continue
+        start = max(at - width // 3, 0)
+        end = start + width
+        return f"{'…' if start else ''}{text[start:end].strip()}{'…' if end < len(text) else ''}"
+    return ""

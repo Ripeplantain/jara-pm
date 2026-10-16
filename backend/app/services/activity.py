@@ -28,6 +28,20 @@ BOARD_UPDATED = "board.updated"
 BOARD_DELETED = "board.deleted"
 SPRINT_STARTED = "sprint.started"
 SPRINT_COMPLETED = "sprint.completed"
+NOTE_CREATED = "note.created"
+NOTE_UPDATED = "note.updated"
+NOTE_MOVED = "note.moved"
+NOTE_ARCHIVED = "note.archived"
+NOTE_UNARCHIVED = "note.unarchived"
+NOTE_DELETED = "note.deleted"
+
+NOTE = "note"
+"""`entity_type` for a row whose subject is a note rather than a board or a card.
+
+Private notes never reach here at all: the activity feed is readable by every member of the
+workspace and rows are never edited or filtered after the fact, so the only safe way to keep
+a private page private is to write no history for it. `services/notes.py` decides that.
+"""
 
 
 def record(
@@ -38,12 +52,16 @@ def record(
     summary: str,
     board_id: int | None = None,
     card_id: int | None = None,
+    entity_type: str | None = None,
+    entity_id: int | None = None,
 ) -> Activity:
     """Add one row. The caller commits, so history cannot outlive a rolled-back change."""
     entry = Activity(
         workspace_id=workspace_id,
         board_id=board_id,
         card_id=card_id,
+        entity_type=entity_type,
+        entity_id=entity_id,
         actor_id=user.id if user else None,
         action=action,
         summary=summary[:500],

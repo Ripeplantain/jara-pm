@@ -1737,6 +1737,112 @@ dialog.draft-dialog { width: min(44rem, calc(100% - 2rem)); max-width: 44rem; }
 .draft-body details ul { margin: var(--space-2) 0 0; padding-left: 1.1rem; }
 #draft-column { width: 100%; margin-top: 0.4rem; }
 
+/* --- Notes: the page tree, the page, and its blocks -------------------------------------------
+   Only tokens here, no literal colours, so the dark theme needs no override of its own - it
+   redefines the tokens and these rules follow. */
+
+.notes-index-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3); margin-bottom: var(--space-4); }
+.notes-archived-toggle { display: inline-flex; align-items: center; gap: var(--space-2); color: var(--ink-soft); font-size: 0.82rem; }
+.notes-archived-toggle input { margin: 0; }
+
+.note-tree { margin: 0; padding: 0; list-style: none; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface); }
+.note-row { display: flex; align-items: center; gap: var(--space-2); border-bottom: 1px solid var(--line); }
+.note-row:last-child { border-bottom: 0; }
+.note-row-link { display: flex; flex: 1 1 auto; align-items: center; gap: var(--space-2); min-width: 0; padding: var(--space-3) var(--space-3); padding-left: calc(var(--space-3) + (var(--note-depth, 0) * 1.25rem)); color: var(--ink); }
+.note-row-link:hover { color: var(--ink); background: var(--surface-muted); }
+.note-row-icon { display: inline-flex; flex: 0 0 auto; align-items: center; justify-content: center; width: 1.25rem; color: var(--ink-soft); }
+.note-row-title { overflow: hidden; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
+.note-row-owner { margin-left: auto; color: var(--ink-faint); font-size: 0.76rem; white-space: nowrap; }
+.note-row-actions { display: inline-flex; flex: 0 0 auto; gap: 0.15rem; padding-right: var(--space-2); }
+.note-row-actions button { display: inline-flex; align-items: center; padding: 0.3rem; border: 1px solid transparent; border-radius: var(--radius-sm); color: var(--ink-soft); background: transparent; }
+.note-row-actions button:hover:not(:disabled) { border-color: var(--line); color: var(--ink); background: var(--surface-muted); }
+.note-row-actions button:disabled { opacity: 0.4; }
+
+.note-badge { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 0.3rem; padding: 0.1rem 0.4rem; border: 1px solid var(--line); border-radius: var(--radius-sm); color: var(--ink-soft); background: var(--surface-muted); font-size: 0.7rem; font-weight: 600; }
+.note-badge.private { border-color: color-mix(in srgb, var(--brand) 35%, var(--line)); color: var(--brand-dark); background: var(--brand-soft); }
+
+/* --- one page --------------------------------------------------------------------------------- */
+
+.note-page-main { max-width: var(--notion-page-width); }
+.note-crumbs { display: flex; gap: var(--space-2); margin-bottom: var(--space-3); color: var(--ink-faint); font-size: 0.78rem; }
+.note-title-row { display: flex; align-items: center; gap: var(--space-3); }
+.note-title-icon { display: inline-flex; align-items: center; color: var(--ink-soft); font-size: 1.6rem; line-height: 1; }
+.note-title-input { flex: 1 1 auto; min-width: 0; margin: 0; padding: 0; border: 0; color: var(--ink); background: transparent; font-family: var(--font-display-stack); font-size: var(--notion-font-size-title); font-weight: var(--notion-font-weight-title); letter-spacing: -0.02em; line-height: 1.15; }
+.note-title-input::placeholder { color: var(--ink-faint); }
+.note-title-input:focus-visible { box-shadow: none; outline: 0; }
+.note-page-meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); margin: var(--space-3) 0; font-size: 0.8rem; }
+.note-page-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); padding-bottom: var(--space-4); border-bottom: 1px solid var(--line); }
+.note-page-actions button { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.35rem 0.6rem; border: 1px solid var(--line); border-radius: var(--radius-sm); color: var(--ink); background: var(--surface); font-size: 0.8rem; }
+.note-page-actions button:hover:not(:disabled) { background: var(--surface-muted); }
+.note-page-actions button.danger { color: var(--danger); }
+
+/* --- blocks ----------------------------------------------------------------------------------- */
+
+.note-blocks { margin: var(--space-4) 0 0; padding: 0; list-style: none; }
+.block { padding-left: calc(var(--block-indent, 0) * 1.5rem); }
+.block-line { display: flex; align-items: flex-start; gap: var(--space-2); padding: var(--notion-block-gap) 0; border-radius: var(--radius-sm); }
+.block-line:hover { background: color-mix(in srgb, var(--surface-muted) 55%, transparent); }
+.block-marker { flex: 0 0 auto; padding-top: 0.15rem; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.block-check { flex: 0 0 auto; margin: 0.4rem 0 0; }
+.block-input, .block-text { flex: 1 1 auto; min-width: 0; margin: 0; padding: 0.1rem 0; border: 0; color: var(--ink); background: transparent; font-family: inherit; font-size: inherit; line-height: var(--notion-line-height-body); resize: none; overflow: hidden; }
+.block-input::placeholder { color: var(--ink-faint); }
+.block-input:focus-visible { box-shadow: none; outline: 0; }
+.block-actions { display: inline-flex; flex: 0 0 auto; gap: 0.1rem; opacity: 0; transition: opacity var(--ease-standard); }
+.block-line:hover .block-actions, .block-line:focus-within .block-actions { opacity: 1; }
+.block-actions button { padding: 0.2rem; border: 0; border-radius: var(--radius-sm); color: var(--ink-faint); background: transparent; }
+.block-actions button:hover { color: var(--ink); background: var(--surface-muted); }
+
+.block-heading1 :is(.block-input, .block-text) { font-size: var(--notion-font-size-h1); font-weight: var(--notion-font-weight-heading); letter-spacing: -0.015em; }
+.block-heading2 :is(.block-input, .block-text) { font-size: var(--notion-font-size-h2); font-weight: var(--notion-font-weight-heading); letter-spacing: -0.01em; }
+.block-heading3 :is(.block-input, .block-text) { font-size: var(--notion-font-size-h3); font-weight: var(--notion-font-weight-heading); }
+.block-quote .block-line { padding-left: var(--space-3); border-left: 3px solid var(--line-strong); }
+.block-quote :is(.block-input, .block-text) { color: var(--ink-soft); font-style: italic; }
+.block-callout .block-line { padding: var(--space-3); border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface-tint); }
+.block-code .block-line { padding: var(--space-3); border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface-muted); }
+.block-code :is(.block-input, .block-text) { font-family: var(--notion-font-mono); font-size: 0.86rem; white-space: pre-wrap; }
+.block-todo.done :is(.block-input, .block-text) { color: var(--ink-faint); text-decoration: line-through; }
+.block-divider { flex: 1 1 auto; margin: var(--space-3) 0; border: 0; border-top: 1px solid var(--line); }
+
+.block-embed { display: inline-flex; flex: 1 1 auto; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-3); border: 1px solid var(--line); border-radius: var(--radius-md); color: var(--ink); background: var(--surface); }
+.block-embed:hover { color: var(--ink); background: var(--surface-muted); }
+.block-embed strong { overflow: hidden; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.block-embed span { color: var(--ink-faint); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; }
+.block-embed.unavailable { color: var(--ink-soft); background: var(--surface-muted); font-size: 0.85rem; }
+
+.note-editor-foot { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); margin-top: var(--space-4); }
+.note-save-state { margin: 0; color: var(--ink-faint); font-size: 0.76rem; }
+
+/* --- the "/" menu and the embed picker -------------------------------------------------------- */
+
+.slash-menu, .embed-picker { margin: var(--space-2) 0 var(--space-3); padding: var(--space-2); border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface); box-shadow: var(--shadow-sm); }
+.slash-menu-list { max-height: 15rem; margin: 0; padding: 0; overflow-y: auto; list-style: none; }
+.slash-menu-list li button { display: grid; grid-template-columns: auto auto 1fr; align-items: center; gap: var(--space-2); width: 100%; padding: 0.35rem var(--space-2); border: 0; border-radius: var(--radius-sm); color: var(--ink); background: transparent; text-align: left; }
+.slash-menu-list li.active button { background: var(--surface-muted); }
+.slash-menu-list li button span { color: var(--ink-faint); font-size: 0.76rem; }
+
+.embed-picker form { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--space-2); }
+.embed-picker form input { flex: 1 1 12rem; }
+.embed-picker-results { max-height: 13rem; margin: var(--space-2) 0; padding: 0; overflow-y: auto; list-style: none; }
+.embed-picker-results li button { display: block; width: 100%; padding: 0.35rem var(--space-2); border: 0; border-radius: var(--radius-sm); color: var(--ink); background: transparent; text-align: left; }
+.embed-picker-results li button:hover { background: var(--surface-muted); }
+.embed-picker-results li span { display: block; color: var(--ink-faint); font-size: 0.76rem; }
+
+.note-subpages { margin-top: var(--space-8); padding-top: var(--space-4); border-top: 1px solid var(--line); }
+.note-subpages h2 { font-size: 0.95rem; }
+.note-subpages ul { margin: 0; padding: 0; list-style: none; }
+.note-subpages li a { display: inline-flex; align-items: center; gap: var(--space-2); padding: 0.3rem 0; color: var(--ink); }
+
+@media (max-width: 640px) {
+  .note-title-input { font-size: 1.9rem; }
+  .note-row-actions { display: none; }
+  .note-page-actions button { flex: 1 1 auto; justify-content: center; }
+}
+
+/* Nothing here animates for people who would rather it did not. */
+@media (prefers-reduced-motion: reduce) {
+  .block-actions { transition: none; }
+}
+
 /* --- Display type ----------------------------------------------------------------------------
    Fraunces carries headings and brand moments; every control, label and card face stays in the
    UI sans so dense columns remain legible. This block comes last so it wins over the per-section

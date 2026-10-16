@@ -1,8 +1,9 @@
 # Kobi
 
-A containerized product-management app built around shared Kanban boards. Teams work in
-workspaces with real roles; an AI assistant can do most of what a person can, through the same
-code and the same permission checks.
+A containerized productivity app for product teams: shared Kanban boards for the work, and
+pages for everything a card cannot hold. Teams work in workspaces with real roles; an AI
+assistant can do most of what a person can, through the same code and the same permission
+checks.
 
 - **Frontend:** Next.js (App Router), NextAuth email/password sessions, `@dnd-kit` drag and drop
 - **Backend:** FastAPI, SQLAlchemy 2 + SQLite, Alembic migrations, argon2 password hashes
@@ -18,7 +19,7 @@ signing up. Four roles:
 | | viewer | member | admin | owner |
 |---|:--:|:--:|:--:|:--:|
 | Read everything in the workspace | ● | ● | ● | ● |
-| Create and edit boards, columns, cards, sprints | | ● | ● | ● |
+| Create and edit boards, columns, cards, sprints, pages | | ● | ● | ● |
 | Create and attach labels, comment | | ● | ● | ● |
 | Invite, remove and re-role people; rename the workspace | | | ● | ● |
 | Rename or delete labels | | | ● | ● |
@@ -34,6 +35,12 @@ work-in-progress limit (a warning, never a block) and a "done" flag.
 a drawer that deep-links at `/boards/{id}?card={cardId}`. Archive is the reversible way to clear
 a card; delete is still there for good.
 
+**Pages.** Notes, specs, research and plans, nested into a tree. A page is written in blocks -
+headings, lists, to-dos you can tick, quotes, callouts, code - and can embed a card or a board,
+which gives that card a "Mentioned in" list of the pages that point at it. A page is visible to
+the workspace, or **private to you**: a private page is invisible to everyone else, including
+admins and owners, writes nothing to the activity feed, and never appears in anyone else's export.
+
 **Planning.** Sprints with a goal, a progress bar, and one decision when you finish one: where
 the unfinished work goes.
 
@@ -46,8 +53,9 @@ when someone assigns you a card, mentions you with `@name`, or finishes somethin
 about your own actions.
 
 **The assistant.** It can create and edit boards and cards, set assignees, priorities, due dates
-and estimates, add labels and checklist items, comment, archive, run sprints, and answer "what is
-blocked?" from the same numbers the insights page shows. It works through typed tools and the
+and estimates, add labels and checklist items, comment, archive, run sprints, write and append to
+pages, and answer "what is blocked?" from the same numbers the insights page shows. It cannot see
+anyone else's private pages, and it has no way to delete a page at all. It works through typed tools and the
 same service functions the UI uses, so a viewer's assistant can read the board and change nothing.
 Deletions are only ever proposed; you confirm them.
 

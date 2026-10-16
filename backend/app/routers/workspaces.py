@@ -12,6 +12,7 @@ from app.schemas.analytics import WorkspaceOverview
 from app.schemas.boards import CardHit, CardOut
 from app.schemas.data_lifecycle import WorkspaceExport
 from app.schemas.labels import LabelCreate, LabelOut, LabelUpdate
+from app.schemas.notes import NoteHit
 from app.schemas.workspaces import (
     InviteCreate,
     InviteOut,
@@ -22,6 +23,7 @@ from app.schemas.workspaces import (
     WorkspaceCreate,
     WorkspaceDelete,
     WorkspaceOut,
+    WorkspaceSearchResults,
     WorkspaceUpdate,
 )
 from app.services import activity as activity_svc
@@ -197,10 +199,23 @@ def workspace_activity(
     return activity_svc.for_workspace(db, user, workspace_id, limit, before_id, board_id, actor_id)
 
 
-@router.get("/workspaces/{workspace_id}/search", response_model=list[CardHit])
+@router.get("/workspaces/{workspace_id}/search", response_model=WorkspaceSearchResults)
 def search_workspace(workspace_id: int, q: str, user: CurrentUser, db: DbSession, limit: int = 50):
-    """Cards across every board in the workspace. An empty query returns nothing."""
-    return [_hit(card) for card in search_svc.search_workspace(db, user, workspace_id, q, limit)]
+    """Cards and pages across the whole workspace. An empty query returns nothing.
+
+    Someone else's private page never appears here: `search_notes` composes the same visibility
+    filter every other note read does.
+    """
+    return WorkspaceSearchResults(
+        cards=[_hit(card) for card in search_svc.search_workspace(db, user, workspace_id, q, limit)],
+        notes=[
+            NoteHit(
+                **NoteHit.model_validate(note).model_dump(exclude={"excerpt"}),
+                excerpt=search_svc.note_excerpt(note, q),
+            )
+            for note in search_svc.search_notes(db, user, workspace_id, q, limit)
+        ],
+    )
 
 
 @router.get("/my-cards", response_model=list[CardHit])

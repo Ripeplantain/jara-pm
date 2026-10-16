@@ -10,6 +10,7 @@ class WorkspaceExport(BaseModel):
     members: list[dict[str, Any]]
     boards: list[dict[str, Any]]
     labels: list[dict[str, Any]]
+    notes: list[dict[str, Any]]
     sprints: list[dict[str, Any]]
     activities: list[dict[str, Any]]
     notifications: list[dict[str, Any]]

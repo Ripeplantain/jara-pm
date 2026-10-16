@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Icon } from "@/components/icon";
 import { Modal } from "@/components/board/modal";
@@ -8,6 +9,8 @@ import { Skeleton } from "@/components/shell/skeleton";
 import { api, RequestError } from "@/lib/api/browser";
 import { fromDateInput, longDateTime, toDateInput } from "@/lib/dates";
 import type { Activity } from "@/lib/types/activity";
+import { noteTitle } from "@/lib/types/note";
+import type { NoteSummary } from "@/lib/types/note";
 import type { Card, Column, Priority } from "@/lib/types/board";
 import { PRIORITIES, PRIORITY_LABEL } from "@/lib/types/board";
 import type { ChecklistItem, Comment } from "@/lib/types/card-detail";
@@ -56,6 +59,7 @@ export function CardDrawer({
   const [description, setDescription] = useState(card.description);
   const [comments, setComments] = useState<Comment[] | null>(null);
   const [activity, setActivity] = useState<Activity[] | null>(null);
+  const [mentions, setMentions] = useState<NoteSummary[]>([]);
   const [comment, setComment] = useState("");
   const [newItem, setNewItem] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -112,6 +116,20 @@ export function CardDrawer({
       cancelled = true;
     };
   }, [card.id, column?.board_id]);
+
+  // Backlinks: the pages that embed this card. Someone else's private page is not among them,
+  // so an empty list here does not mean nobody has written about it - only that you cannot see
+  // it. Failure is silent: a missing section is better than an error over a card's details.
+  useEffect(() => {
+    let cancelled = false;
+    api
+      .notesForCard(card.id)
+      .then((found) => !cancelled && setMentions(found))
+      .catch(() => !cancelled && setMentions([]));
+    return () => {
+      cancelled = true;
+    };
+  }, [card.id]);
 
   const run = useCallback(async (fn: () => Promise<void>) => {
     setBusy(true);
@@ -230,6 +248,20 @@ export function CardDrawer({
                     <li key={`related-${entry.id}`}>
                       <button type="button" onClick={() => onOpenCard(entry)}>{entry.title}</button>
                       <span>same sprint or label</span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
+            {mentions.length > 0 && (
+              <section aria-labelledby="mentions-heading" className="drawer-section">
+                <h3 id="mentions-heading">Mentioned in</h3>
+                <ul className="related-cards">
+                  {mentions.map((page) => (
+                    <li key={`page-${page.id}`}>
+                      <Link href={`/notes/${page.id}`}>{noteTitle(page)}</Link>
+                      <span>{page.visibility === "private" ? "your private page" : "page"}</span>
                     </li>
                   ))}
                 </ul>

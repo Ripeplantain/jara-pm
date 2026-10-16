@@ -413,3 +413,114 @@ def test_card_details_reach_the_model(client, scene, use_llm):
     assert '"estimate": 3' in prompt
     assert '"checklist": "0/1"' in prompt
     assert f'"label_ids": [{scene["label"]["id"]}]' in prompt
+
+
+# --- pages (phase 21) -------------------------------------------------------------------------
+
+
+def test_the_assistant_writes_a_page_with_blocks(client, scene, use_llm):
+    fake = use_llm(
+        call(
+            "create_page",
+            title="Retro",
+            blocks=[
+                {"type": "heading2", "text": "What went well"},
+                {"type": "todo", "text": "Automate the release"},
+                {"type": "card_embed", "ref_card_id": scene["card"]["id"]},
+            ],
+        ),
+        say("Written up."),
+    )
+    res = ask(client, scene["owner"], scene["board"]["id"], "Write up the retro")
+    assert res.status_code == 200
+    assert tool_results(fake)[0]["ok"] is True
+    note_id = tool_results(fake)[0]["note_id"]
+
+    page = client.get(f"/api/notes/{note_id}", headers=scene["owner"]).json()
+    assert [b["type"] for b in page["blocks"]] == ["heading2", "todo", "card_embed"]
+    # The embed is validated against real state, so the card gets a real backlink.
+    back = client.get(f"/api/cards/{scene['card']['id']}/notes", headers=scene["owner"]).json()
+    assert [p["id"] for p in back] == [note_id]
+    assert res.json()["changes"][0]["note_id"] == note_id
+
+
+def test_the_assistant_reads_and_appends_to_a_page(client, scene, use_llm):
+    page = client.post(
+        f"/api/workspaces/{scene['board']['workspace_id']}/notes",
+        json={"title": "Standup", "blocks": [{"text": "Yesterday: shipped"}]},
+        headers=scene["owner"],
+    ).json()
+
+    fake = use_llm(
+        call("read_page", note_id=page["id"]),
+        call("append_to_page", note_id=page["id"], blocks=[{"text": "Today: review"}]),
+        say("Added."),
+    )
+    ask(client, scene["owner"], scene["board"]["id"], "Add today's line")
+    read, appended = tool_results(fake)
+    assert [b["text"] for b in read["body"]] == ["Yesterday: shipped"]
+    assert appended["blocks"] == 2
+
+    after = client.get(f"/api/notes/{page['id']}", headers=scene["owner"]).json()
+    assert [b["text"] for b in after["blocks"]] == ["Yesterday: shipped", "Today: review"]
+
+
+def test_the_assistant_cannot_see_someone_elses_private_page(client, scene, use_llm):
+    """Not "refused" - invisible. The tools go through the same visibility filter as the UI."""
+    wid = scene["board"]["workspace_id"]
+    private = client.post(
+        f"/api/workspaces/{wid}/notes",
+        json={"title": "Owner's private", "visibility": "private"},
+        headers=scene["owner"],
+    ).json()
+
+    # The viewer's assistant searches and reads: the page is not there.
+    fake = use_llm(call("search_pages", q="private"), call("read_page", note_id=private["id"]), say("Nothing."))
+    res = ask(client, scene["viewer"], scene["board"]["id"], "Find the private page")
+    assert res.status_code == 200
+    searched, read = tool_results(fake)
+    assert searched["pages"] == []
+    assert read["error"] == "Note not found"
+
+
+def test_a_viewer_cannot_write_a_page_through_the_assistant(client, scene, use_llm):
+    fake = use_llm(call("create_page", title="Nope"), say("I cannot."))
+    res = ask(client, scene["viewer"], scene["board"]["id"], "Write a page")
+    assert res.status_code == 200
+    error = tool_results(fake)[0]["error"]
+    assert "member role" in error and "assistant cannot do this" in error
+    assert res.json()["changes"] == []
+
+
+def test_there_is_no_tool_that_deletes_a_page(client, scene, use_llm):
+    """Archiving is reversible and runs immediately; nothing here can destroy a page."""
+    from app.ai.tools import TOOLS
+
+    assert not [name for name in TOOLS if "page" in name and "delete" in name]
+    assert "archive_page" in TOOLS
+
+    wid = scene["board"]["workspace_id"]
+    page = client.post(
+        f"/api/workspaces/{wid}/notes", json={"title": "Keepable"}, headers=scene["owner"]
+    ).json()
+    fake = use_llm(call("archive_page", note_id=page["id"]), say("Archived."))
+    ask(client, scene["owner"], scene["board"]["id"], "Archive the page")
+    assert tool_results(fake)[0]["ok"] is True
+    # Archived, not gone: still readable, and restorable.
+    assert client.get(f"/api/notes/{page['id']}", headers=scene["owner"]).json()["archived_at"]
+
+
+def test_the_context_lists_visible_pages_only(client, scene, use_llm):
+    wid = scene["board"]["workspace_id"]
+    client.post(f"/api/workspaces/{wid}/notes", json={"title": "Team page"}, headers=scene["owner"])
+    client.post(
+        f"/api/workspaces/{wid}/notes",
+        json={"title": "Owner's private", "visibility": "private"},
+        headers=scene["owner"],
+    )
+
+    fake = use_llm(say("ok"))
+    ask(client, scene["viewer"], scene["board"]["id"], "What pages are there?")
+    system = fake.calls[-1][0]["content"]
+    assert "Team page" in system
+    assert "Owner's private" not in system

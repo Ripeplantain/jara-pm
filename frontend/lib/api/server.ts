@@ -4,6 +4,7 @@ import type { Notification } from "@/lib/types/activity";
 import type { WorkspaceOverview } from "@/lib/types/analytics";
 import type { Board, BoardSummary, BoardTemplate, CardHit } from "@/lib/types/board";
 import type { Label } from "@/lib/types/label";
+import type { Note, NoteSummary } from "@/lib/types/note";
 import type { Workspace } from "@/lib/types/workspace";
 import type { OnboardingStatus } from "@/lib/types/workspace";
 
@@ -49,3 +50,12 @@ export const unreadCount = (token: string) =>
 
 export const getOnboardingStatus = (token: string) =>
   backendFetch<OnboardingStatus>("/api/onboarding", { token });
+
+export const listNotes = (token: string, workspaceId: number, includeArchived = false) =>
+  backendFetch<NoteSummary[]>(
+    `/api/workspaces/${workspaceId}/notes${includeArchived ? "?include_archived=true" : ""}`,
+    { token },
+  );
+
+export const getNote = (token: string, id: number) =>
+  backendFetch<Note>(`/api/notes/${id}`, { token });

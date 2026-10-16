@@ -128,13 +128,16 @@ def test_workspace_search_spans_boards_and_says_where(client, scene):
     board, _, _, tokens, _, _ = scene
     owner = headers(tokens["owner"])
     wid = board["workspace_id"]
-    hits = client.get(f"/api/workspaces/{wid}/search?q=login", headers=owner).json()
-    assert titles(hits) == ["Fix login", "Launch campaign"]
-    by_title = {h["title"]: h for h in hits}
+    found = client.get(f"/api/workspaces/{wid}/search?q=login", headers=owner).json()
+    # Search answers with one envelope per surface: cards here, pages in test_notes.py.
+    assert titles(found["cards"]) == ["Fix login", "Launch campaign"]
+    assert found["notes"] == []
+    by_title = {h["title"]: h for h in found["cards"]}
     assert by_title["Launch campaign"]["board_title"] == "Marketing"
     assert by_title["Launch campaign"]["column_title"] == "Ideas"
     assert by_title["Fix login"]["board_id"] == board["id"]
-    assert client.get(f"/api/workspaces/{wid}/search?q=   ", headers=owner).json() == []
+    empty = client.get(f"/api/workspaces/{wid}/search?q=   ", headers=owner).json()
+    assert empty == {"cards": [], "notes": []}
 
 
 def test_my_cards_lists_open_work_by_due_date(client, scene):

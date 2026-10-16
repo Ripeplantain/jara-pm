@@ -6,6 +6,15 @@ from app.models.board import Board, BoardFavorite, Card, Column, Priority
 from app.models.card_detail import ChecklistItem, Comment
 from app.models.invite import WorkspaceInvite
 from app.models.label import CardLabel, Label
+from app.models.note import (
+    BLOCK_TYPES,
+    EMBED_TYPES,
+    MAX_INDENT,
+    Note,
+    NoteBlock,
+    NoteLink,
+    NoteVisibility,
+)
 from app.models.notification import Notification
 from app.models.onboarding import OnboardingProfile
 from app.models.product_event import ProductEvent
@@ -14,6 +23,9 @@ from app.models.user import User
 from app.models.workspace import Workspace, WorkspaceMember, WorkspaceRole
 
 __all__ = [
+    "BLOCK_TYPES",
+    "EMBED_TYPES",
+    "MAX_INDENT",
     "AccountToken",
     "AccountTokenKind",
     "Activity",
@@ -27,6 +39,10 @@ __all__ = [
     "Column",
     "Comment",
     "Label",
+    "Note",
+    "NoteBlock",
+    "NoteLink",
+    "NoteVisibility",
     "Notification",
     "OnboardingProfile",
     "Priority",

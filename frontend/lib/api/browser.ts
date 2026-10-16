@@ -14,6 +14,13 @@ import type {
 } from "@/lib/types/board";
 import type { ChecklistItem, Comment } from "@/lib/types/card-detail";
 import type { Label } from "@/lib/types/label";
+import type {
+  Note,
+  NoteBlockInput,
+  NoteHit,
+  NoteSummary,
+  Visibility,
+} from "@/lib/types/note";
 import type { Sprint, SprintProgress } from "@/lib/types/sprint";
 import type {
   Invite,
@@ -63,6 +70,21 @@ function query(params: Record<string, string | number | boolean | undefined | nu
     if (value !== undefined && value !== null && value !== "") search.set(key, String(value));
   }
   return search.size ? `?${search}` : "";
+}
+
+/** What one workspace search found, by surface. */
+export interface SearchResults {
+  cards: CardHit[];
+  notes: NoteHit[];
+}
+
+/** The fields a new page may be created with. */
+export interface NotePatch {
+  title?: string;
+  icon?: string;
+  parent_id?: number | null;
+  visibility?: Visibility;
+  position?: number;
 }
 
 export interface CardPatch {
@@ -195,7 +217,7 @@ export const api = {
   filterCards: (boardId: number, filters: CardFilters) =>
     request<Card[]>("GET", `/boards/${boardId}/cards${query({ ...filters })}`),
   search: (workspaceId: number, q: string) =>
-    request<CardHit[]>("GET", `/workspaces/${workspaceId}/search${query({ q })}`),
+    request<SearchResults>("GET", `/workspaces/${workspaceId}/search${query({ q })}`),
   myCards: (workspaceId?: number) =>
     request<CardHit[]>("GET", `/my-cards${query({ workspace_id: workspaceId })}`),
 
@@ -213,6 +235,36 @@ export const api = {
     request<Comment>("POST", `/cards/${cardId}/comments`, { body }),
   updateComment: (id: number, body: string) => request<Comment>("PATCH", `/comments/${id}`, { body }),
   deleteComment: (id: number) => request<void>("DELETE", `/comments/${id}`),
+
+  // --- pages --------------------------------------------------------------------------------
+  listNotes: (workspaceId: number, includeArchived = false) =>
+    request<NoteSummary[]>(
+      "GET",
+      `/workspaces/${workspaceId}/notes${query({ include_archived: includeArchived || undefined })}`,
+    ),
+  getNote: (id: number) => request<Note>("GET", `/notes/${id}`),
+  createNote: (workspaceId: number, body: NotePatch & { blocks?: NoteBlockInput[] } = {}) =>
+    request<Note>("POST", `/workspaces/${workspaceId}/notes`, body),
+  updateNote: (id: number, patch: { title?: string; icon?: string }) =>
+    request<Note>("PATCH", `/notes/${id}`, patch),
+  setNoteVisibility: (id: number, visibility: Visibility) =>
+    request<Note>("PUT", `/notes/${id}/visibility`, { visibility }),
+  moveNote: (id: number, body: { parent_id?: number | null; position?: number }) =>
+    request<Note>("POST", `/notes/${id}/move`, body),
+  archiveNote: (id: number) => request<Note>("POST", `/notes/${id}/archive`),
+  unarchiveNote: (id: number) => request<Note>("POST", `/notes/${id}/unarchive`),
+  deleteNote: (id: number) => request<void>("DELETE", `/notes/${id}`),
+  /** The editor's save: the page's whole body, in one transaction. */
+  saveBlocks: (id: number, blocks: NoteBlockInput[]) =>
+    request<Note>("PUT", `/notes/${id}/blocks`, { blocks }),
+  addBlocks: (id: number, blocks: NoteBlockInput[], position?: number) =>
+    request<Note>("POST", `/notes/${id}/blocks`, { blocks, position }),
+  patchBlock: (
+    blockId: number,
+    patch: { text?: string; type?: string; checked?: boolean; indent?: number },
+  ) => request<Note>("PATCH", `/note-blocks/${blockId}`, patch),
+  /** A card's backlinks: pages that embed it, and that this user can see. */
+  notesForCard: (cardId: number) => request<NoteSummary[]>("GET", `/cards/${cardId}/notes`),
 
   // --- sprints ------------------------------------------------------------------------------
   listSprints: (boardId: number) => request<Sprint[]>("GET", `/boards/${boardId}/sprints`),

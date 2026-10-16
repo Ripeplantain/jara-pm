@@ -22,6 +22,8 @@ class AppliedChange(BaseModel):
     board_id: int
     column_id: int | None = None
     card_id: int | None = None
+    # Set when the change was to a page rather than to the board the chat is open on.
+    note_id: int | None = None
 
 
 class PendingAction(BaseModel):

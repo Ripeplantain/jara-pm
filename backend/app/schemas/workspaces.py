@@ -5,6 +5,8 @@ from pydantic import BaseModel, ConfigDict, EmailStr, StringConstraints, field_v
 
 from app.models import WorkspaceRole
 from app.schemas.auth import UserOut
+from app.schemas.boards import CardHit
+from app.schemas.notes import NoteHit
 
 WorkspaceName = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=200)]
 
@@ -92,3 +94,14 @@ class InviteResult(BaseModel):
     kind: Literal["invite", "member"]
     invite: InviteOut | None = None
     member: MemberOut | None = None
+
+
+class WorkspaceSearchResults(BaseModel):
+    """What one search across a workspace found, by surface.
+
+    An envelope rather than a flat list: a card and a page are different things, open in
+    different places, and the UI shows them under their own headings.
+    """
+
+    cards: list[CardHit] = []
+    notes: list[NoteHit] = []

@@ -9,7 +9,17 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
 
 from app.ai.llm import LLMError, LLMNotConfigured
-from app.routers import ai, auth, boards, health, notifications, onboarding, sprints, workspaces
+from app.routers import (
+    ai,
+    auth,
+    boards,
+    health,
+    notes,
+    notifications,
+    onboarding,
+    sprints,
+    workspaces,
+)
 from app.services import errors as service_errors
 from app.services.abuse import bucket_for, limit_for, rate_limiter
 from app.services.metrics import metrics
@@ -93,5 +103,6 @@ app.include_router(onboarding.router, prefix="/api")
 app.include_router(boards.router, prefix="/api")
 app.include_router(workspaces.router, prefix="/api")
 app.include_router(sprints.router, prefix="/api")
+app.include_router(notes.router, prefix="/api")
 app.include_router(notifications.router, prefix="/api")
 app.include_router(ai.router, prefix="/api")

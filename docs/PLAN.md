@@ -7,7 +7,7 @@ cards, planning, insights, and an AI assistant that understands all of it.
 This file is the memory of the [Ralph loop](../PROMPT.md). One iteration = the first unchecked
 task. Tick it when `./scripts/verify.sh` prints `VERIFY: PASS`.
 
-**Status: phases 0-14 shipped; SaaS MVP tasks 15.1-15.6, 16.1-16.6, 17.1-17.6, 18.1-18.4, and 19.1-19.4 are complete. The first unchecked task is 18.5. The visual redesign workstream is tracked separately in [docs/UI-REDESIGN-TODO.md](UI-REDESIGN-TODO.md).**
+**Status: phases 0-14 shipped; SaaS MVP tasks 15.1-15.6, 16.1-16.6, 17.1-17.6, 18.1-18.4, and 19.1-19.4 are complete, as are phases 20 and 21.1-21.7 (notes). The open tasks are 18.5 (external security review) and 19.5 (final launch verification). The visual redesign workstream is tracked separately in [docs/UI-REDESIGN-TODO.md](UI-REDESIGN-TODO.md).**
 
 ---
 
@@ -529,3 +529,138 @@ the foundation; these phases harden and package it for real users.
   `AI_MAX_DRAFT_ITERATIONS` (3) turns; a successful draft ends the loop without another call.
 - Drafts go to one column chosen in the dialog. Per-card columns and sprint assignment are not
   drafted.
+
+---
+
+# Productivity platform track
+
+Kobi is a productivity app, not only a project-management one: the Kanban board is one work
+surface beside pages, habits and goal progress. The board, workspace, role, activity and typed-tool
+machinery carries over unchanged - each new surface hangs off a workspace and goes through the same
+service and permission layer.
+
+## Platform scope decisions
+
+- **Notes first.** Pages are the largest step toward the positioning, and the page plumbing (tree,
+  blocks, links, visibility) is what habits and goals will reuse.
+- **Per-item visibility.** A page is `workspace` or `private`. A private page belongs to its owner
+  alone - against admins and owners too - and reads as a 404 to everyone else, the same way a
+  workspace you are not a member of does. This is the first access rule in Kobi that workspace
+  membership does not settle.
+- **Blocks, not markdown.** A page's body is an ordered list of typed rows, so a todo can be ticked
+  and an embed can point at a real card. A richer editor can replace the current one without a data
+  migration.
+- **Cross-links in v1.** Pages embed cards and boards; a card shows the pages that mention it.
+- **Deferred:** inline rich text (bold/italic inside a block), drag and drop in the page tree,
+  real-time collaborative editing of a page, and page templates.
+
+## Phase 21 - Notes and docs
+
+- [x] 21.1 Reposition: record the platform track here, add Notes to the primary navigation and the
+  command palette.
+- [x] 21.2 `notes`, `note_blocks`, `note_links` models and migration `0019`, plus nullable
+  `entity_type`/`entity_id` on `activities` and `notifications` so a new surface needs no new
+  column. Additive only; no table is rebuilt.
+- [x] 21.3 `permissions.note_visibility_filter` / `require_note` as the single place visibility is
+  decided, and `services/notes.py` for pages, blocks and derived links.
+- [x] 21.4 `schemas/notes.py`, `routers/notes.py` (9 endpoints), proxy allowlist.
+- [x] 21.5 Notes in workspace search, in the workspace export, and in the AI's reach: `search_pages`,
+  `read_page`, `create_page`, `append_to_page`, `archive_page`.
+- [x] 21.6 Frontend: `/notes` page tree, `/notes/[id]` page with the block editor, the "/" menu, the
+  embed picker, and a "Mentioned in" section on the card drawer.
+- [x] 21.7 `backend/tests/test_notes.py` plus page coverage in `test_ai_tools.py`.
+
+### Notes
+
+- 21.2: a subpage dies with its parent (`parent_id` cascades), and both the page tree and each
+  page's blocks keep contiguous positions. Positions span every sibling whatever its visibility,
+  so an insert is counted in the siblings the acting user can see and translated onto the full
+  list - otherwise one user's private page would shift another user's ordering.
+- 21.3: **a private page writes no activity and sends no notification.** The activity feed is
+  readable by the whole workspace and rows are never edited or filtered after the fact, so the
+  only safe way to keep a private page private is to write no history for it at all. Visibility is
+  also settled before the role is applied in `require_note`, because a 403 on somebody else's
+  private page would confirm that it exists.
+- 21.3: visibility is inherited downwards - a subpage of a private page is private, and a page
+  cannot be shared while its parent is private. Only the page's owner changes visibility; an admin
+  can delete somebody else's page but cannot un-private it.
+- 21.3: autosave would otherwise flood the feed, so `note.updated` is written at most once per
+  actor per page per five minutes, and a mention notifies only people who were not already
+  mentioned in the previous version of the body.
+- 21.5: `GET /api/workspaces/{id}/search` now answers with `{cards, notes}` instead of a flat card
+  list. This is the one breaking contract change in the phase; its only consumer was the command
+  palette.
+- 21.5: embed blocks carry a `ref_title` (and a card embed its `ref_card_board_id`) resolved at read
+  time rather than stored, so a renamed card renames its embeds and a deleted one leaves a block
+  that says it is unavailable instead of a caption that lies.
+- 21.5: the assistant has **no tool that deletes a page**. Archiving is reversible and runs
+  immediately, which is stricter than the confirmation rule requires.
+- 21.6: the editor is one textarea per block rather than a contenteditable document. The block model
+  is identical either way, but a textarea cannot lose a caret, breaks no IME and needs no custom
+  selection code; the cost is that formatting is per block rather than per word. Inline marks are
+  deferred, not designed out - the data model already supports replacing the editor.
+- 21.6: the page tree reorders and re-nests through explicit buttons rather than drag and drop. A
+  tree drop target has to infer both a parent and a position, and a wrong guess silently moves a
+  page into another page; blocks, which are a flat list, keep keyboard move controls (Alt+Up/Down)
+  for the same reason. Drag and drop for both is a later task.
+- 21.6: the body save sends the whole page and the backend applies it in one transaction, updating
+  blocks that arrive with an id in place. Autosave therefore never churns block identity and a
+  half-finished save cannot leave a page empty.
+
+### Verification, 2026-10-16
+
+`./scripts/verify.sh` -> `VERIFY: PASS`, through Docker (the daemon was up, so the compose path ran
+rather than the host fallback): **300 backend tests**, Ruff, frontend ESLint and TypeScript. The
+production frontend build succeeds and emits `/notes` and `/notes/[id]` among its routes.
+`bash scripts/migration-check.sh` passes against a disposable database at **24 tables** (21 before
+this phase). Migration `0019` was also applied to the running dev database by restarting the
+backend container, which left its existing user and workspace rows untouched.
+
+**Browser smoke, headless Chrome over CDP against the dev stack, 21 of 21 checks.** The script is
+in the session scratchpad rather than the repo; what it covered:
+
+| | Check | Result |
+|---|---|---|
+| 1-2 | `/notes` renders, empty state and role-aware New page control | ok |
+| 3 | New page creates a page and opens it | ok |
+| 4-5 | `/` opens the block menu; choosing Heading 2 converts the block and keeps the caret in it | ok |
+| 6 | A to-do block can be ticked | ok |
+| 7-8 | Tab indents a block; Enter on an empty list item ends the list | ok |
+| 9-11 | The embed picker opens, finds a card by search, and the embed renders with the card's live title and a link to it on its board | ok |
+| 12 | The body autosaves ("Saved") | ok |
+| 13-16 | Title, ticked to-do, embed and block order all survive a reload | ok |
+| 17 | The card drawer shows the page under "Mentioned in" | ok |
+| 18 | A page can be made private from its own header | ok |
+| 19 | Workspace search returns the page under "Pages" | ok |
+| 20 | No horizontal overflow at 375px in dark mode | ok |
+| 21 | Every control on the page has an accessible name | ok |
+
+The delete dialog was driven separately: it names the page, counts its subpages, offers archiving
+instead, and on confirmation removes the page and its subtree while leaving the other pages and
+their blocks alone.
+
+**Fixed during this pass.** Pressing Enter to pick from the `/` menu also ran the block's own Enter
+handler, so the block split and the text typed next landed in a stray block below the chosen one.
+The menu's document-level key handler now stops propagation as well as the default, which is what
+the card drawer already does for Escape. The browser smoke is what caught it; nothing in the
+backend suite could have.
+
+**Not verified.** No frontend rendering test framework exists, so the editor's behaviour is covered
+by the browser smoke above rather than by a repeatable test in the repo - a smoke script in CI is
+worth adding. Accessibility was checked for accessible names, keyboard paths and narrow-screen
+overflow, not with axe or a screen reader. A pre-existing hydration-attribute mismatch on
+`/boards/[id]` was observed and confirmed to predate this phase (it reproduces with the card-drawer
+change stashed); it is unrelated to notes and is left alone.
+
+## Phase 22 - Habits (outline, not started)
+
+- [ ] 22.1 `habits` and `habit_checkins`, user-scoped and private by default, with a schedule
+  (daily, weekly, n times per week).
+- [ ] 22.2 Check-in endpoints and streak calculation, derived rather than stored.
+- [ ] 22.3 A check-in grid on `/habits`, plus today's habits on the dashboard.
+
+## Phase 23 - Goals and progress (outline, not started)
+
+- [ ] 23.1 `goals` and `goal_milestones`, workspace-scoped, each linked to boards, sprints or cards.
+- [ ] 23.2 Progress rolled up from real card and sprint state rather than hand-entered.
+- [ ] 23.3 A goals page, and goal progress on the workspace dashboard.

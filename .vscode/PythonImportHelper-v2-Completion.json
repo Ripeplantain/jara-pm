@@ -114,6 +114,14 @@
         "documentation": {}
     },
     {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
         "label": "field",
         "importPath": "dataclasses",
         "description": "dataclasses",
@@ -170,6 +178,22 @@
         "documentation": {}
     },
     {
+        "label": "ClassVar",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Annotated",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
         "label": "Annotated",
         "importPath": "typing",
         "description": "typing",
@@ -299,6 +323,22 @@
     },
     {
         "label": "Annotated",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Annotated",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Literal",
         "importPath": "typing",
         "description": "typing",
         "isExtraImport": true,
@@ -354,11 +394,11 @@
         "documentation": {}
     },
     {
-        "label": "Session",
-        "importPath": "sqlalchemy.orm",
-        "description": "sqlalchemy.orm",
+        "label": "Any",
+        "importPath": "typing",
+        "description": "typing",
         "isExtraImport": true,
-        "detail": "sqlalchemy.orm",
+        "detail": "typing",
         "documentation": {}
     },
     {
@@ -386,103 +426,7 @@
         "documentation": {}
     },
     {
-        "label": "Mapped",
-        "importPath": "sqlalchemy.orm",
-        "description": "sqlalchemy.orm",
-        "isExtraImport": true,
-        "detail": "sqlalchemy.orm",
-        "documentation": {}
-    },
-    {
-        "label": "mapped_column",
-        "importPath": "sqlalchemy.orm",
-        "description": "sqlalchemy.orm",
-        "isExtraImport": true,
-        "detail": "sqlalchemy.orm",
-        "documentation": {}
-    },
-    {
-        "label": "relationship",
-        "importPath": "sqlalchemy.orm",
-        "description": "sqlalchemy.orm",
-        "isExtraImport": true,
-        "detail": "sqlalchemy.orm",
-        "documentation": {}
-    },
-    {
-        "label": "Mapped",
-        "importPath": "sqlalchemy.orm",
-        "description": "sqlalchemy.orm",
-        "isExtraImport": true,
-        "detail": "sqlalchemy.orm",
-        "documentation": {}
-    },
-    {
-        "label": "mapped_column",
-        "importPath": "sqlalchemy.orm",
-        "description": "sqlalchemy.orm",
-        "isExtraImport": true,
-        "detail": "sqlalchemy.orm",
-        "documentation": {}
-    },
-    {
-        "label": "relationship",
-        "importPath": "sqlalchemy.orm",
-        "description": "sqlalchemy.orm",
-        "isExtraImport": true,
-        "detail": "sqlalchemy.orm",
-        "documentation": {}
-    },
-    {
-        "label": "Mapped",
-        "importPath": "sqlalchemy.orm",
-        "description": "sqlalchemy.orm",
-        "isExtraImport": true,
-        "detail": "sqlalchemy.orm",
-        "documentation": {}
-    },
-    {
-        "label": "mapped_column",
-        "importPath": "sqlalchemy.orm",
-        "description": "sqlalchemy.orm",
-        "isExtraImport": true,
-        "detail": "sqlalchemy.orm",
-        "documentation": {}
-    },
-    {
-        "label": "Mapped",
-        "importPath": "sqlalchemy.orm",
-        "description": "sqlalchemy.orm",
-        "isExtraImport": true,
-        "detail": "sqlalchemy.orm",
-        "documentation": {}
-    },
-    {
-        "label": "mapped_column",
-        "importPath": "sqlalchemy.orm",
-        "description": "sqlalchemy.orm",
-        "isExtraImport": true,
-        "detail": "sqlalchemy.orm",
-        "documentation": {}
-    },
-    {
-        "label": "Mapped",
-        "importPath": "sqlalchemy.orm",
-        "description": "sqlalchemy.orm",
-        "isExtraImport": true,
-        "detail": "sqlalchemy.orm",
-        "documentation": {}
-    },
-    {
-        "label": "mapped_column",
-        "importPath": "sqlalchemy.orm",
-        "description": "sqlalchemy.orm",
-        "isExtraImport": true,
-        "detail": "sqlalchemy.orm",
-        "documentation": {}
-    },
-    {
-        "label": "relationship",
+        "label": "Session",
         "importPath": "sqlalchemy.orm",
         "description": "sqlalchemy.orm",
         "isExtraImport": true,
@@ -586,6 +530,134 @@
         "documentation": {}
     },
     {
+        "label": "relationship",
+        "importPath": "sqlalchemy.orm",
+        "description": "sqlalchemy.orm",
+        "isExtraImport": true,
+        "detail": "sqlalchemy.orm",
+        "documentation": {}
+    },
+    {
+        "label": "Mapped",
+        "importPath": "sqlalchemy.orm",
+        "description": "sqlalchemy.orm",
+        "isExtraImport": true,
+        "detail": "sqlalchemy.orm",
+        "documentation": {}
+    },
+    {
+        "label": "mapped_column",
+        "importPath": "sqlalchemy.orm",
+        "description": "sqlalchemy.orm",
+        "isExtraImport": true,
+        "detail": "sqlalchemy.orm",
+        "documentation": {}
+    },
+    {
+        "label": "relationship",
+        "importPath": "sqlalchemy.orm",
+        "description": "sqlalchemy.orm",
+        "isExtraImport": true,
+        "detail": "sqlalchemy.orm",
+        "documentation": {}
+    },
+    {
+        "label": "Mapped",
+        "importPath": "sqlalchemy.orm",
+        "description": "sqlalchemy.orm",
+        "isExtraImport": true,
+        "detail": "sqlalchemy.orm",
+        "documentation": {}
+    },
+    {
+        "label": "mapped_column",
+        "importPath": "sqlalchemy.orm",
+        "description": "sqlalchemy.orm",
+        "isExtraImport": true,
+        "detail": "sqlalchemy.orm",
+        "documentation": {}
+    },
+    {
+        "label": "relationship",
+        "importPath": "sqlalchemy.orm",
+        "description": "sqlalchemy.orm",
+        "isExtraImport": true,
+        "detail": "sqlalchemy.orm",
+        "documentation": {}
+    },
+    {
+        "label": "Mapped",
+        "importPath": "sqlalchemy.orm",
+        "description": "sqlalchemy.orm",
+        "isExtraImport": true,
+        "detail": "sqlalchemy.orm",
+        "documentation": {}
+    },
+    {
+        "label": "mapped_column",
+        "importPath": "sqlalchemy.orm",
+        "description": "sqlalchemy.orm",
+        "isExtraImport": true,
+        "detail": "sqlalchemy.orm",
+        "documentation": {}
+    },
+    {
+        "label": "Mapped",
+        "importPath": "sqlalchemy.orm",
+        "description": "sqlalchemy.orm",
+        "isExtraImport": true,
+        "detail": "sqlalchemy.orm",
+        "documentation": {}
+    },
+    {
+        "label": "mapped_column",
+        "importPath": "sqlalchemy.orm",
+        "description": "sqlalchemy.orm",
+        "isExtraImport": true,
+        "detail": "sqlalchemy.orm",
+        "documentation": {}
+    },
+    {
+        "label": "relationship",
+        "importPath": "sqlalchemy.orm",
+        "description": "sqlalchemy.orm",
+        "isExtraImport": true,
+        "detail": "sqlalchemy.orm",
+        "documentation": {}
+    },
+    {
+        "label": "Mapped",
+        "importPath": "sqlalchemy.orm",
+        "description": "sqlalchemy.orm",
+        "isExtraImport": true,
+        "detail": "sqlalchemy.orm",
+        "documentation": {}
+    },
+    {
+        "label": "mapped_column",
+        "importPath": "sqlalchemy.orm",
+        "description": "sqlalchemy.orm",
+        "isExtraImport": true,
+        "detail": "sqlalchemy.orm",
+        "documentation": {}
+    },
+    {
+        "label": "Mapped",
+        "importPath": "sqlalchemy.orm",
+        "description": "sqlalchemy.orm",
+        "isExtraImport": true,
+        "detail": "sqlalchemy.orm",
+        "documentation": {}
+    },
+    {
+        "label": "mapped_column",
+        "importPath": "sqlalchemy.orm",
+        "description": "sqlalchemy.orm",
+        "isExtraImport": true,
+        "detail": "sqlalchemy.orm",
+        "documentation": {}
+    },
+    {
         "label": "Mapped",
         "importPath": "sqlalchemy.orm",
         "description": "sqlalchemy.orm",
@@ -651,6 +723,14 @@
     },
     {
         "label": "relationship",
+        "importPath": "sqlalchemy.orm",
+        "description": "sqlalchemy.orm",
+        "isExtraImport": true,
+        "detail": "sqlalchemy.orm",
+        "documentation": {}
+    },
+    {
+        "label": "Session",
         "importPath": "sqlalchemy.orm",
         "description": "sqlalchemy.orm",
         "isExtraImport": true,
@@ -826,7 +906,7 @@
         "documentation": {}
     },
     {
-        "label": "Session",
+        "label": "selectinload",
         "importPath": "sqlalchemy.orm",
         "description": "sqlalchemy.orm",
         "isExtraImport": true,
@@ -851,6 +931,30 @@
     },
     {
         "label": "Session",
+        "importPath": "sqlalchemy.orm",
+        "description": "sqlalchemy.orm",
+        "isExtraImport": true,
+        "detail": "sqlalchemy.orm",
+        "documentation": {}
+    },
+    {
+        "label": "Session",
+        "importPath": "sqlalchemy.orm",
+        "description": "sqlalchemy.orm",
+        "isExtraImport": true,
+        "detail": "sqlalchemy.orm",
+        "documentation": {}
+    },
+    {
+        "label": "Session",
+        "importPath": "sqlalchemy.orm",
+        "description": "sqlalchemy.orm",
+        "isExtraImport": true,
+        "detail": "sqlalchemy.orm",
+        "documentation": {}
+    },
+    {
+        "label": "selectinload",
         "importPath": "sqlalchemy.orm",
         "description": "sqlalchemy.orm",
         "isExtraImport": true,
@@ -1282,6 +1386,22 @@
         "documentation": {}
     },
     {
+        "label": "Note",
+        "importPath": "app.models",
+        "description": "app.models",
+        "isExtraImport": true,
+        "detail": "app.models",
+        "documentation": {}
+    },
+    {
+        "label": "NoteVisibility",
+        "importPath": "app.models",
+        "description": "app.models",
+        "isExtraImport": true,
+        "detail": "app.models",
+        "documentation": {}
+    },
+    {
         "label": "Priority",
         "importPath": "app.models",
         "description": "app.models",
@@ -1666,6 +1786,14 @@
         "documentation": {}
     },
     {
+        "label": "Note",
+        "importPath": "app.models",
+        "description": "app.models",
+        "isExtraImport": true,
+        "detail": "app.models",
+        "documentation": {}
+    },
+    {
         "label": "Notification",
         "importPath": "app.models",
         "description": "app.models",
@@ -1723,6 +1851,102 @@
     },
     {
         "label": "Label",
+        "importPath": "app.models",
+        "description": "app.models",
+        "isExtraImport": true,
+        "detail": "app.models",
+        "documentation": {}
+    },
+    {
+        "label": "User",
+        "importPath": "app.models",
+        "description": "app.models",
+        "isExtraImport": true,
+        "detail": "app.models",
+        "documentation": {}
+    },
+    {
+        "label": "WorkspaceRole",
+        "importPath": "app.models",
+        "description": "app.models",
+        "isExtraImport": true,
+        "detail": "app.models",
+        "documentation": {}
+    },
+    {
+        "label": "BLOCK_TYPES",
+        "importPath": "app.models",
+        "description": "app.models",
+        "isExtraImport": true,
+        "detail": "app.models",
+        "documentation": {}
+    },
+    {
+        "label": "MAX_INDENT",
+        "importPath": "app.models",
+        "description": "app.models",
+        "isExtraImport": true,
+        "detail": "app.models",
+        "documentation": {}
+    },
+    {
+        "label": "Activity",
+        "importPath": "app.models",
+        "description": "app.models",
+        "isExtraImport": true,
+        "detail": "app.models",
+        "documentation": {}
+    },
+    {
+        "label": "Board",
+        "importPath": "app.models",
+        "description": "app.models",
+        "isExtraImport": true,
+        "detail": "app.models",
+        "documentation": {}
+    },
+    {
+        "label": "Card",
+        "importPath": "app.models",
+        "description": "app.models",
+        "isExtraImport": true,
+        "detail": "app.models",
+        "documentation": {}
+    },
+    {
+        "label": "Column",
+        "importPath": "app.models",
+        "description": "app.models",
+        "isExtraImport": true,
+        "detail": "app.models",
+        "documentation": {}
+    },
+    {
+        "label": "Note",
+        "importPath": "app.models",
+        "description": "app.models",
+        "isExtraImport": true,
+        "detail": "app.models",
+        "documentation": {}
+    },
+    {
+        "label": "NoteBlock",
+        "importPath": "app.models",
+        "description": "app.models",
+        "isExtraImport": true,
+        "detail": "app.models",
+        "documentation": {}
+    },
+    {
+        "label": "NoteLink",
+        "importPath": "app.models",
+        "description": "app.models",
+        "isExtraImport": true,
+        "detail": "app.models",
+        "documentation": {}
+    },
+    {
+        "label": "NoteVisibility",
         "importPath": "app.models",
         "description": "app.models",
         "isExtraImport": true,
@@ -1818,6 +2042,22 @@
         "documentation": {}
     },
     {
+        "label": "Note",
+        "importPath": "app.models",
+        "description": "app.models",
+        "isExtraImport": true,
+        "detail": "app.models",
+        "documentation": {}
+    },
+    {
+        "label": "NoteVisibility",
+        "importPath": "app.models",
+        "description": "app.models",
+        "isExtraImport": true,
+        "detail": "app.models",
+        "documentation": {}
+    },
+    {
         "label": "User",
         "importPath": "app.models",
         "description": "app.models",
@@ -1891,6 +2131,22 @@
     },
     {
         "label": "Column",
+        "importPath": "app.models",
+        "description": "app.models",
+        "isExtraImport": true,
+        "detail": "app.models",
+        "documentation": {}
+    },
+    {
+        "label": "Note",
+        "importPath": "app.models",
+        "description": "app.models",
+        "isExtraImport": true,
+        "detail": "app.models",
+        "documentation": {}
+    },
+    {
+        "label": "NoteBlock",
         "importPath": "app.models",
         "description": "app.models",
         "isExtraImport": true,
@@ -2674,6 +2930,14 @@
         "documentation": {}
     },
     {
+        "label": "CardHit",
+        "importPath": "app.schemas.boards",
+        "description": "app.schemas.boards",
+        "isExtraImport": true,
+        "detail": "app.schemas.boards",
+        "documentation": {}
+    },
+    {
         "label": "boards",
         "importPath": "app.services",
         "description": "app.services",
@@ -2683,6 +2947,14 @@
     },
     {
         "label": "labels",
+        "importPath": "app.services",
+        "description": "app.services",
+        "isExtraImport": true,
+        "detail": "app.services",
+        "documentation": {}
+    },
+    {
+        "label": "notes",
         "importPath": "app.services",
         "description": "app.services",
         "isExtraImport": true,
@@ -2755,6 +3027,22 @@
     },
     {
         "label": "labels",
+        "importPath": "app.services",
+        "description": "app.services",
+        "isExtraImport": true,
+        "detail": "app.services",
+        "documentation": {}
+    },
+    {
+        "label": "notes",
+        "importPath": "app.services",
+        "description": "app.services",
+        "isExtraImport": true,
+        "detail": "app.services",
+        "documentation": {}
+    },
+    {
+        "label": "search",
         "importPath": "app.services",
         "description": "app.services",
         "isExtraImport": true,
@@ -2859,6 +3147,14 @@
     },
     {
         "label": "templates",
+        "importPath": "app.services",
+        "description": "app.services",
+        "isExtraImport": true,
+        "detail": "app.services",
+        "documentation": {}
+    },
+    {
+        "label": "notes",
         "importPath": "app.services",
         "description": "app.services",
         "isExtraImport": true,
@@ -3083,6 +3379,30 @@
     },
     {
         "label": "permissions",
+        "importPath": "app.services",
+        "description": "app.services",
+        "isExtraImport": true,
+        "detail": "app.services",
+        "documentation": {}
+    },
+    {
+        "label": "permissions",
+        "importPath": "app.services",
+        "description": "app.services",
+        "isExtraImport": true,
+        "detail": "app.services",
+        "documentation": {}
+    },
+    {
+        "label": "activity",
+        "importPath": "app.services",
+        "description": "app.services",
+        "isExtraImport": true,
+        "detail": "app.services",
+        "documentation": {}
+    },
+    {
+        "label": "notifications",
         "importPath": "app.services",
         "description": "app.services",
         "isExtraImport": true,
@@ -3570,6 +3890,22 @@
         "documentation": {}
     },
     {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "UTC",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
         "label": "date",
         "importPath": "datetime",
         "description": "datetime",
@@ -3603,6 +3939,14 @@
     },
     {
         "label": "UTC",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
         "importPath": "datetime",
         "description": "datetime",
         "isExtraImport": true,
@@ -3811,6 +4155,30 @@
     },
     {
         "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "UTC",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "timedelta",
         "importPath": "datetime",
         "description": "datetime",
         "isExtraImport": true,
@@ -4338,6 +4706,38 @@
         "documentation": {}
     },
     {
+        "label": "Field",
+        "importPath": "pydantic",
+        "description": "pydantic",
+        "isExtraImport": true,
+        "detail": "pydantic",
+        "documentation": {}
+    },
+    {
+        "label": "StringConstraints",
+        "importPath": "pydantic",
+        "description": "pydantic",
+        "isExtraImport": true,
+        "detail": "pydantic",
+        "documentation": {}
+    },
+    {
+        "label": "BaseModel",
+        "importPath": "pydantic",
+        "description": "pydantic",
+        "isExtraImport": true,
+        "detail": "pydantic",
+        "documentation": {}
+    },
+    {
+        "label": "ConfigDict",
+        "importPath": "pydantic",
+        "description": "pydantic",
+        "isExtraImport": true,
+        "detail": "pydantic",
+        "documentation": {}
+    },
+    {
         "label": "BaseModel",
         "importPath": "pydantic",
         "description": "pydantic",
@@ -4723,6 +5123,62 @@
         "documentation": {}
     },
     {
+        "label": "Boolean",
+        "importPath": "sqlalchemy",
+        "description": "sqlalchemy",
+        "isExtraImport": true,
+        "detail": "sqlalchemy",
+        "documentation": {}
+    },
+    {
+        "label": "DateTime",
+        "importPath": "sqlalchemy",
+        "description": "sqlalchemy",
+        "isExtraImport": true,
+        "detail": "sqlalchemy",
+        "documentation": {}
+    },
+    {
+        "label": "ForeignKey",
+        "importPath": "sqlalchemy",
+        "description": "sqlalchemy",
+        "isExtraImport": true,
+        "detail": "sqlalchemy",
+        "documentation": {}
+    },
+    {
+        "label": "Integer",
+        "importPath": "sqlalchemy",
+        "description": "sqlalchemy",
+        "isExtraImport": true,
+        "detail": "sqlalchemy",
+        "documentation": {}
+    },
+    {
+        "label": "String",
+        "importPath": "sqlalchemy",
+        "description": "sqlalchemy",
+        "isExtraImport": true,
+        "detail": "sqlalchemy",
+        "documentation": {}
+    },
+    {
+        "label": "Text",
+        "importPath": "sqlalchemy",
+        "description": "sqlalchemy",
+        "isExtraImport": true,
+        "detail": "sqlalchemy",
+        "documentation": {}
+    },
+    {
+        "label": "UniqueConstraint",
+        "importPath": "sqlalchemy",
+        "description": "sqlalchemy",
+        "isExtraImport": true,
+        "detail": "sqlalchemy",
+        "documentation": {}
+    },
+    {
         "label": "DateTime",
         "importPath": "sqlalchemy",
         "description": "sqlalchemy",
@@ -5011,6 +5467,14 @@
         "documentation": {}
     },
     {
+        "label": "select",
+        "importPath": "sqlalchemy",
+        "description": "sqlalchemy",
+        "isExtraImport": true,
+        "detail": "sqlalchemy",
+        "documentation": {}
+    },
+    {
         "label": "func",
         "importPath": "sqlalchemy",
         "description": "sqlalchemy",
@@ -5036,6 +5500,14 @@
     },
     {
         "label": "select",
+        "importPath": "sqlalchemy",
+        "description": "sqlalchemy",
+        "isExtraImport": true,
+        "detail": "sqlalchemy",
+        "documentation": {}
+    },
+    {
+        "label": "or_",
         "importPath": "sqlalchemy",
         "description": "sqlalchemy",
         "isExtraImport": true,
@@ -5155,6 +5627,126 @@
         "documentation": {}
     },
     {
+        "label": "BlockText",
+        "importPath": "app.schemas.notes",
+        "description": "app.schemas.notes",
+        "isExtraImport": true,
+        "detail": "app.schemas.notes",
+        "documentation": {}
+    },
+    {
+        "label": "BlockType",
+        "importPath": "app.schemas.notes",
+        "description": "app.schemas.notes",
+        "isExtraImport": true,
+        "detail": "app.schemas.notes",
+        "documentation": {}
+    },
+    {
+        "label": "Indent",
+        "importPath": "app.schemas.notes",
+        "description": "app.schemas.notes",
+        "isExtraImport": true,
+        "detail": "app.schemas.notes",
+        "documentation": {}
+    },
+    {
+        "label": "NoteTitle",
+        "importPath": "app.schemas.notes",
+        "description": "app.schemas.notes",
+        "isExtraImport": true,
+        "detail": "app.schemas.notes",
+        "documentation": {}
+    },
+    {
+        "label": "NoteBlockPatch",
+        "importPath": "app.schemas.notes",
+        "description": "app.schemas.notes",
+        "isExtraImport": true,
+        "detail": "app.schemas.notes",
+        "documentation": {}
+    },
+    {
+        "label": "NoteBlocksAdd",
+        "importPath": "app.schemas.notes",
+        "description": "app.schemas.notes",
+        "isExtraImport": true,
+        "detail": "app.schemas.notes",
+        "documentation": {}
+    },
+    {
+        "label": "NoteBlocksReplace",
+        "importPath": "app.schemas.notes",
+        "description": "app.schemas.notes",
+        "isExtraImport": true,
+        "detail": "app.schemas.notes",
+        "documentation": {}
+    },
+    {
+        "label": "NoteCreate",
+        "importPath": "app.schemas.notes",
+        "description": "app.schemas.notes",
+        "isExtraImport": true,
+        "detail": "app.schemas.notes",
+        "documentation": {}
+    },
+    {
+        "label": "NoteDetail",
+        "importPath": "app.schemas.notes",
+        "description": "app.schemas.notes",
+        "isExtraImport": true,
+        "detail": "app.schemas.notes",
+        "documentation": {}
+    },
+    {
+        "label": "NoteMove",
+        "importPath": "app.schemas.notes",
+        "description": "app.schemas.notes",
+        "isExtraImport": true,
+        "detail": "app.schemas.notes",
+        "documentation": {}
+    },
+    {
+        "label": "NoteSummary",
+        "importPath": "app.schemas.notes",
+        "description": "app.schemas.notes",
+        "isExtraImport": true,
+        "detail": "app.schemas.notes",
+        "documentation": {}
+    },
+    {
+        "label": "NoteUpdate",
+        "importPath": "app.schemas.notes",
+        "description": "app.schemas.notes",
+        "isExtraImport": true,
+        "detail": "app.schemas.notes",
+        "documentation": {}
+    },
+    {
+        "label": "NoteVisibilityUpdate",
+        "importPath": "app.schemas.notes",
+        "description": "app.schemas.notes",
+        "isExtraImport": true,
+        "detail": "app.schemas.notes",
+        "documentation": {}
+    },
+    {
+        "label": "NoteHit",
+        "importPath": "app.schemas.notes",
+        "description": "app.schemas.notes",
+        "isExtraImport": true,
+        "detail": "app.schemas.notes",
+        "documentation": {}
+    },
+    {
+        "label": "NoteHit",
+        "importPath": "app.schemas.notes",
+        "description": "app.schemas.notes",
+        "isExtraImport": true,
+        "detail": "app.schemas.notes",
+        "documentation": {}
+    },
+    {
         "label": "Forbidden",
         "importPath": "app.services.errors",
         "description": "app.services.errors",
@@ -5300,6 +5892,30 @@
     },
     {
         "label": "Conflict",
+        "importPath": "app.services.errors",
+        "description": "app.services.errors",
+        "isExtraImport": true,
+        "detail": "app.services.errors",
+        "documentation": {}
+    },
+    {
+        "label": "InvalidRequest",
+        "importPath": "app.services.errors",
+        "description": "app.services.errors",
+        "isExtraImport": true,
+        "detail": "app.services.errors",
+        "documentation": {}
+    },
+    {
+        "label": "NotFound",
+        "importPath": "app.services.errors",
+        "description": "app.services.errors",
+        "isExtraImport": true,
+        "detail": "app.services.errors",
+        "documentation": {}
+    },
+    {
+        "label": "Forbidden",
         "importPath": "app.services.errors",
         "description": "app.services.errors",
         "isExtraImport": true,
@@ -5564,6 +6180,30 @@
     },
     {
         "label": "Depends",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "APIRouter",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "Depends",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "status",
         "importPath": "fastapi",
         "description": "fastapi",
         "isExtraImport": true,
@@ -5835,6 +6475,22 @@
         "documentation": {}
     },
     {
+        "label": "Base",
+        "importPath": "app.db",
+        "description": "app.db",
+        "isExtraImport": true,
+        "detail": "app.db",
+        "documentation": {}
+    },
+    {
+        "label": "get_db",
+        "importPath": "app.db",
+        "description": "app.db",
+        "isExtraImport": true,
+        "detail": "app.db",
+        "documentation": {}
+    },
+    {
         "label": "get_db",
         "importPath": "app.db",
         "description": "app.db",
@@ -5971,6 +6627,14 @@
         "documentation": {}
     },
     {
+        "label": "get_engine",
+        "importPath": "app.db",
+        "description": "app.db",
+        "isExtraImport": true,
+        "detail": "app.db",
+        "documentation": {}
+    },
+    {
         "label": "PasswordHasher",
         "importPath": "argon2",
         "description": "argon2",
@@ -6010,6 +6674,14 @@
         "importPath": "secrets",
         "description": "secrets",
         "detail": "secrets",
+        "documentation": {}
+    },
+    {
+        "label": "StrEnum",
+        "importPath": "enum",
+        "description": "enum",
+        "isExtraImport": true,
+        "detail": "enum",
         "documentation": {}
     },
     {
@@ -6262,6 +6934,14 @@
         "documentation": {}
     },
     {
+        "label": "CurrentUser",
+        "importPath": "app.auth.dependencies",
+        "description": "app.auth.dependencies",
+        "isExtraImport": true,
+        "detail": "app.auth.dependencies",
+        "documentation": {}
+    },
+    {
         "label": "AccountDeactivate",
         "importPath": "app.schemas.auth",
         "description": "app.schemas.auth",
@@ -6382,6 +7062,14 @@
         "documentation": {}
     },
     {
+        "label": "UserOut",
+        "importPath": "app.schemas.auth",
+        "description": "app.schemas.auth",
+        "isExtraImport": true,
+        "detail": "app.schemas.auth",
+        "documentation": {}
+    },
+    {
         "label": "InvitePreview",
         "importPath": "app.schemas.workspaces",
         "description": "app.schemas.workspaces",
@@ -6455,6 +7143,14 @@
     },
     {
         "label": "WorkspaceOut",
+        "importPath": "app.schemas.workspaces",
+        "description": "app.schemas.workspaces",
+        "isExtraImport": true,
+        "detail": "app.schemas.workspaces",
+        "documentation": {}
+    },
+    {
+        "label": "WorkspaceSearchResults",
         "importPath": "app.schemas.workspaces",
         "description": "app.schemas.workspaces",
         "isExtraImport": true,
@@ -6766,6 +7462,30 @@
         "documentation": {}
     },
     {
+        "label": "BLOCK_TYPES",
+        "importPath": "app.models.note",
+        "description": "app.models.note",
+        "isExtraImport": true,
+        "detail": "app.models.note",
+        "documentation": {}
+    },
+    {
+        "label": "MAX_INDENT",
+        "importPath": "app.models.note",
+        "description": "app.models.note",
+        "isExtraImport": true,
+        "detail": "app.models.note",
+        "documentation": {}
+    },
+    {
+        "label": "NoteVisibility",
+        "importPath": "app.models.note",
+        "description": "app.models.note",
+        "isExtraImport": true,
+        "detail": "app.models.note",
+        "documentation": {}
+    },
+    {
         "label": "os",
         "kind": 6,
         "isExtraImport": true,
@@ -6850,6 +7570,38 @@
     },
     {
         "label": "card_for",
+        "importPath": "app.services.boards",
+        "description": "app.services.boards",
+        "isExtraImport": true,
+        "detail": "app.services.boards",
+        "documentation": {}
+    },
+    {
+        "label": "board_for",
+        "importPath": "app.services.boards",
+        "description": "app.services.boards",
+        "isExtraImport": true,
+        "detail": "app.services.boards",
+        "documentation": {}
+    },
+    {
+        "label": "card_for",
+        "importPath": "app.services.boards",
+        "description": "app.services.boards",
+        "isExtraImport": true,
+        "detail": "app.services.boards",
+        "documentation": {}
+    },
+    {
+        "label": "_fresh",
+        "importPath": "app.services.boards",
+        "description": "app.services.boards",
+        "isExtraImport": true,
+        "detail": "app.services.boards",
+        "documentation": {}
+    },
+    {
+        "label": "_renumber",
         "importPath": "app.services.boards",
         "description": "app.services.boards",
         "isExtraImport": true,
@@ -7099,6 +7851,14 @@
         "documentation": {}
     },
     {
+        "label": "notes",
+        "importPath": "app.routers",
+        "description": "app.routers",
+        "isExtraImport": true,
+        "detail": "app.routers",
+        "documentation": {}
+    },
+    {
         "label": "notifications",
         "importPath": "app.routers",
         "description": "app.routers",
@@ -7324,7 +8084,23 @@
         "documentation": {}
     },
     {
+        "label": "op",
+        "importPath": "alembic",
+        "description": "alembic",
+        "isExtraImport": true,
+        "detail": "alembic",
+        "documentation": {}
+    },
+    {
         "label": "context",
+        "importPath": "alembic",
+        "description": "alembic",
+        "isExtraImport": true,
+        "detail": "alembic",
+        "documentation": {}
+    },
+    {
+        "label": "command",
         "importPath": "alembic",
         "description": "alembic",
         "isExtraImport": true,
@@ -7370,6 +8146,14 @@
         "importPath": "pytest",
         "description": "pytest",
         "detail": "pytest",
+        "documentation": {}
+    },
+    {
+        "label": "Config",
+        "importPath": "alembic.config",
+        "description": "alembic.config",
+        "isExtraImport": true,
+        "detail": "alembic.config",
         "documentation": {}
     },
     {
@@ -7865,7 +8649,16 @@
         "kind": 5,
         "importPath": "backend.app.ai.context",
         "description": "backend.app.ai.context",
-        "peekOfCode": "MAX_CARDS_PER_COLUMN = 50\nMAX_DESCRIPTION_CHARS = 200\nMAX_EXISTING_TITLES = 100\nSYSTEM_PROMPT = \"\"\"You are the assistant inside Kobi, a product-management app. You help the \\\nuser manage the board they have open: columns and cards, assignees, priorities, due dates, \\\nestimates, labels, checklists, comments, and sprints.\nRules:\n- Act only through the provided tools. Use the exact numeric IDs from the board state below; \\\nnever invent IDs. Positions are 0-based.\n- If a tool returns an error, read it, fix the arguments and try again, or explain the problem.",
+        "peekOfCode": "MAX_CARDS_PER_COLUMN = 50\nMAX_PAGES = 40\n\"\"\"Page titles in the context. The body is read on demand with `read_page`.\"\"\"\nMAX_DESCRIPTION_CHARS = 200\nMAX_EXISTING_TITLES = 100\nSYSTEM_PROMPT = \"\"\"You are the assistant inside Kobi, a productivity app. You help the \\\nuser manage the board they have open: columns and cards, assignees, priorities, due dates, \\\nestimates, labels, checklists, comments, and sprints - and the workspace's pages: notes, docs \\\nand written-up plans.\nRules:",
+        "detail": "backend.app.ai.context",
+        "documentation": {}
+    },
+    {
+        "label": "MAX_PAGES",
+        "kind": 5,
+        "importPath": "backend.app.ai.context",
+        "description": "backend.app.ai.context",
+        "peekOfCode": "MAX_PAGES = 40\n\"\"\"Page titles in the context. The body is read on demand with `read_page`.\"\"\"\nMAX_DESCRIPTION_CHARS = 200\nMAX_EXISTING_TITLES = 100\nSYSTEM_PROMPT = \"\"\"You are the assistant inside Kobi, a productivity app. You help the \\\nuser manage the board they have open: columns and cards, assignees, priorities, due dates, \\\nestimates, labels, checklists, comments, and sprints - and the workspace's pages: notes, docs \\\nand written-up plans.\nRules:\n- Act only through the provided tools. Use the exact numeric IDs from the board state below; \\",
         "detail": "backend.app.ai.context",
         "documentation": {}
     },
@@ -7874,7 +8667,7 @@
         "kind": 5,
         "importPath": "backend.app.ai.context",
         "description": "backend.app.ai.context",
-        "peekOfCode": "MAX_DESCRIPTION_CHARS = 200\nMAX_EXISTING_TITLES = 100\nSYSTEM_PROMPT = \"\"\"You are the assistant inside Kobi, a product-management app. You help the \\\nuser manage the board they have open: columns and cards, assignees, priorities, due dates, \\\nestimates, labels, checklists, comments, and sprints.\nRules:\n- Act only through the provided tools. Use the exact numeric IDs from the board state below; \\\nnever invent IDs. Positions are 0-based.\n- If a tool returns an error, read it, fix the arguments and try again, or explain the problem.\n- Deleting needs the user's confirmation. Delete tools only PROPOSE a deletion; after calling \\",
+        "peekOfCode": "MAX_DESCRIPTION_CHARS = 200\nMAX_EXISTING_TITLES = 100\nSYSTEM_PROMPT = \"\"\"You are the assistant inside Kobi, a productivity app. You help the \\\nuser manage the board they have open: columns and cards, assignees, priorities, due dates, \\\nestimates, labels, checklists, comments, and sprints - and the workspace's pages: notes, docs \\\nand written-up plans.\nRules:\n- Act only through the provided tools. Use the exact numeric IDs from the board state below; \\\nnever invent IDs. Positions are 0-based.\n- If a tool returns an error, read it, fix the arguments and try again, or explain the problem.",
         "detail": "backend.app.ai.context",
         "documentation": {}
     },
@@ -7883,7 +8676,7 @@
         "kind": 5,
         "importPath": "backend.app.ai.context",
         "description": "backend.app.ai.context",
-        "peekOfCode": "MAX_EXISTING_TITLES = 100\nSYSTEM_PROMPT = \"\"\"You are the assistant inside Kobi, a product-management app. You help the \\\nuser manage the board they have open: columns and cards, assignees, priorities, due dates, \\\nestimates, labels, checklists, comments, and sprints.\nRules:\n- Act only through the provided tools. Use the exact numeric IDs from the board state below; \\\nnever invent IDs. Positions are 0-based.\n- If a tool returns an error, read it, fix the arguments and try again, or explain the problem.\n- Deleting needs the user's confirmation. Delete tools only PROPOSE a deletion; after calling \\\none, tell the user it is waiting for their confirmation. Never claim something was deleted. \\",
+        "peekOfCode": "MAX_EXISTING_TITLES = 100\nSYSTEM_PROMPT = \"\"\"You are the assistant inside Kobi, a productivity app. You help the \\\nuser manage the board they have open: columns and cards, assignees, priorities, due dates, \\\nestimates, labels, checklists, comments, and sprints - and the workspace's pages: notes, docs \\\nand written-up plans.\nRules:\n- Act only through the provided tools. Use the exact numeric IDs from the board state below; \\\nnever invent IDs. Positions are 0-based.\n- If a tool returns an error, read it, fix the arguments and try again, or explain the problem.\n- Deleting needs the user's confirmation. Delete tools only PROPOSE a deletion; after calling \\",
         "detail": "backend.app.ai.context",
         "documentation": {}
     },
@@ -7892,7 +8685,7 @@
         "kind": 5,
         "importPath": "backend.app.ai.context",
         "description": "backend.app.ai.context",
-        "peekOfCode": "SYSTEM_PROMPT = \"\"\"You are the assistant inside Kobi, a product-management app. You help the \\\nuser manage the board they have open: columns and cards, assignees, priorities, due dates, \\\nestimates, labels, checklists, comments, and sprints.\nRules:\n- Act only through the provided tools. Use the exact numeric IDs from the board state below; \\\nnever invent IDs. Positions are 0-based.\n- If a tool returns an error, read it, fix the arguments and try again, or explain the problem.\n- Deleting needs the user's confirmation. Delete tools only PROPOSE a deletion; after calling \\\none, tell the user it is waiting for their confirmation. Never claim something was deleted. \\\nPrefer archive_card, which is reversible and runs immediately.",
+        "peekOfCode": "SYSTEM_PROMPT = \"\"\"You are the assistant inside Kobi, a productivity app. You help the \\\nuser manage the board they have open: columns and cards, assignees, priorities, due dates, \\\nestimates, labels, checklists, comments, and sprints - and the workspace's pages: notes, docs \\\nand written-up plans.\nRules:\n- Act only through the provided tools. Use the exact numeric IDs from the board state below; \\\nnever invent IDs. Positions are 0-based.\n- If a tool returns an error, read it, fix the arguments and try again, or explain the problem.\n- Deleting needs the user's confirmation. Delete tools only PROPOSE a deletion; after calling \\\none, tell the user it is waiting for their confirmation. Never claim something was deleted. \\",
         "detail": "backend.app.ai.context",
         "documentation": {}
     },
@@ -8216,7 +9009,7 @@
         "kind": 6,
         "importPath": "backend.app.ai.tools",
         "description": "backend.app.ai.tools",
-        "peekOfCode": "class BatchCardAuthoringArgs(_Args):\n    changes: list[CardAuthoringArgs] = Field(min_length=1, max_length=20)\n    rationale: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=500)] = \"\"\nclass DraftCardsArgs(_Args):\n    cards: list[CardDraft] = Field(min_length=1, max_length=MAX_BATCH_CARDS)\nclass DeleteCardArgs(_Args):\n    card_id: int\nclass DeleteBoardArgs(_Args):\n    pass\n# --- handlers -------------------------------------------------------------------------------",
+        "peekOfCode": "class BatchCardAuthoringArgs(_Args):\n    changes: list[CardAuthoringArgs] = Field(min_length=1, max_length=20)\n    rationale: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=500)] = \"\"\nclass DraftCardsArgs(_Args):\n    cards: list[CardDraft] = Field(min_length=1, max_length=MAX_BATCH_CARDS)\n# Pages. The model writes blocks, not markdown: a todo it adds can be ticked, and a card it\n# embeds is checked against real state by the service before anything is written.\nclass PageBlockSpec(_Args):\n    type: BlockType = \"paragraph\"\n    text: BlockText = \"\"",
         "detail": "backend.app.ai.tools",
         "documentation": {}
     },
@@ -8225,7 +9018,61 @@
         "kind": 6,
         "importPath": "backend.app.ai.tools",
         "description": "backend.app.ai.tools",
-        "peekOfCode": "class DraftCardsArgs(_Args):\n    cards: list[CardDraft] = Field(min_length=1, max_length=MAX_BATCH_CARDS)\nclass DeleteCardArgs(_Args):\n    card_id: int\nclass DeleteBoardArgs(_Args):\n    pass\n# --- handlers -------------------------------------------------------------------------------\ndef _change(ctx: ToolContext, kind: str, summary: str, **ids: int | None) -> AppliedChange:\n    return AppliedChange(kind=kind, summary=summary, board_id=ids.pop(\"board_id\", None) or ctx.board_id, **ids)\ndef _card_data(card: Card) -> dict[str, Any]:",
+        "peekOfCode": "class DraftCardsArgs(_Args):\n    cards: list[CardDraft] = Field(min_length=1, max_length=MAX_BATCH_CARDS)\n# Pages. The model writes blocks, not markdown: a todo it adds can be ticked, and a card it\n# embeds is checked against real state by the service before anything is written.\nclass PageBlockSpec(_Args):\n    type: BlockType = \"paragraph\"\n    text: BlockText = \"\"\n    checked: bool = Field(False, description=\"Only meaningful on a todo block\")\n    indent: Indent = Field(0, description=\"Nesting level, 0 is the left margin\")\n    ref_card_id: int | None = Field(None, description=\"Required on a card_embed block\")",
+        "detail": "backend.app.ai.tools",
+        "documentation": {}
+    },
+    {
+        "label": "PageBlockSpec",
+        "kind": 6,
+        "importPath": "backend.app.ai.tools",
+        "description": "backend.app.ai.tools",
+        "peekOfCode": "class PageBlockSpec(_Args):\n    type: BlockType = \"paragraph\"\n    text: BlockText = \"\"\n    checked: bool = Field(False, description=\"Only meaningful on a todo block\")\n    indent: Indent = Field(0, description=\"Nesting level, 0 is the left margin\")\n    ref_card_id: int | None = Field(None, description=\"Required on a card_embed block\")\n    ref_board_id: int | None = Field(None, description=\"Required on a board_embed block\")\nMAX_AI_BLOCKS = 100\nclass SearchPagesArgs(_Args):\n    q: Annotated[str, StringConstraints(strip_whitespace=True, min_length=2, max_length=100)]",
+        "detail": "backend.app.ai.tools",
+        "documentation": {}
+    },
+    {
+        "label": "SearchPagesArgs",
+        "kind": 6,
+        "importPath": "backend.app.ai.tools",
+        "description": "backend.app.ai.tools",
+        "peekOfCode": "class SearchPagesArgs(_Args):\n    q: Annotated[str, StringConstraints(strip_whitespace=True, min_length=2, max_length=100)]\nclass ReadPageArgs(_Args):\n    note_id: int\nclass CreatePageArgs(_Args):\n    title: NoteTitle\n    parent_id: int | None = Field(None, description=\"Page id to nest this one under\")\n    private: bool = Field(False, description=\"True for a page only this user can see\")\n    blocks: list[PageBlockSpec] = Field(default_factory=list, max_length=MAX_AI_BLOCKS)\nclass AppendPageArgs(_Args):",
+        "detail": "backend.app.ai.tools",
+        "documentation": {}
+    },
+    {
+        "label": "ReadPageArgs",
+        "kind": 6,
+        "importPath": "backend.app.ai.tools",
+        "description": "backend.app.ai.tools",
+        "peekOfCode": "class ReadPageArgs(_Args):\n    note_id: int\nclass CreatePageArgs(_Args):\n    title: NoteTitle\n    parent_id: int | None = Field(None, description=\"Page id to nest this one under\")\n    private: bool = Field(False, description=\"True for a page only this user can see\")\n    blocks: list[PageBlockSpec] = Field(default_factory=list, max_length=MAX_AI_BLOCKS)\nclass AppendPageArgs(_Args):\n    note_id: int\n    blocks: list[PageBlockSpec] = Field(min_length=1, max_length=MAX_AI_BLOCKS)",
+        "detail": "backend.app.ai.tools",
+        "documentation": {}
+    },
+    {
+        "label": "CreatePageArgs",
+        "kind": 6,
+        "importPath": "backend.app.ai.tools",
+        "description": "backend.app.ai.tools",
+        "peekOfCode": "class CreatePageArgs(_Args):\n    title: NoteTitle\n    parent_id: int | None = Field(None, description=\"Page id to nest this one under\")\n    private: bool = Field(False, description=\"True for a page only this user can see\")\n    blocks: list[PageBlockSpec] = Field(default_factory=list, max_length=MAX_AI_BLOCKS)\nclass AppendPageArgs(_Args):\n    note_id: int\n    blocks: list[PageBlockSpec] = Field(min_length=1, max_length=MAX_AI_BLOCKS)\nclass ArchivePageArgs(_Args):\n    note_id: int",
+        "detail": "backend.app.ai.tools",
+        "documentation": {}
+    },
+    {
+        "label": "AppendPageArgs",
+        "kind": 6,
+        "importPath": "backend.app.ai.tools",
+        "description": "backend.app.ai.tools",
+        "peekOfCode": "class AppendPageArgs(_Args):\n    note_id: int\n    blocks: list[PageBlockSpec] = Field(min_length=1, max_length=MAX_AI_BLOCKS)\nclass ArchivePageArgs(_Args):\n    note_id: int\nclass DeleteCardArgs(_Args):\n    card_id: int\nclass DeleteBoardArgs(_Args):\n    pass\n# --- handlers -------------------------------------------------------------------------------",
+        "detail": "backend.app.ai.tools",
+        "documentation": {}
+    },
+    {
+        "label": "ArchivePageArgs",
+        "kind": 6,
+        "importPath": "backend.app.ai.tools",
+        "description": "backend.app.ai.tools",
+        "peekOfCode": "class ArchivePageArgs(_Args):\n    note_id: int\nclass DeleteCardArgs(_Args):\n    card_id: int\nclass DeleteBoardArgs(_Args):\n    pass\n# --- handlers -------------------------------------------------------------------------------\ndef _change(ctx: ToolContext, kind: str, summary: str, **ids: int | None) -> AppliedChange:\n    return AppliedChange(kind=kind, summary=summary, board_id=ids.pop(\"board_id\", None) or ctx.board_id, **ids)\ndef _card_data(card: Card) -> dict[str, Any]:",
         "detail": "backend.app.ai.tools",
         "documentation": {}
     },
@@ -8280,6 +9127,15 @@
         "importPath": "backend.app.ai.tools",
         "description": "backend.app.ai.tools",
         "peekOfCode": "def execute(ctx: ToolContext, name: str, args: Any) -> ToolResult:\n    \"\"\"Validate and run one tool call. Every failure becomes a ToolError for the model.\"\"\"\n    tool = TOOLS.get(name)\n    if tool is None:\n        raise ToolError(f\"Unknown tool '{name}'. Available: {', '.join(TOOLS)}.\")\n    try:\n        parsed = tool.args.model_validate(args)\n    except ValidationError as exc:  # keep the message short for the model\n        detail = \"; \".join(f\"{'.'.join(map(str, e['loc'])) or 'arguments'}: {e['msg']}\" for e in exc.errors()[:5])\n        raise ToolError(f\"Invalid arguments: {detail}\") from None",
+        "detail": "backend.app.ai.tools",
+        "documentation": {}
+    },
+    {
+        "label": "MAX_AI_BLOCKS",
+        "kind": 5,
+        "importPath": "backend.app.ai.tools",
+        "description": "backend.app.ai.tools",
+        "peekOfCode": "MAX_AI_BLOCKS = 100\nclass SearchPagesArgs(_Args):\n    q: Annotated[str, StringConstraints(strip_whitespace=True, min_length=2, max_length=100)]\nclass ReadPageArgs(_Args):\n    note_id: int\nclass CreatePageArgs(_Args):\n    title: NoteTitle\n    parent_id: int | None = Field(None, description=\"Page id to nest this one under\")\n    private: bool = Field(False, description=\"True for a page only this user can see\")\n    blocks: list[PageBlockSpec] = Field(default_factory=list, max_length=MAX_AI_BLOCKS)",
         "detail": "backend.app.ai.tools",
         "documentation": {}
     },
@@ -8596,6 +9452,69 @@
         "description": "backend.app.models.label",
         "peekOfCode": "LABEL_COLORS = (\n    \"slate\",\n    \"indigo\",\n    \"cyan\",\n    \"emerald\",\n    \"amber\",\n    \"rose\",\n    \"violet\",\n)\nclass Label(Base):",
         "detail": "backend.app.models.label",
+        "documentation": {}
+    },
+    {
+        "label": "NoteVisibility",
+        "kind": 6,
+        "importPath": "backend.app.models.note",
+        "description": "backend.app.models.note",
+        "peekOfCode": "class NoteVisibility(StrEnum):\n    \"\"\"Stored as the string value, like `WorkspaceRole` and `Priority`.\"\"\"\n    WORKSPACE = \"workspace\"\n    \"\"\"Every member of the workspace can read it; writing still needs a member role.\"\"\"\n    PRIVATE = \"private\"\n    \"\"\"Only the owner, including against admins and owners. A non-owner gets a 404.\"\"\"\n# The fixed block vocabulary. Like `LABEL_COLORS`, a closed set keeps the UI from having to\n# render something it has never heard of, and keeps the AI from inventing a block type.\nBLOCK_TYPES = (\n    \"paragraph\",",
+        "detail": "backend.app.models.note",
+        "documentation": {}
+    },
+    {
+        "label": "Note",
+        "kind": 6,
+        "importPath": "backend.app.models.note",
+        "description": "backend.app.models.note",
+        "peekOfCode": "class Note(Base):\n    \"\"\"A page. `owner_id` is provenance for a workspace note and access for a private one.\"\"\"\n    __tablename__ = \"notes\"\n    id: Mapped[int] = mapped_column(primary_key=True)\n    workspace_id: Mapped[int] = mapped_column(\n        ForeignKey(\"workspaces.id\", ondelete=\"CASCADE\"), index=True\n    )\n    # A subpage dies with its parent, the way a column's cards do.\n    parent_id: Mapped[int | None] = mapped_column(\n        ForeignKey(\"notes.id\", ondelete=\"CASCADE\"), index=True, default=None",
+        "detail": "backend.app.models.note",
+        "documentation": {}
+    },
+    {
+        "label": "NoteBlock",
+        "kind": 6,
+        "importPath": "backend.app.models.note",
+        "description": "backend.app.models.note",
+        "peekOfCode": "class NoteBlock(Base):\n    \"\"\"One line of a page. `indent` expresses nesting without a second tree to keep in order.\"\"\"\n    __tablename__ = \"note_blocks\"\n    id: Mapped[int] = mapped_column(primary_key=True)\n    note_id: Mapped[int] = mapped_column(ForeignKey(\"notes.id\", ondelete=\"CASCADE\"), index=True)\n    type: Mapped[str] = mapped_column(String(20), default=BLOCK_TYPES[0])\n    text: Mapped[str] = mapped_column(Text, default=\"\")\n    # Only meaningful on a todo block; left False everywhere else.\n    checked: Mapped[bool] = mapped_column(Boolean, default=False)\n    indent: Mapped[int] = mapped_column(Integer, default=0)",
+        "detail": "backend.app.models.note",
+        "documentation": {}
+    },
+    {
+        "label": "NoteLink",
+        "kind": 6,
+        "importPath": "backend.app.models.note",
+        "description": "backend.app.models.note",
+        "peekOfCode": "class NoteLink(Base):\n    \"\"\"A note's reference to board work, derived from its blocks on every save.\n    It exists so a card can answer \"which pages mention me?\" without reading every block in the\n    workspace. `target_id` is a plain integer for the same reason `Activity.card_id` is.\n    \"\"\"\n    __tablename__ = \"note_links\"\n    __table_args__ = (\n        UniqueConstraint(\"note_id\", \"target_type\", \"target_id\", name=\"uq_note_link_target\"),\n    )\n    id: Mapped[int] = mapped_column(primary_key=True)",
+        "detail": "backend.app.models.note",
+        "documentation": {}
+    },
+    {
+        "label": "BLOCK_TYPES",
+        "kind": 5,
+        "importPath": "backend.app.models.note",
+        "description": "backend.app.models.note",
+        "peekOfCode": "BLOCK_TYPES = (\n    \"paragraph\",\n    \"heading1\",\n    \"heading2\",\n    \"heading3\",\n    \"bulleted\",\n    \"numbered\",\n    \"todo\",\n    \"quote\",\n    \"callout\",",
+        "detail": "backend.app.models.note",
+        "documentation": {}
+    },
+    {
+        "label": "EMBED_TYPES",
+        "kind": 5,
+        "importPath": "backend.app.models.note",
+        "description": "backend.app.models.note",
+        "peekOfCode": "EMBED_TYPES = (\"card_embed\", \"board_embed\")\n\"\"\"Blocks that reference board work instead of carrying text.\"\"\"\nMAX_INDENT = 5\nclass Note(Base):\n    \"\"\"A page. `owner_id` is provenance for a workspace note and access for a private one.\"\"\"\n    __tablename__ = \"notes\"\n    id: Mapped[int] = mapped_column(primary_key=True)\n    workspace_id: Mapped[int] = mapped_column(\n        ForeignKey(\"workspaces.id\", ondelete=\"CASCADE\"), index=True\n    )",
+        "detail": "backend.app.models.note",
+        "documentation": {}
+    },
+    {
+        "label": "MAX_INDENT",
+        "kind": 5,
+        "importPath": "backend.app.models.note",
+        "description": "backend.app.models.note",
+        "peekOfCode": "MAX_INDENT = 5\nclass Note(Base):\n    \"\"\"A page. `owner_id` is provenance for a workspace note and access for a private one.\"\"\"\n    __tablename__ = \"notes\"\n    id: Mapped[int] = mapped_column(primary_key=True)\n    workspace_id: Mapped[int] = mapped_column(\n        ForeignKey(\"workspaces.id\", ondelete=\"CASCADE\"), index=True\n    )\n    # A subpage dies with its parent, the way a column's cards do.\n    parent_id: Mapped[int | None] = mapped_column(",
+        "detail": "backend.app.models.note",
         "documentation": {}
     },
     {
@@ -9247,6 +10166,141 @@
         "documentation": {}
     },
     {
+        "label": "list_notes",
+        "kind": 2,
+        "importPath": "backend.app.routers.notes",
+        "description": "backend.app.routers.notes",
+        "peekOfCode": "def list_notes(workspace_id: int, user: CurrentUser, db: DbSession, include_archived: bool = False):\n    \"\"\"Flat and ordered; the client assembles the tree from `parent_id`.\"\"\"\n    return svc.list_notes(db, user, workspace_id, include_archived)\n@router.post(\n    \"/workspaces/{workspace_id}/notes\",\n    response_model=NoteDetail,\n    status_code=status.HTTP_201_CREATED,\n)\ndef create_note(workspace_id: int, body: NoteCreate, user: CurrentUser, db: DbSession):\n    return svc.create_note(",
+        "detail": "backend.app.routers.notes",
+        "documentation": {}
+    },
+    {
+        "label": "create_note",
+        "kind": 2,
+        "importPath": "backend.app.routers.notes",
+        "description": "backend.app.routers.notes",
+        "peekOfCode": "def create_note(workspace_id: int, body: NoteCreate, user: CurrentUser, db: DbSession):\n    return svc.create_note(\n        db,\n        user,\n        workspace_id,\n        title=body.title,\n        parent_id=body.parent_id,\n        visibility=body.visibility.value if body.visibility else None,\n        icon=body.icon,\n        position=body.position,",
+        "detail": "backend.app.routers.notes",
+        "documentation": {}
+    },
+    {
+        "label": "get_note",
+        "kind": 2,
+        "importPath": "backend.app.routers.notes",
+        "description": "backend.app.routers.notes",
+        "peekOfCode": "def get_note(note_id: int, user: CurrentUser, db: DbSession):\n    return svc.note_for(db, user, note_id)\n@router.patch(\"/notes/{note_id}\", response_model=NoteDetail)\ndef update_note(note_id: int, body: NoteUpdate, user: CurrentUser, db: DbSession):\n    \"\"\"A field sent as null is left alone; an empty title is allowed, pages start untitled.\"\"\"\n    return svc.update_note(\n        db,\n        user,\n        note_id,\n        body.title if body.title is not None else svc.UNSET,",
+        "detail": "backend.app.routers.notes",
+        "documentation": {}
+    },
+    {
+        "label": "update_note",
+        "kind": 2,
+        "importPath": "backend.app.routers.notes",
+        "description": "backend.app.routers.notes",
+        "peekOfCode": "def update_note(note_id: int, body: NoteUpdate, user: CurrentUser, db: DbSession):\n    \"\"\"A field sent as null is left alone; an empty title is allowed, pages start untitled.\"\"\"\n    return svc.update_note(\n        db,\n        user,\n        note_id,\n        body.title if body.title is not None else svc.UNSET,\n        body.icon if body.icon is not None else svc.UNSET,\n    )\n@router.put(\"/notes/{note_id}/visibility\", response_model=NoteDetail)",
+        "detail": "backend.app.routers.notes",
+        "documentation": {}
+    },
+    {
+        "label": "set_visibility",
+        "kind": 2,
+        "importPath": "backend.app.routers.notes",
+        "description": "backend.app.routers.notes",
+        "peekOfCode": "def set_visibility(note_id: int, body: NoteVisibilityUpdate, user: CurrentUser, db: DbSession):\n    \"\"\"Owner only, and it applies to the whole subtree.\"\"\"\n    return svc.set_visibility(db, user, note_id, body.visibility.value)\n@router.post(\"/notes/{note_id}/move\", response_model=NoteDetail)\ndef move_note(note_id: int, body: NoteMove, user: CurrentUser, db: DbSession):\n    \"\"\"`parent_id` left out keeps the current parent; sent as null moves the page to the top.\"\"\"\n    sent = body.model_fields_set\n    return svc.move_note(\n        db,\n        user,",
+        "detail": "backend.app.routers.notes",
+        "documentation": {}
+    },
+    {
+        "label": "move_note",
+        "kind": 2,
+        "importPath": "backend.app.routers.notes",
+        "description": "backend.app.routers.notes",
+        "peekOfCode": "def move_note(note_id: int, body: NoteMove, user: CurrentUser, db: DbSession):\n    \"\"\"`parent_id` left out keeps the current parent; sent as null moves the page to the top.\"\"\"\n    sent = body.model_fields_set\n    return svc.move_note(\n        db,\n        user,\n        note_id,\n        body.parent_id if \"parent_id\" in sent else svc.UNSET,\n        body.position,\n    )",
+        "detail": "backend.app.routers.notes",
+        "documentation": {}
+    },
+    {
+        "label": "archive_note",
+        "kind": 2,
+        "importPath": "backend.app.routers.notes",
+        "description": "backend.app.routers.notes",
+        "peekOfCode": "def archive_note(note_id: int, user: CurrentUser, db: DbSession):\n    return svc.archive_note(db, user, note_id)\n@router.post(\"/notes/{note_id}/unarchive\", response_model=NoteDetail)\ndef unarchive_note(note_id: int, user: CurrentUser, db: DbSession):\n    return svc.unarchive_note(db, user, note_id)\n@router.delete(\"/notes/{note_id}\", status_code=status.HTTP_204_NO_CONTENT)\ndef delete_note(note_id: int, user: CurrentUser, db: DbSession):\n    svc.delete_note(db, user, note_id)\n@router.put(\"/notes/{note_id}/blocks\", response_model=NoteDetail)\ndef replace_blocks(note_id: int, body: NoteBlocksReplace, user: CurrentUser, db: DbSession):",
+        "detail": "backend.app.routers.notes",
+        "documentation": {}
+    },
+    {
+        "label": "unarchive_note",
+        "kind": 2,
+        "importPath": "backend.app.routers.notes",
+        "description": "backend.app.routers.notes",
+        "peekOfCode": "def unarchive_note(note_id: int, user: CurrentUser, db: DbSession):\n    return svc.unarchive_note(db, user, note_id)\n@router.delete(\"/notes/{note_id}\", status_code=status.HTTP_204_NO_CONTENT)\ndef delete_note(note_id: int, user: CurrentUser, db: DbSession):\n    svc.delete_note(db, user, note_id)\n@router.put(\"/notes/{note_id}/blocks\", response_model=NoteDetail)\ndef replace_blocks(note_id: int, body: NoteBlocksReplace, user: CurrentUser, db: DbSession):\n    \"\"\"The editor's save: the page's whole body, in one transaction.\"\"\"\n    return svc.replace_blocks(db, user, note_id, _blocks(body))\n@router.post(\"/notes/{note_id}/blocks\", response_model=NoteDetail)",
+        "detail": "backend.app.routers.notes",
+        "documentation": {}
+    },
+    {
+        "label": "delete_note",
+        "kind": 2,
+        "importPath": "backend.app.routers.notes",
+        "description": "backend.app.routers.notes",
+        "peekOfCode": "def delete_note(note_id: int, user: CurrentUser, db: DbSession):\n    svc.delete_note(db, user, note_id)\n@router.put(\"/notes/{note_id}/blocks\", response_model=NoteDetail)\ndef replace_blocks(note_id: int, body: NoteBlocksReplace, user: CurrentUser, db: DbSession):\n    \"\"\"The editor's save: the page's whole body, in one transaction.\"\"\"\n    return svc.replace_blocks(db, user, note_id, _blocks(body))\n@router.post(\"/notes/{note_id}/blocks\", response_model=NoteDetail)\ndef add_blocks(note_id: int, body: NoteBlocksAdd, user: CurrentUser, db: DbSession):\n    return svc.add_blocks(db, user, note_id, _blocks(body), body.position)\n@router.patch(\"/note-blocks/{block_id}\", response_model=NoteDetail)",
+        "detail": "backend.app.routers.notes",
+        "documentation": {}
+    },
+    {
+        "label": "replace_blocks",
+        "kind": 2,
+        "importPath": "backend.app.routers.notes",
+        "description": "backend.app.routers.notes",
+        "peekOfCode": "def replace_blocks(note_id: int, body: NoteBlocksReplace, user: CurrentUser, db: DbSession):\n    \"\"\"The editor's save: the page's whole body, in one transaction.\"\"\"\n    return svc.replace_blocks(db, user, note_id, _blocks(body))\n@router.post(\"/notes/{note_id}/blocks\", response_model=NoteDetail)\ndef add_blocks(note_id: int, body: NoteBlocksAdd, user: CurrentUser, db: DbSession):\n    return svc.add_blocks(db, user, note_id, _blocks(body), body.position)\n@router.patch(\"/note-blocks/{block_id}\", response_model=NoteDetail)\ndef patch_block(block_id: int, body: NoteBlockPatch, user: CurrentUser, db: DbSession):\n    \"\"\"One block, without resending the page. Returns the page, since positions may shift.\"\"\"\n    return svc.patch_block(",
+        "detail": "backend.app.routers.notes",
+        "documentation": {}
+    },
+    {
+        "label": "add_blocks",
+        "kind": 2,
+        "importPath": "backend.app.routers.notes",
+        "description": "backend.app.routers.notes",
+        "peekOfCode": "def add_blocks(note_id: int, body: NoteBlocksAdd, user: CurrentUser, db: DbSession):\n    return svc.add_blocks(db, user, note_id, _blocks(body), body.position)\n@router.patch(\"/note-blocks/{block_id}\", response_model=NoteDetail)\ndef patch_block(block_id: int, body: NoteBlockPatch, user: CurrentUser, db: DbSession):\n    \"\"\"One block, without resending the page. Returns the page, since positions may shift.\"\"\"\n    return svc.patch_block(\n        db,\n        user,\n        block_id,\n        text=body.text if body.text is not None else svc.UNSET,",
+        "detail": "backend.app.routers.notes",
+        "documentation": {}
+    },
+    {
+        "label": "patch_block",
+        "kind": 2,
+        "importPath": "backend.app.routers.notes",
+        "description": "backend.app.routers.notes",
+        "peekOfCode": "def patch_block(block_id: int, body: NoteBlockPatch, user: CurrentUser, db: DbSession):\n    \"\"\"One block, without resending the page. Returns the page, since positions may shift.\"\"\"\n    return svc.patch_block(\n        db,\n        user,\n        block_id,\n        text=body.text if body.text is not None else svc.UNSET,\n        type=body.type if body.type is not None else svc.UNSET,\n        checked=body.checked if body.checked is not None else svc.UNSET,\n        indent=body.indent if body.indent is not None else svc.UNSET,",
+        "detail": "backend.app.routers.notes",
+        "documentation": {}
+    },
+    {
+        "label": "notes_for_card",
+        "kind": 2,
+        "importPath": "backend.app.routers.notes",
+        "description": "backend.app.routers.notes",
+        "peekOfCode": "def notes_for_card(card_id: int, user: CurrentUser, db: DbSession):\n    \"\"\"The card's backlinks: pages that embed it, and that this user can see.\"\"\"\n    return svc.notes_linking_to(db, user, \"card\", card_id)",
+        "detail": "backend.app.routers.notes",
+        "documentation": {}
+    },
+    {
+        "label": "router",
+        "kind": 5,
+        "importPath": "backend.app.routers.notes",
+        "description": "backend.app.routers.notes",
+        "peekOfCode": "router = APIRouter()\nDbSession = Annotated[Session, Depends(get_db)]\ndef _blocks(body) -> list[svc.NewBlock]:\n    return [svc.NewBlock(**block.model_dump()) for block in body.blocks]\n@router.get(\"/workspaces/{workspace_id}/notes\", response_model=list[NoteSummary])\ndef list_notes(workspace_id: int, user: CurrentUser, db: DbSession, include_archived: bool = False):\n    \"\"\"Flat and ordered; the client assembles the tree from `parent_id`.\"\"\"\n    return svc.list_notes(db, user, workspace_id, include_archived)\n@router.post(\n    \"/workspaces/{workspace_id}/notes\",",
+        "detail": "backend.app.routers.notes",
+        "documentation": {}
+    },
+    {
+        "label": "DbSession",
+        "kind": 5,
+        "importPath": "backend.app.routers.notes",
+        "description": "backend.app.routers.notes",
+        "peekOfCode": "DbSession = Annotated[Session, Depends(get_db)]\ndef _blocks(body) -> list[svc.NewBlock]:\n    return [svc.NewBlock(**block.model_dump()) for block in body.blocks]\n@router.get(\"/workspaces/{workspace_id}/notes\", response_model=list[NoteSummary])\ndef list_notes(workspace_id: int, user: CurrentUser, db: DbSession, include_archived: bool = False):\n    \"\"\"Flat and ordered; the client assembles the tree from `parent_id`.\"\"\"\n    return svc.list_notes(db, user, workspace_id, include_archived)\n@router.post(\n    \"/workspaces/{workspace_id}/notes\",\n    response_model=NoteDetail,",
+        "detail": "backend.app.routers.notes",
+        "documentation": {}
+    },
+    {
         "label": "list_notifications",
         "kind": 2,
         "importPath": "backend.app.routers.notifications",
@@ -9611,7 +10665,7 @@
         "kind": 2,
         "importPath": "backend.app.routers.workspaces",
         "description": "backend.app.routers.workspaces",
-        "peekOfCode": "def search_workspace(workspace_id: int, q: str, user: CurrentUser, db: DbSession, limit: int = 50):\n    \"\"\"Cards across every board in the workspace. An empty query returns nothing.\"\"\"\n    return [_hit(card) for card in search_svc.search_workspace(db, user, workspace_id, q, limit)]\n@router.get(\"/my-cards\", response_model=list[CardHit])\ndef my_cards(user: CurrentUser, db: DbSession, workspace_id: int | None = None):\n    \"\"\"Everything assigned to me and still open, newest deadlines first.\"\"\"\n    return [_hit(card) for card in search_svc.my_cards(db, user, workspace_id)]\n@router.get(\"/workspaces/{workspace_id}/overview\", response_model=WorkspaceOverview)\ndef workspace_overview(workspace_id: int, user: CurrentUser, db: DbSession):\n    return analytics_svc.workspace_overview(db, user, workspace_id)",
+        "peekOfCode": "def search_workspace(workspace_id: int, q: str, user: CurrentUser, db: DbSession, limit: int = 50):\n    \"\"\"Cards and pages across the whole workspace. An empty query returns nothing.\n    Someone else's private page never appears here: `search_notes` composes the same visibility\n    filter every other note read does.\n    \"\"\"\n    return WorkspaceSearchResults(\n        cards=[_hit(card) for card in search_svc.search_workspace(db, user, workspace_id, q, limit)],\n        notes=[\n            NoteHit(\n                **NoteHit.model_validate(note).model_dump(exclude={\"excerpt\"}),",
         "detail": "backend.app.routers.workspaces",
         "documentation": {}
     },
@@ -9683,7 +10737,7 @@
         "kind": 6,
         "importPath": "backend.app.schemas.ai",
         "description": "backend.app.schemas.ai",
-        "peekOfCode": "class AiRequest(BaseModel):\n    message: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=2000)]\n    history: list[ChatMessage] = Field(default_factory=list, max_length=20)\nclass AppliedChange(BaseModel):\n    kind: str  # the tool that ran, e.g. \"move_card\"\n    summary: str\n    board_id: int\n    column_id: int | None = None\n    card_id: int | None = None\nclass PendingAction(BaseModel):",
+        "peekOfCode": "class AiRequest(BaseModel):\n    message: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=2000)]\n    history: list[ChatMessage] = Field(default_factory=list, max_length=20)\nclass AppliedChange(BaseModel):\n    kind: str  # the tool that ran, e.g. \"move_card\"\n    summary: str\n    board_id: int\n    column_id: int | None = None\n    card_id: int | None = None\n    # Set when the change was to a page rather than to the board the chat is open on.",
         "detail": "backend.app.schemas.ai",
         "documentation": {}
     },
@@ -9692,7 +10746,7 @@
         "kind": 6,
         "importPath": "backend.app.schemas.ai",
         "description": "backend.app.schemas.ai",
-        "peekOfCode": "class AppliedChange(BaseModel):\n    kind: str  # the tool that ran, e.g. \"move_card\"\n    summary: str\n    board_id: int\n    column_id: int | None = None\n    card_id: int | None = None\nclass PendingAction(BaseModel):\n    \"\"\"A destructive change the model proposed. Nothing is deleted until the user confirms.\"\"\"\n    tool: str\n    summary: str",
+        "peekOfCode": "class AppliedChange(BaseModel):\n    kind: str  # the tool that ran, e.g. \"move_card\"\n    summary: str\n    board_id: int\n    column_id: int | None = None\n    card_id: int | None = None\n    # Set when the change was to a page rather than to the board the chat is open on.\n    note_id: int | None = None\nclass PendingAction(BaseModel):\n    \"\"\"A destructive change the model proposed. Nothing is deleted until the user confirms.\"\"\"",
         "detail": "backend.app.schemas.ai",
         "documentation": {}
     },
@@ -10232,7 +11286,7 @@
         "kind": 6,
         "importPath": "backend.app.schemas.data_lifecycle",
         "description": "backend.app.schemas.data_lifecycle",
-        "peekOfCode": "class WorkspaceExport(BaseModel):\n    exported_at: datetime\n    workspace: dict[str, Any]\n    members: list[dict[str, Any]]\n    boards: list[dict[str, Any]]\n    labels: list[dict[str, Any]]\n    sprints: list[dict[str, Any]]\n    activities: list[dict[str, Any]]\n    notifications: list[dict[str, Any]]",
+        "peekOfCode": "class WorkspaceExport(BaseModel):\n    exported_at: datetime\n    workspace: dict[str, Any]\n    members: list[dict[str, Any]]\n    boards: list[dict[str, Any]]\n    labels: list[dict[str, Any]]\n    notes: list[dict[str, Any]]\n    sprints: list[dict[str, Any]]\n    activities: list[dict[str, Any]]\n    notifications: list[dict[str, Any]]",
         "detail": "backend.app.schemas.data_lifecycle",
         "documentation": {}
     },
@@ -10300,11 +11354,182 @@
         "documentation": {}
     },
     {
+        "label": "NoteBlockIn",
+        "kind": 6,
+        "importPath": "backend.app.schemas.notes",
+        "description": "backend.app.schemas.notes",
+        "peekOfCode": "class NoteBlockIn(BaseModel):\n    \"\"\"A block on the way in. `id` keeps an existing row on a document save; omit it for a new\n    block, and leave a block out of the save to delete it.\"\"\"\n    id: int | None = None\n    type: BlockType = \"paragraph\"\n    text: BlockText = \"\"\n    checked: bool = False\n    indent: Indent = 0\n    ref_card_id: int | None = None\n    ref_board_id: int | None = None",
+        "detail": "backend.app.schemas.notes",
+        "documentation": {}
+    },
+    {
+        "label": "NoteBlockOut",
+        "kind": 6,
+        "importPath": "backend.app.schemas.notes",
+        "description": "backend.app.schemas.notes",
+        "peekOfCode": "class NoteBlockOut(BaseModel):\n    model_config = ConfigDict(from_attributes=True)\n    id: int\n    type: str\n    text: str\n    checked: bool\n    indent: int\n    position: int\n    ref_card_id: int | None\n    ref_board_id: int | None",
+        "detail": "backend.app.schemas.notes",
+        "documentation": {}
+    },
+    {
+        "label": "NoteSummary",
+        "kind": 6,
+        "importPath": "backend.app.schemas.notes",
+        "description": "backend.app.schemas.notes",
+        "peekOfCode": "class NoteSummary(BaseModel):\n    \"\"\"What the page tree is drawn from. The body is not included.\"\"\"\n    model_config = ConfigDict(from_attributes=True)\n    id: int\n    workspace_id: int\n    parent_id: int | None\n    title: str\n    icon: str\n    visibility: NoteVisibility\n    position: int",
+        "detail": "backend.app.schemas.notes",
+        "documentation": {}
+    },
+    {
+        "label": "NoteDetail",
+        "kind": 6,
+        "importPath": "backend.app.schemas.notes",
+        "description": "backend.app.schemas.notes",
+        "peekOfCode": "class NoteDetail(NoteSummary):\n    blocks: list[NoteBlockOut]\nclass NoteHit(NoteSummary):\n    \"\"\"A page found by search, with a window around the match so the row says why it matched.\"\"\"\n    excerpt: str = \"\"\nclass NoteCreate(BaseModel):\n    title: NoteTitle = \"\"\n    icon: NoteIcon = \"\"\n    parent_id: int | None = None\n    # Omitted: inherited from the parent page, or workspace-visible at the top level. A subpage",
+        "detail": "backend.app.schemas.notes",
+        "documentation": {}
+    },
+    {
+        "label": "NoteHit",
+        "kind": 6,
+        "importPath": "backend.app.schemas.notes",
+        "description": "backend.app.schemas.notes",
+        "peekOfCode": "class NoteHit(NoteSummary):\n    \"\"\"A page found by search, with a window around the match so the row says why it matched.\"\"\"\n    excerpt: str = \"\"\nclass NoteCreate(BaseModel):\n    title: NoteTitle = \"\"\n    icon: NoteIcon = \"\"\n    parent_id: int | None = None\n    # Omitted: inherited from the parent page, or workspace-visible at the top level. A subpage\n    # of a private page is private whatever is asked for here.\n    visibility: NoteVisibility | None = None",
+        "detail": "backend.app.schemas.notes",
+        "documentation": {}
+    },
+    {
+        "label": "NoteCreate",
+        "kind": 6,
+        "importPath": "backend.app.schemas.notes",
+        "description": "backend.app.schemas.notes",
+        "peekOfCode": "class NoteCreate(BaseModel):\n    title: NoteTitle = \"\"\n    icon: NoteIcon = \"\"\n    parent_id: int | None = None\n    # Omitted: inherited from the parent page, or workspace-visible at the top level. A subpage\n    # of a private page is private whatever is asked for here.\n    visibility: NoteVisibility | None = None\n    position: Position | None = None  # None appends\n    blocks: list[NoteBlockIn] = Field(default_factory=list, max_length=MAX_BLOCKS_PER_REQUEST)\nclass NoteUpdate(BaseModel):",
+        "detail": "backend.app.schemas.notes",
+        "documentation": {}
+    },
+    {
+        "label": "NoteUpdate",
+        "kind": 6,
+        "importPath": "backend.app.schemas.notes",
+        "description": "backend.app.schemas.notes",
+        "peekOfCode": "class NoteUpdate(BaseModel):\n    \"\"\"Absent fields are left alone.\"\"\"\n    title: NoteTitle | None = None\n    icon: NoteIcon | None = None\nclass NoteVisibilityUpdate(BaseModel):\n    visibility: NoteVisibility\nclass NoteMove(BaseModel):\n    \"\"\"`parent_id` left out keeps the current parent; sent as null moves the page to the top.\"\"\"\n    parent_id: int | None = None\n    position: Position | None = None",
+        "detail": "backend.app.schemas.notes",
+        "documentation": {}
+    },
+    {
+        "label": "NoteVisibilityUpdate",
+        "kind": 6,
+        "importPath": "backend.app.schemas.notes",
+        "description": "backend.app.schemas.notes",
+        "peekOfCode": "class NoteVisibilityUpdate(BaseModel):\n    visibility: NoteVisibility\nclass NoteMove(BaseModel):\n    \"\"\"`parent_id` left out keeps the current parent; sent as null moves the page to the top.\"\"\"\n    parent_id: int | None = None\n    position: Position | None = None\nclass NoteBlocksReplace(BaseModel):\n    blocks: list[NoteBlockIn] = Field(default_factory=list, max_length=MAX_BLOCKS_PER_REQUEST)\nclass NoteBlocksAdd(BaseModel):\n    blocks: list[NoteBlockIn] = Field(min_length=1, max_length=MAX_BLOCKS_PER_REQUEST)",
+        "detail": "backend.app.schemas.notes",
+        "documentation": {}
+    },
+    {
+        "label": "NoteMove",
+        "kind": 6,
+        "importPath": "backend.app.schemas.notes",
+        "description": "backend.app.schemas.notes",
+        "peekOfCode": "class NoteMove(BaseModel):\n    \"\"\"`parent_id` left out keeps the current parent; sent as null moves the page to the top.\"\"\"\n    parent_id: int | None = None\n    position: Position | None = None\nclass NoteBlocksReplace(BaseModel):\n    blocks: list[NoteBlockIn] = Field(default_factory=list, max_length=MAX_BLOCKS_PER_REQUEST)\nclass NoteBlocksAdd(BaseModel):\n    blocks: list[NoteBlockIn] = Field(min_length=1, max_length=MAX_BLOCKS_PER_REQUEST)\n    position: Position | None = None  # None appends\nclass NoteBlockPatch(BaseModel):",
+        "detail": "backend.app.schemas.notes",
+        "documentation": {}
+    },
+    {
+        "label": "NoteBlocksReplace",
+        "kind": 6,
+        "importPath": "backend.app.schemas.notes",
+        "description": "backend.app.schemas.notes",
+        "peekOfCode": "class NoteBlocksReplace(BaseModel):\n    blocks: list[NoteBlockIn] = Field(default_factory=list, max_length=MAX_BLOCKS_PER_REQUEST)\nclass NoteBlocksAdd(BaseModel):\n    blocks: list[NoteBlockIn] = Field(min_length=1, max_length=MAX_BLOCKS_PER_REQUEST)\n    position: Position | None = None  # None appends\nclass NoteBlockPatch(BaseModel):\n    \"\"\"Absent fields are left alone. Ticking a todo is `{\"checked\": true}`.\"\"\"\n    type: BlockType | None = None\n    text: BlockText | None = None\n    checked: bool | None = None",
+        "detail": "backend.app.schemas.notes",
+        "documentation": {}
+    },
+    {
+        "label": "NoteBlocksAdd",
+        "kind": 6,
+        "importPath": "backend.app.schemas.notes",
+        "description": "backend.app.schemas.notes",
+        "peekOfCode": "class NoteBlocksAdd(BaseModel):\n    blocks: list[NoteBlockIn] = Field(min_length=1, max_length=MAX_BLOCKS_PER_REQUEST)\n    position: Position | None = None  # None appends\nclass NoteBlockPatch(BaseModel):\n    \"\"\"Absent fields are left alone. Ticking a todo is `{\"checked\": true}`.\"\"\"\n    type: BlockType | None = None\n    text: BlockText | None = None\n    checked: bool | None = None\n    indent: Indent | None = None",
+        "detail": "backend.app.schemas.notes",
+        "documentation": {}
+    },
+    {
+        "label": "NoteBlockPatch",
+        "kind": 6,
+        "importPath": "backend.app.schemas.notes",
+        "description": "backend.app.schemas.notes",
+        "peekOfCode": "class NoteBlockPatch(BaseModel):\n    \"\"\"Absent fields are left alone. Ticking a todo is `{\"checked\": true}`.\"\"\"\n    type: BlockType | None = None\n    text: BlockText | None = None\n    checked: bool | None = None\n    indent: Indent | None = None",
+        "detail": "backend.app.schemas.notes",
+        "documentation": {}
+    },
+    {
+        "label": "NoteTitle",
+        "kind": 5,
+        "importPath": "backend.app.schemas.notes",
+        "description": "backend.app.schemas.notes",
+        "peekOfCode": "NoteTitle = Annotated[str, StringConstraints(strip_whitespace=True, max_length=200)]\n\"\"\"A page may be untitled while it is being written, so unlike a card title this can be empty.\"\"\"\nNoteIcon = Annotated[str, StringConstraints(strip_whitespace=True, max_length=8)]\nBlockText = Annotated[str, StringConstraints(max_length=10_000)]\nBlockType = Literal[BLOCK_TYPES]  # type: ignore[valid-type]\nIndent = Annotated[int, Field(ge=0, le=MAX_INDENT)]\nPosition = Annotated[int, Field(ge=0)]\nMAX_BLOCKS_PER_REQUEST = 500\n\"\"\"One request's worth. `services/notes.MAX_BLOCKS` caps what a whole page may hold.\"\"\"\nclass NoteBlockIn(BaseModel):",
+        "detail": "backend.app.schemas.notes",
+        "documentation": {}
+    },
+    {
+        "label": "NoteIcon",
+        "kind": 5,
+        "importPath": "backend.app.schemas.notes",
+        "description": "backend.app.schemas.notes",
+        "peekOfCode": "NoteIcon = Annotated[str, StringConstraints(strip_whitespace=True, max_length=8)]\nBlockText = Annotated[str, StringConstraints(max_length=10_000)]\nBlockType = Literal[BLOCK_TYPES]  # type: ignore[valid-type]\nIndent = Annotated[int, Field(ge=0, le=MAX_INDENT)]\nPosition = Annotated[int, Field(ge=0)]\nMAX_BLOCKS_PER_REQUEST = 500\n\"\"\"One request's worth. `services/notes.MAX_BLOCKS` caps what a whole page may hold.\"\"\"\nclass NoteBlockIn(BaseModel):\n    \"\"\"A block on the way in. `id` keeps an existing row on a document save; omit it for a new\n    block, and leave a block out of the save to delete it.\"\"\"",
+        "detail": "backend.app.schemas.notes",
+        "documentation": {}
+    },
+    {
+        "label": "BlockText",
+        "kind": 5,
+        "importPath": "backend.app.schemas.notes",
+        "description": "backend.app.schemas.notes",
+        "peekOfCode": "BlockText = Annotated[str, StringConstraints(max_length=10_000)]\nBlockType = Literal[BLOCK_TYPES]  # type: ignore[valid-type]\nIndent = Annotated[int, Field(ge=0, le=MAX_INDENT)]\nPosition = Annotated[int, Field(ge=0)]\nMAX_BLOCKS_PER_REQUEST = 500\n\"\"\"One request's worth. `services/notes.MAX_BLOCKS` caps what a whole page may hold.\"\"\"\nclass NoteBlockIn(BaseModel):\n    \"\"\"A block on the way in. `id` keeps an existing row on a document save; omit it for a new\n    block, and leave a block out of the save to delete it.\"\"\"\n    id: int | None = None",
+        "detail": "backend.app.schemas.notes",
+        "documentation": {}
+    },
+    {
+        "label": "BlockType",
+        "kind": 5,
+        "importPath": "backend.app.schemas.notes",
+        "description": "backend.app.schemas.notes",
+        "peekOfCode": "BlockType = Literal[BLOCK_TYPES]  # type: ignore[valid-type]\nIndent = Annotated[int, Field(ge=0, le=MAX_INDENT)]\nPosition = Annotated[int, Field(ge=0)]\nMAX_BLOCKS_PER_REQUEST = 500\n\"\"\"One request's worth. `services/notes.MAX_BLOCKS` caps what a whole page may hold.\"\"\"\nclass NoteBlockIn(BaseModel):\n    \"\"\"A block on the way in. `id` keeps an existing row on a document save; omit it for a new\n    block, and leave a block out of the save to delete it.\"\"\"\n    id: int | None = None\n    type: BlockType = \"paragraph\"",
+        "detail": "backend.app.schemas.notes",
+        "documentation": {}
+    },
+    {
+        "label": "Indent",
+        "kind": 5,
+        "importPath": "backend.app.schemas.notes",
+        "description": "backend.app.schemas.notes",
+        "peekOfCode": "Indent = Annotated[int, Field(ge=0, le=MAX_INDENT)]\nPosition = Annotated[int, Field(ge=0)]\nMAX_BLOCKS_PER_REQUEST = 500\n\"\"\"One request's worth. `services/notes.MAX_BLOCKS` caps what a whole page may hold.\"\"\"\nclass NoteBlockIn(BaseModel):\n    \"\"\"A block on the way in. `id` keeps an existing row on a document save; omit it for a new\n    block, and leave a block out of the save to delete it.\"\"\"\n    id: int | None = None\n    type: BlockType = \"paragraph\"\n    text: BlockText = \"\"",
+        "detail": "backend.app.schemas.notes",
+        "documentation": {}
+    },
+    {
+        "label": "Position",
+        "kind": 5,
+        "importPath": "backend.app.schemas.notes",
+        "description": "backend.app.schemas.notes",
+        "peekOfCode": "Position = Annotated[int, Field(ge=0)]\nMAX_BLOCKS_PER_REQUEST = 500\n\"\"\"One request's worth. `services/notes.MAX_BLOCKS` caps what a whole page may hold.\"\"\"\nclass NoteBlockIn(BaseModel):\n    \"\"\"A block on the way in. `id` keeps an existing row on a document save; omit it for a new\n    block, and leave a block out of the save to delete it.\"\"\"\n    id: int | None = None\n    type: BlockType = \"paragraph\"\n    text: BlockText = \"\"\n    checked: bool = False",
+        "detail": "backend.app.schemas.notes",
+        "documentation": {}
+    },
+    {
+        "label": "MAX_BLOCKS_PER_REQUEST",
+        "kind": 5,
+        "importPath": "backend.app.schemas.notes",
+        "description": "backend.app.schemas.notes",
+        "peekOfCode": "MAX_BLOCKS_PER_REQUEST = 500\n\"\"\"One request's worth. `services/notes.MAX_BLOCKS` caps what a whole page may hold.\"\"\"\nclass NoteBlockIn(BaseModel):\n    \"\"\"A block on the way in. `id` keeps an existing row on a document save; omit it for a new\n    block, and leave a block out of the save to delete it.\"\"\"\n    id: int | None = None\n    type: BlockType = \"paragraph\"\n    text: BlockText = \"\"\n    checked: bool = False\n    indent: Indent = 0",
+        "detail": "backend.app.schemas.notes",
+        "documentation": {}
+    },
+    {
         "label": "NotificationOut",
         "kind": 6,
         "importPath": "backend.app.schemas.notifications",
         "description": "backend.app.schemas.notifications",
-        "peekOfCode": "class NotificationOut(BaseModel):\n    model_config = ConfigDict(from_attributes=True)\n    id: int\n    workspace_id: int\n    kind: str\n    title: str\n    body: str\n    board_id: int | None\n    card_id: int | None\n    actor_id: int | None",
+        "peekOfCode": "class NotificationOut(BaseModel):\n    model_config = ConfigDict(from_attributes=True)\n    id: int\n    workspace_id: int\n    kind: str\n    title: str\n    body: str\n    board_id: int | None\n    card_id: int | None\n    # Set instead of board/card when the subject is a page: (\"note\", 12).",
         "detail": "backend.app.schemas.notifications",
         "documentation": {}
     },
@@ -10547,7 +11772,16 @@
         "kind": 6,
         "importPath": "backend.app.schemas.workspaces",
         "description": "backend.app.schemas.workspaces",
-        "peekOfCode": "class InviteResult(BaseModel):\n    \"\"\"Inviting an address does one of two things, and the caller is told which.\n    `member` when the address already had an account (they are in the workspace now), `invite`\n    when it did not (they join automatically when they register).\n    \"\"\"\n    kind: Literal[\"invite\", \"member\"]\n    invite: InviteOut | None = None\n    member: MemberOut | None = None",
+        "peekOfCode": "class InviteResult(BaseModel):\n    \"\"\"Inviting an address does one of two things, and the caller is told which.\n    `member` when the address already had an account (they are in the workspace now), `invite`\n    when it did not (they join automatically when they register).\n    \"\"\"\n    kind: Literal[\"invite\", \"member\"]\n    invite: InviteOut | None = None\n    member: MemberOut | None = None\nclass WorkspaceSearchResults(BaseModel):\n    \"\"\"What one search across a workspace found, by surface.",
+        "detail": "backend.app.schemas.workspaces",
+        "documentation": {}
+    },
+    {
+        "label": "WorkspaceSearchResults",
+        "kind": 6,
+        "importPath": "backend.app.schemas.workspaces",
+        "description": "backend.app.schemas.workspaces",
+        "peekOfCode": "class WorkspaceSearchResults(BaseModel):\n    \"\"\"What one search across a workspace found, by surface.\n    An envelope rather than a flat list: a card and a page are different things, open in\n    different places, and the UI shows them under their own headings.\n    \"\"\"\n    cards: list[CardHit] = []\n    notes: list[NoteHit] = []",
         "detail": "backend.app.schemas.workspaces",
         "documentation": {}
     },
@@ -10619,7 +11853,7 @@
         "kind": 2,
         "importPath": "backend.app.services.activity",
         "description": "backend.app.services.activity",
-        "peekOfCode": "def record(\n    db: Session,\n    user: User | None,\n    workspace_id: int,\n    action: str,\n    summary: str,\n    board_id: int | None = None,\n    card_id: int | None = None,\n) -> Activity:\n    \"\"\"Add one row. The caller commits, so history cannot outlive a rolled-back change.\"\"\"",
+        "peekOfCode": "def record(\n    db: Session,\n    user: User | None,\n    workspace_id: int,\n    action: str,\n    summary: str,\n    board_id: int | None = None,\n    card_id: int | None = None,\n    entity_type: str | None = None,\n    entity_id: int | None = None,",
         "detail": "backend.app.services.activity",
         "documentation": {}
     },
@@ -10727,7 +11961,7 @@
         "kind": 5,
         "importPath": "backend.app.services.activity",
         "description": "backend.app.services.activity",
-        "peekOfCode": "CARD_COMMENTED = \"card.commented\"\nCOLUMN_CREATED = \"column.created\"\nCOLUMN_UPDATED = \"column.updated\"\nCOLUMN_DELETED = \"column.deleted\"\nBOARD_CREATED = \"board.created\"\nBOARD_UPDATED = \"board.updated\"\nBOARD_DELETED = \"board.deleted\"\nSPRINT_STARTED = \"sprint.started\"\nSPRINT_COMPLETED = \"sprint.completed\"\ndef record(",
+        "peekOfCode": "CARD_COMMENTED = \"card.commented\"\nCOLUMN_CREATED = \"column.created\"\nCOLUMN_UPDATED = \"column.updated\"\nCOLUMN_DELETED = \"column.deleted\"\nBOARD_CREATED = \"board.created\"\nBOARD_UPDATED = \"board.updated\"\nBOARD_DELETED = \"board.deleted\"\nSPRINT_STARTED = \"sprint.started\"\nSPRINT_COMPLETED = \"sprint.completed\"\nNOTE_CREATED = \"note.created\"",
         "detail": "backend.app.services.activity",
         "documentation": {}
     },
@@ -10736,7 +11970,7 @@
         "kind": 5,
         "importPath": "backend.app.services.activity",
         "description": "backend.app.services.activity",
-        "peekOfCode": "COLUMN_CREATED = \"column.created\"\nCOLUMN_UPDATED = \"column.updated\"\nCOLUMN_DELETED = \"column.deleted\"\nBOARD_CREATED = \"board.created\"\nBOARD_UPDATED = \"board.updated\"\nBOARD_DELETED = \"board.deleted\"\nSPRINT_STARTED = \"sprint.started\"\nSPRINT_COMPLETED = \"sprint.completed\"\ndef record(\n    db: Session,",
+        "peekOfCode": "COLUMN_CREATED = \"column.created\"\nCOLUMN_UPDATED = \"column.updated\"\nCOLUMN_DELETED = \"column.deleted\"\nBOARD_CREATED = \"board.created\"\nBOARD_UPDATED = \"board.updated\"\nBOARD_DELETED = \"board.deleted\"\nSPRINT_STARTED = \"sprint.started\"\nSPRINT_COMPLETED = \"sprint.completed\"\nNOTE_CREATED = \"note.created\"\nNOTE_UPDATED = \"note.updated\"",
         "detail": "backend.app.services.activity",
         "documentation": {}
     },
@@ -10745,7 +11979,7 @@
         "kind": 5,
         "importPath": "backend.app.services.activity",
         "description": "backend.app.services.activity",
-        "peekOfCode": "COLUMN_UPDATED = \"column.updated\"\nCOLUMN_DELETED = \"column.deleted\"\nBOARD_CREATED = \"board.created\"\nBOARD_UPDATED = \"board.updated\"\nBOARD_DELETED = \"board.deleted\"\nSPRINT_STARTED = \"sprint.started\"\nSPRINT_COMPLETED = \"sprint.completed\"\ndef record(\n    db: Session,\n    user: User | None,",
+        "peekOfCode": "COLUMN_UPDATED = \"column.updated\"\nCOLUMN_DELETED = \"column.deleted\"\nBOARD_CREATED = \"board.created\"\nBOARD_UPDATED = \"board.updated\"\nBOARD_DELETED = \"board.deleted\"\nSPRINT_STARTED = \"sprint.started\"\nSPRINT_COMPLETED = \"sprint.completed\"\nNOTE_CREATED = \"note.created\"\nNOTE_UPDATED = \"note.updated\"\nNOTE_MOVED = \"note.moved\"",
         "detail": "backend.app.services.activity",
         "documentation": {}
     },
@@ -10754,7 +11988,7 @@
         "kind": 5,
         "importPath": "backend.app.services.activity",
         "description": "backend.app.services.activity",
-        "peekOfCode": "COLUMN_DELETED = \"column.deleted\"\nBOARD_CREATED = \"board.created\"\nBOARD_UPDATED = \"board.updated\"\nBOARD_DELETED = \"board.deleted\"\nSPRINT_STARTED = \"sprint.started\"\nSPRINT_COMPLETED = \"sprint.completed\"\ndef record(\n    db: Session,\n    user: User | None,\n    workspace_id: int,",
+        "peekOfCode": "COLUMN_DELETED = \"column.deleted\"\nBOARD_CREATED = \"board.created\"\nBOARD_UPDATED = \"board.updated\"\nBOARD_DELETED = \"board.deleted\"\nSPRINT_STARTED = \"sprint.started\"\nSPRINT_COMPLETED = \"sprint.completed\"\nNOTE_CREATED = \"note.created\"\nNOTE_UPDATED = \"note.updated\"\nNOTE_MOVED = \"note.moved\"\nNOTE_ARCHIVED = \"note.archived\"",
         "detail": "backend.app.services.activity",
         "documentation": {}
     },
@@ -10763,7 +11997,7 @@
         "kind": 5,
         "importPath": "backend.app.services.activity",
         "description": "backend.app.services.activity",
-        "peekOfCode": "BOARD_CREATED = \"board.created\"\nBOARD_UPDATED = \"board.updated\"\nBOARD_DELETED = \"board.deleted\"\nSPRINT_STARTED = \"sprint.started\"\nSPRINT_COMPLETED = \"sprint.completed\"\ndef record(\n    db: Session,\n    user: User | None,\n    workspace_id: int,\n    action: str,",
+        "peekOfCode": "BOARD_CREATED = \"board.created\"\nBOARD_UPDATED = \"board.updated\"\nBOARD_DELETED = \"board.deleted\"\nSPRINT_STARTED = \"sprint.started\"\nSPRINT_COMPLETED = \"sprint.completed\"\nNOTE_CREATED = \"note.created\"\nNOTE_UPDATED = \"note.updated\"\nNOTE_MOVED = \"note.moved\"\nNOTE_ARCHIVED = \"note.archived\"\nNOTE_UNARCHIVED = \"note.unarchived\"",
         "detail": "backend.app.services.activity",
         "documentation": {}
     },
@@ -10772,7 +12006,7 @@
         "kind": 5,
         "importPath": "backend.app.services.activity",
         "description": "backend.app.services.activity",
-        "peekOfCode": "BOARD_UPDATED = \"board.updated\"\nBOARD_DELETED = \"board.deleted\"\nSPRINT_STARTED = \"sprint.started\"\nSPRINT_COMPLETED = \"sprint.completed\"\ndef record(\n    db: Session,\n    user: User | None,\n    workspace_id: int,\n    action: str,\n    summary: str,",
+        "peekOfCode": "BOARD_UPDATED = \"board.updated\"\nBOARD_DELETED = \"board.deleted\"\nSPRINT_STARTED = \"sprint.started\"\nSPRINT_COMPLETED = \"sprint.completed\"\nNOTE_CREATED = \"note.created\"\nNOTE_UPDATED = \"note.updated\"\nNOTE_MOVED = \"note.moved\"\nNOTE_ARCHIVED = \"note.archived\"\nNOTE_UNARCHIVED = \"note.unarchived\"\nNOTE_DELETED = \"note.deleted\"",
         "detail": "backend.app.services.activity",
         "documentation": {}
     },
@@ -10781,7 +12015,7 @@
         "kind": 5,
         "importPath": "backend.app.services.activity",
         "description": "backend.app.services.activity",
-        "peekOfCode": "BOARD_DELETED = \"board.deleted\"\nSPRINT_STARTED = \"sprint.started\"\nSPRINT_COMPLETED = \"sprint.completed\"\ndef record(\n    db: Session,\n    user: User | None,\n    workspace_id: int,\n    action: str,\n    summary: str,\n    board_id: int | None = None,",
+        "peekOfCode": "BOARD_DELETED = \"board.deleted\"\nSPRINT_STARTED = \"sprint.started\"\nSPRINT_COMPLETED = \"sprint.completed\"\nNOTE_CREATED = \"note.created\"\nNOTE_UPDATED = \"note.updated\"\nNOTE_MOVED = \"note.moved\"\nNOTE_ARCHIVED = \"note.archived\"\nNOTE_UNARCHIVED = \"note.unarchived\"\nNOTE_DELETED = \"note.deleted\"\nNOTE = \"note\"",
         "detail": "backend.app.services.activity",
         "documentation": {}
     },
@@ -10790,7 +12024,7 @@
         "kind": 5,
         "importPath": "backend.app.services.activity",
         "description": "backend.app.services.activity",
-        "peekOfCode": "SPRINT_STARTED = \"sprint.started\"\nSPRINT_COMPLETED = \"sprint.completed\"\ndef record(\n    db: Session,\n    user: User | None,\n    workspace_id: int,\n    action: str,\n    summary: str,\n    board_id: int | None = None,\n    card_id: int | None = None,",
+        "peekOfCode": "SPRINT_STARTED = \"sprint.started\"\nSPRINT_COMPLETED = \"sprint.completed\"\nNOTE_CREATED = \"note.created\"\nNOTE_UPDATED = \"note.updated\"\nNOTE_MOVED = \"note.moved\"\nNOTE_ARCHIVED = \"note.archived\"\nNOTE_UNARCHIVED = \"note.unarchived\"\nNOTE_DELETED = \"note.deleted\"\nNOTE = \"note\"\n\"\"\"`entity_type` for a row whose subject is a note rather than a board or a card.",
         "detail": "backend.app.services.activity",
         "documentation": {}
     },
@@ -10799,7 +12033,70 @@
         "kind": 5,
         "importPath": "backend.app.services.activity",
         "description": "backend.app.services.activity",
-        "peekOfCode": "SPRINT_COMPLETED = \"sprint.completed\"\ndef record(\n    db: Session,\n    user: User | None,\n    workspace_id: int,\n    action: str,\n    summary: str,\n    board_id: int | None = None,\n    card_id: int | None = None,\n) -> Activity:",
+        "peekOfCode": "SPRINT_COMPLETED = \"sprint.completed\"\nNOTE_CREATED = \"note.created\"\nNOTE_UPDATED = \"note.updated\"\nNOTE_MOVED = \"note.moved\"\nNOTE_ARCHIVED = \"note.archived\"\nNOTE_UNARCHIVED = \"note.unarchived\"\nNOTE_DELETED = \"note.deleted\"\nNOTE = \"note\"\n\"\"\"`entity_type` for a row whose subject is a note rather than a board or a card.\nPrivate notes never reach here at all: the activity feed is readable by every member of the",
+        "detail": "backend.app.services.activity",
+        "documentation": {}
+    },
+    {
+        "label": "NOTE_CREATED",
+        "kind": 5,
+        "importPath": "backend.app.services.activity",
+        "description": "backend.app.services.activity",
+        "peekOfCode": "NOTE_CREATED = \"note.created\"\nNOTE_UPDATED = \"note.updated\"\nNOTE_MOVED = \"note.moved\"\nNOTE_ARCHIVED = \"note.archived\"\nNOTE_UNARCHIVED = \"note.unarchived\"\nNOTE_DELETED = \"note.deleted\"\nNOTE = \"note\"\n\"\"\"`entity_type` for a row whose subject is a note rather than a board or a card.\nPrivate notes never reach here at all: the activity feed is readable by every member of the\nworkspace and rows are never edited or filtered after the fact, so the only safe way to keep",
+        "detail": "backend.app.services.activity",
+        "documentation": {}
+    },
+    {
+        "label": "NOTE_UPDATED",
+        "kind": 5,
+        "importPath": "backend.app.services.activity",
+        "description": "backend.app.services.activity",
+        "peekOfCode": "NOTE_UPDATED = \"note.updated\"\nNOTE_MOVED = \"note.moved\"\nNOTE_ARCHIVED = \"note.archived\"\nNOTE_UNARCHIVED = \"note.unarchived\"\nNOTE_DELETED = \"note.deleted\"\nNOTE = \"note\"\n\"\"\"`entity_type` for a row whose subject is a note rather than a board or a card.\nPrivate notes never reach here at all: the activity feed is readable by every member of the\nworkspace and rows are never edited or filtered after the fact, so the only safe way to keep\na private page private is to write no history for it. `services/notes.py` decides that.",
+        "detail": "backend.app.services.activity",
+        "documentation": {}
+    },
+    {
+        "label": "NOTE_MOVED",
+        "kind": 5,
+        "importPath": "backend.app.services.activity",
+        "description": "backend.app.services.activity",
+        "peekOfCode": "NOTE_MOVED = \"note.moved\"\nNOTE_ARCHIVED = \"note.archived\"\nNOTE_UNARCHIVED = \"note.unarchived\"\nNOTE_DELETED = \"note.deleted\"\nNOTE = \"note\"\n\"\"\"`entity_type` for a row whose subject is a note rather than a board or a card.\nPrivate notes never reach here at all: the activity feed is readable by every member of the\nworkspace and rows are never edited or filtered after the fact, so the only safe way to keep\na private page private is to write no history for it. `services/notes.py` decides that.\n\"\"\"",
+        "detail": "backend.app.services.activity",
+        "documentation": {}
+    },
+    {
+        "label": "NOTE_ARCHIVED",
+        "kind": 5,
+        "importPath": "backend.app.services.activity",
+        "description": "backend.app.services.activity",
+        "peekOfCode": "NOTE_ARCHIVED = \"note.archived\"\nNOTE_UNARCHIVED = \"note.unarchived\"\nNOTE_DELETED = \"note.deleted\"\nNOTE = \"note\"\n\"\"\"`entity_type` for a row whose subject is a note rather than a board or a card.\nPrivate notes never reach here at all: the activity feed is readable by every member of the\nworkspace and rows are never edited or filtered after the fact, so the only safe way to keep\na private page private is to write no history for it. `services/notes.py` decides that.\n\"\"\"\ndef record(",
+        "detail": "backend.app.services.activity",
+        "documentation": {}
+    },
+    {
+        "label": "NOTE_UNARCHIVED",
+        "kind": 5,
+        "importPath": "backend.app.services.activity",
+        "description": "backend.app.services.activity",
+        "peekOfCode": "NOTE_UNARCHIVED = \"note.unarchived\"\nNOTE_DELETED = \"note.deleted\"\nNOTE = \"note\"\n\"\"\"`entity_type` for a row whose subject is a note rather than a board or a card.\nPrivate notes never reach here at all: the activity feed is readable by every member of the\nworkspace and rows are never edited or filtered after the fact, so the only safe way to keep\na private page private is to write no history for it. `services/notes.py` decides that.\n\"\"\"\ndef record(\n    db: Session,",
+        "detail": "backend.app.services.activity",
+        "documentation": {}
+    },
+    {
+        "label": "NOTE_DELETED",
+        "kind": 5,
+        "importPath": "backend.app.services.activity",
+        "description": "backend.app.services.activity",
+        "peekOfCode": "NOTE_DELETED = \"note.deleted\"\nNOTE = \"note\"\n\"\"\"`entity_type` for a row whose subject is a note rather than a board or a card.\nPrivate notes never reach here at all: the activity feed is readable by every member of the\nworkspace and rows are never edited or filtered after the fact, so the only safe way to keep\na private page private is to write no history for it. `services/notes.py` decides that.\n\"\"\"\ndef record(\n    db: Session,\n    user: User | None,",
+        "detail": "backend.app.services.activity",
+        "documentation": {}
+    },
+    {
+        "label": "NOTE",
+        "kind": 5,
+        "importPath": "backend.app.services.activity",
+        "description": "backend.app.services.activity",
+        "peekOfCode": "NOTE = \"note\"\n\"\"\"`entity_type` for a row whose subject is a note rather than a board or a card.\nPrivate notes never reach here at all: the activity feed is readable by every member of the\nworkspace and rows are never edited or filtered after the fact, so the only safe way to keep\na private page private is to write no history for it. `services/notes.py` decides that.\n\"\"\"\ndef record(\n    db: Session,\n    user: User | None,\n    workspace_id: int,",
         "detail": "backend.app.services.activity",
         "documentation": {}
     },
@@ -11596,6 +12893,177 @@
         "documentation": {}
     },
     {
+        "label": "NewBlock",
+        "kind": 6,
+        "importPath": "backend.app.services.notes",
+        "description": "backend.app.services.notes",
+        "peekOfCode": "class NewBlock:\n    \"\"\"One block on the way in. `id` lets a document save keep existing rows rather than\n    replacing them, so the editor's block identities survive a save.\"\"\"\n    type: str = BLOCK_TYPES[0]\n    text: str = \"\"\n    checked: bool = False\n    indent: int = 0\n    ref_card_id: int | None = None\n    ref_board_id: int | None = None\n    id: int | None = None",
+        "detail": "backend.app.services.notes",
+        "documentation": {}
+    },
+    {
+        "label": "note_for",
+        "kind": 2,
+        "importPath": "backend.app.services.notes",
+        "description": "backend.app.services.notes",
+        "peekOfCode": "def note_for(db: Session, user: User, note_id: int, minimum: WorkspaceRole = VIEWER) -> Note:\n    \"\"\"Load a page the user may act on. `permissions.require_note` is what decides.\n    The visibility filter is applied to the query as well, so a caller that somehow skipped the\n    permission check still cannot load someone else's private page.\n    \"\"\"\n    permissions.require_note(db, user, note_id, minimum)\n    note = db.scalar(\n        _fresh(\n            select(Note)\n            .options(selectinload(Note.blocks))",
+        "detail": "backend.app.services.notes",
+        "documentation": {}
+    },
+    {
+        "label": "list_notes",
+        "kind": 2,
+        "importPath": "backend.app.services.notes",
+        "description": "backend.app.services.notes",
+        "peekOfCode": "def list_notes(\n    db: Session, user: User, workspace_id: int, include_archived: bool = False\n) -> list[Note]:\n    \"\"\"Every page the user can see, flat and ordered: roots first, then grouped by parent.\n    Flat rather than nested on purpose - the caller assembles the tree, and a flat list is also\n    what the AI reads. A visible page always has a visible parent, because visibility is\n    inherited downwards, so the list can never contain an orphan.\n    \"\"\"\n    permissions.require_workspace(db, user, workspace_id)\n    stmt = (",
+        "detail": "backend.app.services.notes",
+        "documentation": {}
+    },
+    {
+        "label": "create_note",
+        "kind": 2,
+        "importPath": "backend.app.services.notes",
+        "description": "backend.app.services.notes",
+        "peekOfCode": "def create_note(\n    db: Session,\n    user: User,\n    workspace_id: int,\n    title: str = \"\",\n    parent_id: int | None = None,\n    visibility: str | None = None,\n    icon: str = \"\",\n    position: int | None = None,\n    blocks: list[NewBlock] | None = None,",
+        "detail": "backend.app.services.notes",
+        "documentation": {}
+    },
+    {
+        "label": "update_note",
+        "kind": 2,
+        "importPath": "backend.app.services.notes",
+        "description": "backend.app.services.notes",
+        "peekOfCode": "def update_note(\n    db: Session, user: User, note_id: int, title: Any = UNSET, icon: Any = UNSET\n) -> Note:\n    \"\"\"Rename a page or change its icon. Absent fields are left alone.\"\"\"\n    note = note_for(db, user, note_id, MEMBER)\n    renamed = title is not UNSET and title != note.title\n    if title is not UNSET:\n        note.title = title\n    if icon is not UNSET:\n        note.icon = icon",
+        "detail": "backend.app.services.notes",
+        "documentation": {}
+    },
+    {
+        "label": "set_visibility",
+        "kind": 2,
+        "importPath": "backend.app.services.notes",
+        "description": "backend.app.services.notes",
+        "peekOfCode": "def set_visibility(db: Session, user: User, note_id: int, visibility: str) -> Note:\n    \"\"\"Who can see this page. Only its owner decides.\n    An admin cannot un-private someone else's page: the role table governs workspace data, and a\n    private page is personal. The change applies to the whole subtree, so a subpage is never\n    more visible than the page it sits in.\n    \"\"\"\n    note = note_for(db, user, note_id, MEMBER)\n    if note.owner_id != user.id:\n        raise Forbidden(\"Only the page's owner can change who can see it\")\n    chosen = NoteVisibility(visibility)",
+        "detail": "backend.app.services.notes",
+        "documentation": {}
+    },
+    {
+        "label": "move_note",
+        "kind": 2,
+        "importPath": "backend.app.services.notes",
+        "description": "backend.app.services.notes",
+        "peekOfCode": "def move_note(\n    db: Session, user: User, note_id: int, parent_id: Any = UNSET, position: int | None = None\n) -> Note:\n    \"\"\"Reparent and/or reorder a page. Both sibling lists end up contiguous.\"\"\"\n    note = note_for(db, user, note_id, MEMBER)\n    old_parent_id = note.parent_id\n    new_parent_id = old_parent_id if parent_id is UNSET else parent_id\n    if new_parent_id is not None:\n        if new_parent_id == note.id:\n            raise InvalidRequest(\"A page cannot be its own parent\")",
+        "detail": "backend.app.services.notes",
+        "documentation": {}
+    },
+    {
+        "label": "archive_note",
+        "kind": 2,
+        "importPath": "backend.app.services.notes",
+        "description": "backend.app.services.notes",
+        "peekOfCode": "def archive_note(db: Session, user: User, note_id: int) -> Note:\n    \"\"\"Archive a page and its subpages. Reversible, which is why it needs no confirmation.\"\"\"\n    note = note_for(db, user, note_id, MEMBER)\n    if note.archived_at is None:\n        when = datetime.now(UTC)\n        note.archived_at = when\n        for page in _descendants(db, note):\n            page.archived_at = when\n        _renumber([n for n in _siblings(db, note.workspace_id, note.parent_id) if n.id != note.id])\n        _record(db, user, note, activity.NOTE_ARCHIVED, f\"archived the page “{_label(note)}”\")",
+        "detail": "backend.app.services.notes",
+        "documentation": {}
+    },
+    {
+        "label": "unarchive_note",
+        "kind": 2,
+        "importPath": "backend.app.services.notes",
+        "description": "backend.app.services.notes",
+        "peekOfCode": "def unarchive_note(db: Session, user: User, note_id: int) -> Note:\n    \"\"\"Restore a page to the end of its sibling list, with its subpages.\"\"\"\n    note = note_for(db, user, note_id, MEMBER)\n    if note.archived_at is not None:\n        siblings = _siblings(db, note.workspace_id, note.parent_id)\n        note.archived_at = None\n        for page in _descendants(db, note):\n            page.archived_at = None\n        _insert_among_visible(user, siblings, note, None)\n        _record(db, user, note, activity.NOTE_UNARCHIVED, f\"restored the page “{_label(note)}”\")",
+        "detail": "backend.app.services.notes",
+        "documentation": {}
+    },
+    {
+        "label": "delete_note",
+        "kind": 2,
+        "importPath": "backend.app.services.notes",
+        "description": "backend.app.services.notes",
+        "peekOfCode": "def delete_note(db: Session, user: User, note_id: int) -> None:\n    \"\"\"Hard delete, with the subpages, blocks and links under it. The owner or an admin only.\"\"\"\n    note = note_for(db, user, note_id, MEMBER)\n    role = permissions.role_in(db, user, note.workspace_id)\n    if note.owner_id != user.id and not (role is not None and role.at_least(permissions.ADMIN)):\n        raise Forbidden(\"Only the page's owner or a workspace admin can delete it\")\n    siblings = [n for n in _siblings(db, note.workspace_id, note.parent_id) if n.id != note.id]\n    # Written before the delete: history outlives its subject, and `entity_id` is a plain\n    # integer precisely so this row survives.\n    _record(db, user, note, activity.NOTE_DELETED, f\"deleted the page “{_label(note)}”\")",
+        "detail": "backend.app.services.notes",
+        "documentation": {}
+    },
+    {
+        "label": "replace_blocks",
+        "kind": 2,
+        "importPath": "backend.app.services.notes",
+        "description": "backend.app.services.notes",
+        "peekOfCode": "def replace_blocks(db: Session, user: User, note_id: int, blocks: list[NewBlock]) -> Note:\n    \"\"\"Save a page's whole body in one transaction.\n    Blocks that arrive with an `id` this page already has are updated in place rather than\n    replaced, so the editor's block identities survive a save and a half-finished save cannot\n    leave the page empty. Blocks the save leaves out are deleted.\n    \"\"\"\n    note = note_for(db, user, note_id, MEMBER)\n    _check_block_count(len(blocks))\n    for new in blocks:\n        _check_block(db, user, note.workspace_id, new)",
+        "detail": "backend.app.services.notes",
+        "documentation": {}
+    },
+    {
+        "label": "add_blocks",
+        "kind": 2,
+        "importPath": "backend.app.services.notes",
+        "description": "backend.app.services.notes",
+        "peekOfCode": "def add_blocks(\n    db: Session, user: User, note_id: int, blocks: list[NewBlock], position: int | None = None\n) -> Note:\n    \"\"\"Insert blocks into a page without resending the rest of it: the AI's append, and the\n    editor's quick add.\"\"\"\n    note = note_for(db, user, note_id, MEMBER)\n    existing = _blocks_of(db, note.id)\n    _check_block_count(len(existing) + len(blocks))\n    for new in blocks:\n        _check_block(db, user, note.workspace_id, new)",
+        "detail": "backend.app.services.notes",
+        "documentation": {}
+    },
+    {
+        "label": "patch_block",
+        "kind": 2,
+        "importPath": "backend.app.services.notes",
+        "description": "backend.app.services.notes",
+        "peekOfCode": "def patch_block(\n    db: Session,\n    user: User,\n    block_id: int,\n    text: Any = UNSET,\n    type: Any = UNSET,\n    checked: Any = UNSET,\n    indent: Any = UNSET,\n) -> Note:\n    \"\"\"Change one block - ticking a todo, mostly - without resending the page.\"\"\"",
+        "detail": "backend.app.services.notes",
+        "documentation": {}
+    },
+    {
+        "label": "notes_linking_to",
+        "kind": 2,
+        "importPath": "backend.app.services.notes",
+        "description": "backend.app.services.notes",
+        "peekOfCode": "def notes_linking_to(\n    db: Session, user: User, target_type: str, target_id: int\n) -> list[Note]:\n    \"\"\"The pages the user can see that point at one card or board: its backlinks.\n    Someone else's private page that mentions your card stays invisible, which is the whole\n    point of the visibility filter being a single expression.\n    \"\"\"\n    if target_type not in (\"card\", \"board\"):\n        raise InvalidRequest(\"A link target is a card or a board\")\n    if target_type == \"card\":",
+        "detail": "backend.app.services.notes",
+        "documentation": {}
+    },
+    {
+        "label": "VIEWER",
+        "kind": 5,
+        "importPath": "backend.app.services.notes",
+        "description": "backend.app.services.notes",
+        "peekOfCode": "VIEWER = WorkspaceRole.VIEWER\nMEMBER = WorkspaceRole.MEMBER\nMAX_BLOCKS = 2_000\n\"\"\"A page is a page, not a database. The schema caps each block's text as well.\"\"\"\nEDIT_HISTORY_COOLDOWN = timedelta(minutes=5)\n\"\"\"Editing is autosaved, so one activity row per keystroke-batch would drown the feed. One row\nper actor per page per five minutes reads like \"someone worked on this page\", which is what the\nfeed is for.\"\"\"\nUNSET: Any = object()\n\"\"\"Sentinel for \"leave this field alone\", so None can mean \"clear it\" - as in `services/boards`.\"\"\"",
+        "detail": "backend.app.services.notes",
+        "documentation": {}
+    },
+    {
+        "label": "MEMBER",
+        "kind": 5,
+        "importPath": "backend.app.services.notes",
+        "description": "backend.app.services.notes",
+        "peekOfCode": "MEMBER = WorkspaceRole.MEMBER\nMAX_BLOCKS = 2_000\n\"\"\"A page is a page, not a database. The schema caps each block's text as well.\"\"\"\nEDIT_HISTORY_COOLDOWN = timedelta(minutes=5)\n\"\"\"Editing is autosaved, so one activity row per keystroke-batch would drown the feed. One row\nper actor per page per five minutes reads like \"someone worked on this page\", which is what the\nfeed is for.\"\"\"\nUNSET: Any = object()\n\"\"\"Sentinel for \"leave this field alone\", so None can mean \"clear it\" - as in `services/boards`.\"\"\"\n@dataclass",
+        "detail": "backend.app.services.notes",
+        "documentation": {}
+    },
+    {
+        "label": "MAX_BLOCKS",
+        "kind": 5,
+        "importPath": "backend.app.services.notes",
+        "description": "backend.app.services.notes",
+        "peekOfCode": "MAX_BLOCKS = 2_000\n\"\"\"A page is a page, not a database. The schema caps each block's text as well.\"\"\"\nEDIT_HISTORY_COOLDOWN = timedelta(minutes=5)\n\"\"\"Editing is autosaved, so one activity row per keystroke-batch would drown the feed. One row\nper actor per page per five minutes reads like \"someone worked on this page\", which is what the\nfeed is for.\"\"\"\nUNSET: Any = object()\n\"\"\"Sentinel for \"leave this field alone\", so None can mean \"clear it\" - as in `services/boards`.\"\"\"\n@dataclass\nclass NewBlock:",
+        "detail": "backend.app.services.notes",
+        "documentation": {}
+    },
+    {
+        "label": "EDIT_HISTORY_COOLDOWN",
+        "kind": 5,
+        "importPath": "backend.app.services.notes",
+        "description": "backend.app.services.notes",
+        "peekOfCode": "EDIT_HISTORY_COOLDOWN = timedelta(minutes=5)\n\"\"\"Editing is autosaved, so one activity row per keystroke-batch would drown the feed. One row\nper actor per page per five minutes reads like \"someone worked on this page\", which is what the\nfeed is for.\"\"\"\nUNSET: Any = object()\n\"\"\"Sentinel for \"leave this field alone\", so None can mean \"clear it\" - as in `services/boards`.\"\"\"\n@dataclass\nclass NewBlock:\n    \"\"\"One block on the way in. `id` lets a document save keep existing rows rather than\n    replacing them, so the editor's block identities survive a save.\"\"\"",
+        "detail": "backend.app.services.notes",
+        "documentation": {}
+    },
+    {
+        "label": "__all__",
+        "kind": 5,
+        "importPath": "backend.app.services.notes",
+        "description": "backend.app.services.notes",
+        "peekOfCode": "__all__ = [\n    \"Forbidden\",\n    \"InvalidRequest\",\n    \"NewBlock\",\n    \"NotFound\",\n    \"add_blocks\",\n    \"archive_note\",\n    \"create_note\",\n    \"delete_note\",\n    \"list_notes\",",
+        "detail": "backend.app.services.notes",
+        "documentation": {}
+    },
+    {
         "label": "notify",
         "kind": 2,
         "importPath": "backend.app.services.notifications",
@@ -11663,7 +13131,7 @@
         "kind": 5,
         "importPath": "backend.app.services.notifications",
         "description": "backend.app.services.notifications",
-        "peekOfCode": "ASSIGNED = \"card.assigned\"\nMENTIONED = \"card.mentioned\"\nCOMPLETED = \"card.completed\"\nCOMMENTED = \"card.commented\"\nAI_SIGNAL = \"ai.signal\"\n# @ followed by a name, an email, or a dotted handle. Deliberately conservative.\nMENTION = re.compile(r\"@([\\w.\\-+]+(?:@[\\w.\\-]+)?)\")\ndef notify(\n    db: Session,\n    recipient_id: int | None,",
+        "peekOfCode": "ASSIGNED = \"card.assigned\"\nMENTIONED = \"card.mentioned\"\nCOMPLETED = \"card.completed\"\nCOMMENTED = \"card.commented\"\nAI_SIGNAL = \"ai.signal\"\nNOTE_MENTIONED = \"note.mentioned\"\nNOTE_LINKED = \"note.linked\"\n# @ followed by a name, an email, or a dotted handle. Deliberately conservative.\nMENTION = re.compile(r\"@([\\w.\\-+]+(?:@[\\w.\\-]+)?)\")\ndef notify(",
         "detail": "backend.app.services.notifications",
         "documentation": {}
     },
@@ -11672,7 +13140,7 @@
         "kind": 5,
         "importPath": "backend.app.services.notifications",
         "description": "backend.app.services.notifications",
-        "peekOfCode": "MENTIONED = \"card.mentioned\"\nCOMPLETED = \"card.completed\"\nCOMMENTED = \"card.commented\"\nAI_SIGNAL = \"ai.signal\"\n# @ followed by a name, an email, or a dotted handle. Deliberately conservative.\nMENTION = re.compile(r\"@([\\w.\\-+]+(?:@[\\w.\\-]+)?)\")\ndef notify(\n    db: Session,\n    recipient_id: int | None,\n    actor: User | None,",
+        "peekOfCode": "MENTIONED = \"card.mentioned\"\nCOMPLETED = \"card.completed\"\nCOMMENTED = \"card.commented\"\nAI_SIGNAL = \"ai.signal\"\nNOTE_MENTIONED = \"note.mentioned\"\nNOTE_LINKED = \"note.linked\"\n# @ followed by a name, an email, or a dotted handle. Deliberately conservative.\nMENTION = re.compile(r\"@([\\w.\\-+]+(?:@[\\w.\\-]+)?)\")\ndef notify(\n    db: Session,",
         "detail": "backend.app.services.notifications",
         "documentation": {}
     },
@@ -11681,7 +13149,7 @@
         "kind": 5,
         "importPath": "backend.app.services.notifications",
         "description": "backend.app.services.notifications",
-        "peekOfCode": "COMPLETED = \"card.completed\"\nCOMMENTED = \"card.commented\"\nAI_SIGNAL = \"ai.signal\"\n# @ followed by a name, an email, or a dotted handle. Deliberately conservative.\nMENTION = re.compile(r\"@([\\w.\\-+]+(?:@[\\w.\\-]+)?)\")\ndef notify(\n    db: Session,\n    recipient_id: int | None,\n    actor: User | None,\n    workspace_id: int,",
+        "peekOfCode": "COMPLETED = \"card.completed\"\nCOMMENTED = \"card.commented\"\nAI_SIGNAL = \"ai.signal\"\nNOTE_MENTIONED = \"note.mentioned\"\nNOTE_LINKED = \"note.linked\"\n# @ followed by a name, an email, or a dotted handle. Deliberately conservative.\nMENTION = re.compile(r\"@([\\w.\\-+]+(?:@[\\w.\\-]+)?)\")\ndef notify(\n    db: Session,\n    recipient_id: int | None,",
         "detail": "backend.app.services.notifications",
         "documentation": {}
     },
@@ -11690,7 +13158,7 @@
         "kind": 5,
         "importPath": "backend.app.services.notifications",
         "description": "backend.app.services.notifications",
-        "peekOfCode": "COMMENTED = \"card.commented\"\nAI_SIGNAL = \"ai.signal\"\n# @ followed by a name, an email, or a dotted handle. Deliberately conservative.\nMENTION = re.compile(r\"@([\\w.\\-+]+(?:@[\\w.\\-]+)?)\")\ndef notify(\n    db: Session,\n    recipient_id: int | None,\n    actor: User | None,\n    workspace_id: int,\n    kind: str,",
+        "peekOfCode": "COMMENTED = \"card.commented\"\nAI_SIGNAL = \"ai.signal\"\nNOTE_MENTIONED = \"note.mentioned\"\nNOTE_LINKED = \"note.linked\"\n# @ followed by a name, an email, or a dotted handle. Deliberately conservative.\nMENTION = re.compile(r\"@([\\w.\\-+]+(?:@[\\w.\\-]+)?)\")\ndef notify(\n    db: Session,\n    recipient_id: int | None,\n    actor: User | None,",
         "detail": "backend.app.services.notifications",
         "documentation": {}
     },
@@ -11699,7 +13167,25 @@
         "kind": 5,
         "importPath": "backend.app.services.notifications",
         "description": "backend.app.services.notifications",
-        "peekOfCode": "AI_SIGNAL = \"ai.signal\"\n# @ followed by a name, an email, or a dotted handle. Deliberately conservative.\nMENTION = re.compile(r\"@([\\w.\\-+]+(?:@[\\w.\\-]+)?)\")\ndef notify(\n    db: Session,\n    recipient_id: int | None,\n    actor: User | None,\n    workspace_id: int,\n    kind: str,\n    title: str,",
+        "peekOfCode": "AI_SIGNAL = \"ai.signal\"\nNOTE_MENTIONED = \"note.mentioned\"\nNOTE_LINKED = \"note.linked\"\n# @ followed by a name, an email, or a dotted handle. Deliberately conservative.\nMENTION = re.compile(r\"@([\\w.\\-+]+(?:@[\\w.\\-]+)?)\")\ndef notify(\n    db: Session,\n    recipient_id: int | None,\n    actor: User | None,\n    workspace_id: int,",
+        "detail": "backend.app.services.notifications",
+        "documentation": {}
+    },
+    {
+        "label": "NOTE_MENTIONED",
+        "kind": 5,
+        "importPath": "backend.app.services.notifications",
+        "description": "backend.app.services.notifications",
+        "peekOfCode": "NOTE_MENTIONED = \"note.mentioned\"\nNOTE_LINKED = \"note.linked\"\n# @ followed by a name, an email, or a dotted handle. Deliberately conservative.\nMENTION = re.compile(r\"@([\\w.\\-+]+(?:@[\\w.\\-]+)?)\")\ndef notify(\n    db: Session,\n    recipient_id: int | None,\n    actor: User | None,\n    workspace_id: int,\n    kind: str,",
+        "detail": "backend.app.services.notifications",
+        "documentation": {}
+    },
+    {
+        "label": "NOTE_LINKED",
+        "kind": 5,
+        "importPath": "backend.app.services.notifications",
+        "description": "backend.app.services.notifications",
+        "peekOfCode": "NOTE_LINKED = \"note.linked\"\n# @ followed by a name, an email, or a dotted handle. Deliberately conservative.\nMENTION = re.compile(r\"@([\\w.\\-+]+(?:@[\\w.\\-]+)?)\")\ndef notify(\n    db: Session,\n    recipient_id: int | None,\n    actor: User | None,\n    workspace_id: int,\n    kind: str,\n    title: str,",
         "detail": "backend.app.services.notifications",
         "documentation": {}
     },
@@ -11798,7 +13284,34 @@
         "kind": 2,
         "importPath": "backend.app.services.permissions",
         "description": "backend.app.services.permissions",
-        "peekOfCode": "def require_card(db: Session, user: User, card_id: int, minimum: WorkspaceRole = VIEWER) -> Access:\n    column_id = db.scalar(select(Card.column_id).where(Card.id == card_id))\n    if column_id is None:\n        raise NotFound(\"Card\")\n    try:\n        return require_column(db, user, column_id, minimum)\n    except NotFound:\n        raise NotFound(\"Card\") from None",
+        "peekOfCode": "def require_card(db: Session, user: User, card_id: int, minimum: WorkspaceRole = VIEWER) -> Access:\n    column_id = db.scalar(select(Card.column_id).where(Card.id == card_id))\n    if column_id is None:\n        raise NotFound(\"Card\")\n    try:\n        return require_column(db, user, column_id, minimum)\n    except NotFound:\n        raise NotFound(\"Card\") from None\n# --- notes ------------------------------------------------------------------------------------\n#",
+        "detail": "backend.app.services.permissions",
+        "documentation": {}
+    },
+    {
+        "label": "note_visibility_filter",
+        "kind": 2,
+        "importPath": "backend.app.services.permissions",
+        "description": "backend.app.services.permissions",
+        "peekOfCode": "def note_visibility_filter(user: User):\n    \"\"\"The single condition every note read must compose.\n    It lives here, not in `services/notes.py`, because this module is the only place allowed to\n    decide access - and because a listing, a search, an export and the AI context builder that\n    each wrote their own version of this is exactly how a private page leaks.\n    \"\"\"\n    return or_(\n        Note.visibility == NoteVisibility.WORKSPACE.value,\n        Note.owner_id == user.id,\n    )",
+        "detail": "backend.app.services.permissions",
+        "documentation": {}
+    },
+    {
+        "label": "may_read_note",
+        "kind": 2,
+        "importPath": "backend.app.services.permissions",
+        "description": "backend.app.services.permissions",
+        "peekOfCode": "def may_read_note(user: User, note: Note) -> bool:\n    \"\"\"The in-Python twin of `note_visibility_filter`, for a note already loaded.\"\"\"\n    return not note.is_private or note.owner_id == user.id\ndef require_note(db: Session, user: User, note_id: int, minimum: WorkspaceRole = VIEWER) -> Access:\n    \"\"\"Membership, then visibility, then the role - in that order, deliberately.\n    Visibility is settled before `minimum` is applied, because a Forbidden for someone else's\n    private note would confirm that the note exists. Anything a user may not see is NotFound\n    first; only a note they can see can produce a role error.\n    \"\"\"\n    note = db.get(Note, note_id)",
+        "detail": "backend.app.services.permissions",
+        "documentation": {}
+    },
+    {
+        "label": "require_note",
+        "kind": 2,
+        "importPath": "backend.app.services.permissions",
+        "description": "backend.app.services.permissions",
+        "peekOfCode": "def require_note(db: Session, user: User, note_id: int, minimum: WorkspaceRole = VIEWER) -> Access:\n    \"\"\"Membership, then visibility, then the role - in that order, deliberately.\n    Visibility is settled before `minimum` is applied, because a Forbidden for someone else's\n    private note would confirm that the note exists. Anything a user may not see is NotFound\n    first; only a note they can see can produce a role error.\n    \"\"\"\n    note = db.get(Note, note_id)\n    if note is None:\n        raise NotFound(\"Note\")\n    try:",
         "detail": "backend.app.services.permissions",
         "documentation": {}
     },
@@ -11898,6 +13411,24 @@
         "importPath": "backend.app.services.search",
         "description": "backend.app.services.search",
         "peekOfCode": "def my_cards(db: Session, user: User, workspace_id: int | None = None) -> list[Card]:\n    \"\"\"Everything assigned to me that is still open, across every workspace I belong to.\"\"\"\n    stmt = (\n        select(Card)\n        .join(Column, Card.column_id == Column.id)\n        .join(Board, Column.board_id == Board.id)\n        .where(\n            Card.assignee_id == user.id,\n            Card.archived_at.is_(None),\n            Card.completed_at.is_(None),",
+        "detail": "backend.app.services.search",
+        "documentation": {}
+    },
+    {
+        "label": "search_notes",
+        "kind": 2,
+        "importPath": "backend.app.services.search",
+        "description": "backend.app.services.search",
+        "peekOfCode": "def search_notes(db: Session, user: User, workspace_id: int, q: str, limit: int = 50) -> list[Note]:\n    \"\"\"Pages whose title or body matches, most recently edited first.\n    Someone else's private page is not filtered out of the results afterwards - the query never\n    selects it, because it composes `permissions.note_visibility_filter`, the same expression\n    every other note read uses.\n    \"\"\"\n    permissions.require_workspace(db, user, workspace_id)\n    if not q.strip():\n        return []\n    pattern = _like(q.strip())",
+        "detail": "backend.app.services.search",
+        "documentation": {}
+    },
+    {
+        "label": "note_excerpt",
+        "kind": 2,
+        "importPath": "backend.app.services.search",
+        "description": "backend.app.services.search",
+        "peekOfCode": "def note_excerpt(note: Note, q: str, width: int = 160) -> str:\n    \"\"\"A readable window around the first match, so a result row shows why it matched.\"\"\"\n    term = q.strip().lower()\n    if not term:\n        return \"\"\n    for text in [note.title, *(block.text for block in note.blocks)]:\n        at = text.lower().find(term)\n        if at < 0:\n            continue\n        start = max(at - width // 3, 0)",
         "detail": "backend.app.services.search",
         "documentation": {}
     },
@@ -13504,6 +15035,60 @@
         "documentation": {}
     },
     {
+        "label": "upgrade",
+        "kind": 2,
+        "importPath": "backend.migrations.versions.0019_notes",
+        "description": "backend.migrations.versions.0019_notes",
+        "peekOfCode": "def upgrade() -> None:\n    op.create_table(\n        \"notes\",\n        sa.Column(\"id\", sa.Integer(), nullable=False),\n        sa.Column(\"workspace_id\", sa.Integer(), nullable=False),\n        sa.Column(\"parent_id\", sa.Integer(), nullable=True),\n        sa.Column(\"owner_id\", sa.Integer(), nullable=True),\n        sa.Column(\"title\", sa.String(length=200), nullable=False, server_default=\"\"),\n        sa.Column(\"icon\", sa.String(length=8), nullable=False, server_default=\"\"),\n        sa.Column(\"visibility\", sa.String(length=20), nullable=False, server_default=\"workspace\"),",
+        "detail": "backend.migrations.versions.0019_notes",
+        "documentation": {}
+    },
+    {
+        "label": "downgrade",
+        "kind": 2,
+        "importPath": "backend.migrations.versions.0019_notes",
+        "description": "backend.migrations.versions.0019_notes",
+        "peekOfCode": "def downgrade() -> None:\n    op.drop_column(\"notifications\", \"entity_id\")\n    op.drop_column(\"notifications\", \"entity_type\")\n    op.drop_index(op.f(\"ix_activities_entity_type\"), table_name=\"activities\")\n    op.drop_column(\"activities\", \"entity_id\")\n    op.drop_column(\"activities\", \"entity_type\")\n    with op.batch_alter_table(\"note_links\", schema=None) as batch_op:\n        batch_op.drop_index(batch_op.f(\"ix_note_links_target_id\"))\n        batch_op.drop_index(batch_op.f(\"ix_note_links_note_id\"))\n    op.drop_table(\"note_links\")",
+        "detail": "backend.migrations.versions.0019_notes",
+        "documentation": {}
+    },
+    {
+        "label": "revision",
+        "kind": 5,
+        "importPath": "backend.migrations.versions.0019_notes",
+        "description": "backend.migrations.versions.0019_notes",
+        "peekOfCode": "revision = \"0019\"\ndown_revision = \"0018\"\nbranch_labels = None\ndepends_on = None\ndef upgrade() -> None:\n    op.create_table(\n        \"notes\",\n        sa.Column(\"id\", sa.Integer(), nullable=False),\n        sa.Column(\"workspace_id\", sa.Integer(), nullable=False),\n        sa.Column(\"parent_id\", sa.Integer(), nullable=True),",
+        "detail": "backend.migrations.versions.0019_notes",
+        "documentation": {}
+    },
+    {
+        "label": "down_revision",
+        "kind": 5,
+        "importPath": "backend.migrations.versions.0019_notes",
+        "description": "backend.migrations.versions.0019_notes",
+        "peekOfCode": "down_revision = \"0018\"\nbranch_labels = None\ndepends_on = None\ndef upgrade() -> None:\n    op.create_table(\n        \"notes\",\n        sa.Column(\"id\", sa.Integer(), nullable=False),\n        sa.Column(\"workspace_id\", sa.Integer(), nullable=False),\n        sa.Column(\"parent_id\", sa.Integer(), nullable=True),\n        sa.Column(\"owner_id\", sa.Integer(), nullable=True),",
+        "detail": "backend.migrations.versions.0019_notes",
+        "documentation": {}
+    },
+    {
+        "label": "branch_labels",
+        "kind": 5,
+        "importPath": "backend.migrations.versions.0019_notes",
+        "description": "backend.migrations.versions.0019_notes",
+        "peekOfCode": "branch_labels = None\ndepends_on = None\ndef upgrade() -> None:\n    op.create_table(\n        \"notes\",\n        sa.Column(\"id\", sa.Integer(), nullable=False),\n        sa.Column(\"workspace_id\", sa.Integer(), nullable=False),\n        sa.Column(\"parent_id\", sa.Integer(), nullable=True),\n        sa.Column(\"owner_id\", sa.Integer(), nullable=True),\n        sa.Column(\"title\", sa.String(length=200), nullable=False, server_default=\"\"),",
+        "detail": "backend.migrations.versions.0019_notes",
+        "documentation": {}
+    },
+    {
+        "label": "depends_on",
+        "kind": 5,
+        "importPath": "backend.migrations.versions.0019_notes",
+        "description": "backend.migrations.versions.0019_notes",
+        "peekOfCode": "depends_on = None\ndef upgrade() -> None:\n    op.create_table(\n        \"notes\",\n        sa.Column(\"id\", sa.Integer(), nullable=False),\n        sa.Column(\"workspace_id\", sa.Integer(), nullable=False),\n        sa.Column(\"parent_id\", sa.Integer(), nullable=True),\n        sa.Column(\"owner_id\", sa.Integer(), nullable=True),\n        sa.Column(\"title\", sa.String(length=200), nullable=False, server_default=\"\"),\n        sa.Column(\"icon\", sa.String(length=8), nullable=False, server_default=\"\"),",
+        "detail": "backend.migrations.versions.0019_notes",
+        "documentation": {}
+    },
+    {
         "label": "run_migrations_online",
         "kind": 2,
         "importPath": "backend.migrations.env",
@@ -14175,6 +15760,60 @@
         "importPath": "backend.tests.test_ai_tools",
         "description": "backend.tests.test_ai_tools",
         "peekOfCode": "def test_card_details_reach_the_model(client, scene, use_llm):\n    card_id = scene[\"card\"][\"id\"]\n    client.patch(\n        f\"/api/cards/{card_id}\",\n        json={\"priority\": \"high\", \"estimate\": 3, \"assignee_id\": scene[\"mate_id\"]},\n        headers=scene[\"owner\"],\n    )\n    client.post(f\"/api/cards/{card_id}/labels/{scene['label']['id']}\", headers=scene[\"owner\"])\n    client.post(f\"/api/cards/{card_id}/checklist\", json={\"text\": \"Step one\"}, headers=scene[\"owner\"])\n    fake = use_llm(say(\"Noted.\"))",
+        "detail": "backend.tests.test_ai_tools",
+        "documentation": {}
+    },
+    {
+        "label": "test_the_assistant_writes_a_page_with_blocks",
+        "kind": 2,
+        "importPath": "backend.tests.test_ai_tools",
+        "description": "backend.tests.test_ai_tools",
+        "peekOfCode": "def test_the_assistant_writes_a_page_with_blocks(client, scene, use_llm):\n    fake = use_llm(\n        call(\n            \"create_page\",\n            title=\"Retro\",\n            blocks=[\n                {\"type\": \"heading2\", \"text\": \"What went well\"},\n                {\"type\": \"todo\", \"text\": \"Automate the release\"},\n                {\"type\": \"card_embed\", \"ref_card_id\": scene[\"card\"][\"id\"]},\n            ],",
+        "detail": "backend.tests.test_ai_tools",
+        "documentation": {}
+    },
+    {
+        "label": "test_the_assistant_reads_and_appends_to_a_page",
+        "kind": 2,
+        "importPath": "backend.tests.test_ai_tools",
+        "description": "backend.tests.test_ai_tools",
+        "peekOfCode": "def test_the_assistant_reads_and_appends_to_a_page(client, scene, use_llm):\n    page = client.post(\n        f\"/api/workspaces/{scene['board']['workspace_id']}/notes\",\n        json={\"title\": \"Standup\", \"blocks\": [{\"text\": \"Yesterday: shipped\"}]},\n        headers=scene[\"owner\"],\n    ).json()\n    fake = use_llm(\n        call(\"read_page\", note_id=page[\"id\"]),\n        call(\"append_to_page\", note_id=page[\"id\"], blocks=[{\"text\": \"Today: review\"}]),\n        say(\"Added.\"),",
+        "detail": "backend.tests.test_ai_tools",
+        "documentation": {}
+    },
+    {
+        "label": "test_the_assistant_cannot_see_someone_elses_private_page",
+        "kind": 2,
+        "importPath": "backend.tests.test_ai_tools",
+        "description": "backend.tests.test_ai_tools",
+        "peekOfCode": "def test_the_assistant_cannot_see_someone_elses_private_page(client, scene, use_llm):\n    \"\"\"Not \"refused\" - invisible. The tools go through the same visibility filter as the UI.\"\"\"\n    wid = scene[\"board\"][\"workspace_id\"]\n    private = client.post(\n        f\"/api/workspaces/{wid}/notes\",\n        json={\"title\": \"Owner's private\", \"visibility\": \"private\"},\n        headers=scene[\"owner\"],\n    ).json()\n    # The viewer's assistant searches and reads: the page is not there.\n    fake = use_llm(call(\"search_pages\", q=\"private\"), call(\"read_page\", note_id=private[\"id\"]), say(\"Nothing.\"))",
+        "detail": "backend.tests.test_ai_tools",
+        "documentation": {}
+    },
+    {
+        "label": "test_a_viewer_cannot_write_a_page_through_the_assistant",
+        "kind": 2,
+        "importPath": "backend.tests.test_ai_tools",
+        "description": "backend.tests.test_ai_tools",
+        "peekOfCode": "def test_a_viewer_cannot_write_a_page_through_the_assistant(client, scene, use_llm):\n    fake = use_llm(call(\"create_page\", title=\"Nope\"), say(\"I cannot.\"))\n    res = ask(client, scene[\"viewer\"], scene[\"board\"][\"id\"], \"Write a page\")\n    assert res.status_code == 200\n    error = tool_results(fake)[0][\"error\"]\n    assert \"member role\" in error and \"assistant cannot do this\" in error\n    assert res.json()[\"changes\"] == []\ndef test_there_is_no_tool_that_deletes_a_page(client, scene, use_llm):\n    \"\"\"Archiving is reversible and runs immediately; nothing here can destroy a page.\"\"\"\n    from app.ai.tools import TOOLS",
+        "detail": "backend.tests.test_ai_tools",
+        "documentation": {}
+    },
+    {
+        "label": "test_there_is_no_tool_that_deletes_a_page",
+        "kind": 2,
+        "importPath": "backend.tests.test_ai_tools",
+        "description": "backend.tests.test_ai_tools",
+        "peekOfCode": "def test_there_is_no_tool_that_deletes_a_page(client, scene, use_llm):\n    \"\"\"Archiving is reversible and runs immediately; nothing here can destroy a page.\"\"\"\n    from app.ai.tools import TOOLS\n    assert not [name for name in TOOLS if \"page\" in name and \"delete\" in name]\n    assert \"archive_page\" in TOOLS\n    wid = scene[\"board\"][\"workspace_id\"]\n    page = client.post(\n        f\"/api/workspaces/{wid}/notes\", json={\"title\": \"Keepable\"}, headers=scene[\"owner\"]\n    ).json()\n    fake = use_llm(call(\"archive_page\", note_id=page[\"id\"]), say(\"Archived.\"))",
+        "detail": "backend.tests.test_ai_tools",
+        "documentation": {}
+    },
+    {
+        "label": "test_the_context_lists_visible_pages_only",
+        "kind": 2,
+        "importPath": "backend.tests.test_ai_tools",
+        "description": "backend.tests.test_ai_tools",
+        "peekOfCode": "def test_the_context_lists_visible_pages_only(client, scene, use_llm):\n    wid = scene[\"board\"][\"workspace_id\"]\n    client.post(f\"/api/workspaces/{wid}/notes\", json={\"title\": \"Team page\"}, headers=scene[\"owner\"])\n    client.post(\n        f\"/api/workspaces/{wid}/notes\",\n        json={\"title\": \"Owner's private\", \"visibility\": \"private\"},\n        headers=scene[\"owner\"],\n    )\n    fake = use_llm(say(\"ok\"))\n    ask(client, scene[\"viewer\"], scene[\"board\"][\"id\"], \"What pages are there?\")",
         "detail": "backend.tests.test_ai_tools",
         "documentation": {}
     },
@@ -15790,6 +17429,357 @@
         "documentation": {}
     },
     {
+        "label": "headers",
+        "kind": 2,
+        "importPath": "backend.tests.test_notes",
+        "description": "backend.tests.test_notes",
+        "peekOfCode": "def headers(token):\n    return {\"Authorization\": f\"Bearer {token}\"}\n@pytest.fixture\ndef scene(client, register_and_login):\n    \"\"\"One workspace: an owner, an admin, a member, a viewer, and a board with a card.\"\"\"\n    tokens = {\n        who: register_and_login(f\"{who}@example.com\")\n        for who in (\"owner\", \"admin\", \"member\", \"viewer\")\n    }\n    owner = headers(tokens[\"owner\"])",
+        "detail": "backend.tests.test_notes",
+        "documentation": {}
+    },
+    {
+        "label": "scene",
+        "kind": 2,
+        "importPath": "backend.tests.test_notes",
+        "description": "backend.tests.test_notes",
+        "peekOfCode": "def scene(client, register_and_login):\n    \"\"\"One workspace: an owner, an admin, a member, a viewer, and a board with a card.\"\"\"\n    tokens = {\n        who: register_and_login(f\"{who}@example.com\")\n        for who in (\"owner\", \"admin\", \"member\", \"viewer\")\n    }\n    owner = headers(tokens[\"owner\"])\n    board = client.post(\n        \"/api/boards\", json={\"title\": \"Board\", \"columns\": [\"Todo\"]}, headers=owner\n    ).json()",
+        "detail": "backend.tests.test_notes",
+        "documentation": {}
+    },
+    {
+        "label": "make_page",
+        "kind": 2,
+        "importPath": "backend.tests.test_notes",
+        "description": "backend.tests.test_notes",
+        "peekOfCode": "def make_page(client, scene, who=\"owner\", **body):\n    res = client.post(\n        f\"/api/workspaces/{scene['wid']}/notes\", json=body, headers=headers(scene[\"tokens\"][who])\n    )\n    assert res.status_code == 201, res.text\n    return res.json()\ndef positions(page):\n    return [block[\"position\"] for block in page[\"blocks\"]]\ndef texts(page):\n    return [block[\"text\"] for block in page[\"blocks\"]]",
+        "detail": "backend.tests.test_notes",
+        "documentation": {}
+    },
+    {
+        "label": "positions",
+        "kind": 2,
+        "importPath": "backend.tests.test_notes",
+        "description": "backend.tests.test_notes",
+        "peekOfCode": "def positions(page):\n    return [block[\"position\"] for block in page[\"blocks\"]]\ndef texts(page):\n    return [block[\"text\"] for block in page[\"blocks\"]]\n# --- the page and its body ------------------------------------------------------------------\ndef test_a_page_is_created_with_its_body_in_one_go(client, scene):\n    page = make_page(\n        client,\n        scene,\n        title=\"Launch plan\",",
+        "detail": "backend.tests.test_notes",
+        "documentation": {}
+    },
+    {
+        "label": "texts",
+        "kind": 2,
+        "importPath": "backend.tests.test_notes",
+        "description": "backend.tests.test_notes",
+        "peekOfCode": "def texts(page):\n    return [block[\"text\"] for block in page[\"blocks\"]]\n# --- the page and its body ------------------------------------------------------------------\ndef test_a_page_is_created_with_its_body_in_one_go(client, scene):\n    page = make_page(\n        client,\n        scene,\n        title=\"Launch plan\",\n        icon=\"🚀\",\n        blocks=[",
+        "detail": "backend.tests.test_notes",
+        "documentation": {}
+    },
+    {
+        "label": "test_a_page_is_created_with_its_body_in_one_go",
+        "kind": 2,
+        "importPath": "backend.tests.test_notes",
+        "description": "backend.tests.test_notes",
+        "peekOfCode": "def test_a_page_is_created_with_its_body_in_one_go(client, scene):\n    page = make_page(\n        client,\n        scene,\n        title=\"Launch plan\",\n        icon=\"🚀\",\n        blocks=[\n            {\"type\": \"heading2\", \"text\": \"Goals\"},\n            {\"type\": \"todo\", \"text\": \"Ship the beta\", \"checked\": True},\n            {\"type\": \"bulleted\", \"text\": \"Nested\", \"indent\": 1},",
+        "detail": "backend.tests.test_notes",
+        "documentation": {}
+    },
+    {
+        "label": "test_an_untitled_page_is_allowed_because_writing_comes_first",
+        "kind": 2,
+        "importPath": "backend.tests.test_notes",
+        "description": "backend.tests.test_notes",
+        "peekOfCode": "def test_an_untitled_page_is_allowed_because_writing_comes_first(client, scene):\n    page = make_page(client, scene)\n    assert page[\"title\"] == \"\"\n    assert page[\"blocks\"] == []\ndef test_a_document_save_keeps_the_blocks_it_sends_back(client, scene):\n    \"\"\"The editor's save must not churn block ids, or the caret jumps on every keystroke.\"\"\"\n    owner = headers(scene[\"tokens\"][\"owner\"])\n    page = make_page(\n        client,\n        scene,",
+        "detail": "backend.tests.test_notes",
+        "documentation": {}
+    },
+    {
+        "label": "test_a_document_save_keeps_the_blocks_it_sends_back",
+        "kind": 2,
+        "importPath": "backend.tests.test_notes",
+        "description": "backend.tests.test_notes",
+        "peekOfCode": "def test_a_document_save_keeps_the_blocks_it_sends_back(client, scene):\n    \"\"\"The editor's save must not churn block ids, or the caret jumps on every keystroke.\"\"\"\n    owner = headers(scene[\"tokens\"][\"owner\"])\n    page = make_page(\n        client,\n        scene,\n        title=\"Spec\",\n        blocks=[{\"text\": \"one\"}, {\"text\": \"two\"}, {\"text\": \"three\"}],\n    )\n    first, second, third = (block[\"id\"] for block in page[\"blocks\"])",
+        "detail": "backend.tests.test_notes",
+        "documentation": {}
+    },
+    {
+        "label": "test_blocks_can_be_added_in_the_middle_and_stay_contiguous",
+        "kind": 2,
+        "importPath": "backend.tests.test_notes",
+        "description": "backend.tests.test_notes",
+        "peekOfCode": "def test_blocks_can_be_added_in_the_middle_and_stay_contiguous(client, scene):\n    owner = headers(scene[\"tokens\"][\"owner\"])\n    page = make_page(client, scene, blocks=[{\"text\": \"a\"}, {\"text\": \"b\"}])\n    out = client.post(\n        f\"/api/notes/{page['id']}/blocks\",\n        json={\"blocks\": [{\"text\": \"wedged\"}], \"position\": 1},\n        headers=owner,\n    ).json()\n    assert texts(out) == [\"a\", \"wedged\", \"b\"]\n    assert positions(out) == [0, 1, 2]",
+        "detail": "backend.tests.test_notes",
+        "documentation": {}
+    },
+    {
+        "label": "test_one_block_can_be_patched_without_resending_the_page",
+        "kind": 2,
+        "importPath": "backend.tests.test_notes",
+        "description": "backend.tests.test_notes",
+        "peekOfCode": "def test_one_block_can_be_patched_without_resending_the_page(client, scene):\n    owner = headers(scene[\"tokens\"][\"owner\"])\n    page = make_page(client, scene, blocks=[{\"type\": \"todo\", \"text\": \"Ship it\"}])\n    block_id = page[\"blocks\"][0][\"id\"]\n    out = client.patch(f\"/api/note-blocks/{block_id}\", json={\"checked\": True}, headers=owner).json()\n    assert out[\"blocks\"][0][\"checked\"] is True\n    assert out[\"blocks\"][0][\"text\"] == \"Ship it\"\ndef test_an_unknown_block_type_is_refused(client, scene):\n    res = client.post(\n        f\"/api/workspaces/{scene['wid']}/notes\",",
+        "detail": "backend.tests.test_notes",
+        "documentation": {}
+    },
+    {
+        "label": "test_an_unknown_block_type_is_refused",
+        "kind": 2,
+        "importPath": "backend.tests.test_notes",
+        "description": "backend.tests.test_notes",
+        "peekOfCode": "def test_an_unknown_block_type_is_refused(client, scene):\n    res = client.post(\n        f\"/api/workspaces/{scene['wid']}/notes\",\n        json={\"blocks\": [{\"type\": \"iframe\", \"text\": \"x\"}]},\n        headers=headers(scene[\"tokens\"][\"owner\"]),\n    )\n    assert res.status_code == 422\ndef test_checked_only_sticks_to_a_todo(client, scene):\n    \"\"\"A paragraph that claims to be checked is stored unchecked: the type owns the field.\"\"\"\n    page = make_page(client, scene, blocks=[{\"type\": \"paragraph\", \"text\": \"x\", \"checked\": True}])",
+        "detail": "backend.tests.test_notes",
+        "documentation": {}
+    },
+    {
+        "label": "test_checked_only_sticks_to_a_todo",
+        "kind": 2,
+        "importPath": "backend.tests.test_notes",
+        "description": "backend.tests.test_notes",
+        "peekOfCode": "def test_checked_only_sticks_to_a_todo(client, scene):\n    \"\"\"A paragraph that claims to be checked is stored unchecked: the type owns the field.\"\"\"\n    page = make_page(client, scene, blocks=[{\"type\": \"paragraph\", \"text\": \"x\", \"checked\": True}])\n    assert page[\"blocks\"][0][\"checked\"] is False\n# --- the tree -------------------------------------------------------------------------------\ndef test_a_subpage_hangs_off_its_parent(client, scene):\n    parent = make_page(client, scene, title=\"Handbook\")\n    child = make_page(client, scene, title=\"Onboarding\", parent_id=parent[\"id\"])\n    assert child[\"parent_id\"] == parent[\"id\"]\n    listed = client.get(",
+        "detail": "backend.tests.test_notes",
+        "documentation": {}
+    },
+    {
+        "label": "test_a_subpage_hangs_off_its_parent",
+        "kind": 2,
+        "importPath": "backend.tests.test_notes",
+        "description": "backend.tests.test_notes",
+        "peekOfCode": "def test_a_subpage_hangs_off_its_parent(client, scene):\n    parent = make_page(client, scene, title=\"Handbook\")\n    child = make_page(client, scene, title=\"Onboarding\", parent_id=parent[\"id\"])\n    assert child[\"parent_id\"] == parent[\"id\"]\n    listed = client.get(\n        f\"/api/workspaces/{scene['wid']}/notes\", headers=headers(scene[\"tokens\"][\"owner\"])\n    ).json()\n    assert {p[\"title\"]: p[\"parent_id\"] for p in listed} == {\n        \"Handbook\": None,\n        \"Onboarding\": parent[\"id\"],",
+        "detail": "backend.tests.test_notes",
+        "documentation": {}
+    },
+    {
+        "label": "test_pages_keep_contiguous_positions_as_they_are_reordered",
+        "kind": 2,
+        "importPath": "backend.tests.test_notes",
+        "description": "backend.tests.test_notes",
+        "peekOfCode": "def test_pages_keep_contiguous_positions_as_they_are_reordered(client, scene):\n    owner = headers(scene[\"tokens\"][\"owner\"])\n    pages = [make_page(client, scene, title=t) for t in (\"A\", \"B\", \"C\")]\n    assert [p[\"position\"] for p in pages] == [0, 1, 2]\n    client.post(f\"/api/notes/{pages[2]['id']}/move\", json={\"position\": 0}, headers=owner)\n    listed = client.get(f\"/api/workspaces/{scene['wid']}/notes\", headers=owner).json()\n    assert [(p[\"title\"], p[\"position\"]) for p in listed] == [(\"C\", 0), (\"A\", 1), (\"B\", 2)]\ndef test_a_page_cannot_be_moved_inside_itself_or_its_own_subpage(client, scene):\n    owner = headers(scene[\"tokens\"][\"owner\"])\n    parent = make_page(client, scene, title=\"Parent\")",
+        "detail": "backend.tests.test_notes",
+        "documentation": {}
+    },
+    {
+        "label": "test_a_page_cannot_be_moved_inside_itself_or_its_own_subpage",
+        "kind": 2,
+        "importPath": "backend.tests.test_notes",
+        "description": "backend.tests.test_notes",
+        "peekOfCode": "def test_a_page_cannot_be_moved_inside_itself_or_its_own_subpage(client, scene):\n    owner = headers(scene[\"tokens\"][\"owner\"])\n    parent = make_page(client, scene, title=\"Parent\")\n    child = make_page(client, scene, title=\"Child\", parent_id=parent[\"id\"])\n    itself = client.post(\n        f\"/api/notes/{parent['id']}/move\", json={\"parent_id\": parent[\"id\"]}, headers=owner\n    )\n    assert itself.status_code == 422\n    cycle = client.post(\n        f\"/api/notes/{parent['id']}/move\", json={\"parent_id\": child[\"id\"]}, headers=owner",
+        "detail": "backend.tests.test_notes",
+        "documentation": {}
+    },
+    {
+        "label": "test_archiving_takes_the_subtree_off_the_list_and_restoring_brings_it_back",
+        "kind": 2,
+        "importPath": "backend.tests.test_notes",
+        "description": "backend.tests.test_notes",
+        "peekOfCode": "def test_archiving_takes_the_subtree_off_the_list_and_restoring_brings_it_back(client, scene):\n    owner = headers(scene[\"tokens\"][\"owner\"])\n    parent = make_page(client, scene, title=\"Old project\")\n    make_page(client, scene, title=\"Old notes\", parent_id=parent[\"id\"])\n    keep = make_page(client, scene, title=\"Current\")\n    client.post(f\"/api/notes/{parent['id']}/archive\", headers=owner)\n    live = client.get(f\"/api/workspaces/{scene['wid']}/notes\", headers=owner).json()\n    assert [p[\"title\"] for p in live] == [\"Current\"]\n    # Archived pages leave the ordering, the way archived cards do.\n    assert [p[\"position\"] for p in live] == [0]",
+        "detail": "backend.tests.test_notes",
+        "documentation": {}
+    },
+    {
+        "label": "test_a_private_page_is_invisible_to_everyone_else_including_the_owner_of_the_workspace",
+        "kind": 2,
+        "importPath": "backend.tests.test_notes",
+        "description": "backend.tests.test_notes",
+        "peekOfCode": "def test_a_private_page_is_invisible_to_everyone_else_including_the_owner_of_the_workspace(\n    client, scene\n):\n    \"\"\"The whole point: a private page is not \"forbidden\" to an admin, it does not exist.\"\"\"\n    page = make_page(client, scene, who=\"member\", title=\"My thinking\", visibility=\"private\")\n    wid = scene[\"wid\"]\n    for who in (\"owner\", \"admin\", \"viewer\"):\n        them = headers(scene[\"tokens\"][who])\n        assert client.get(f\"/api/notes/{page['id']}\", headers=them).status_code == 404\n        assert page[\"id\"] not in [p[\"id\"] for p in client.get(f\"/api/workspaces/{wid}/notes\", headers=them).json()]",
+        "detail": "backend.tests.test_notes",
+        "documentation": {}
+    },
+    {
+        "label": "test_a_private_page_writes_no_history",
+        "kind": 2,
+        "importPath": "backend.tests.test_notes",
+        "description": "backend.tests.test_notes",
+        "peekOfCode": "def test_a_private_page_writes_no_history(client, scene):\n    \"\"\"Activity is readable by the whole workspace and never edited, so a private page must\n    leave no row at all - not a filtered one.\"\"\"\n    make_page(client, scene, who=\"member\", title=\"Shared thoughts\")\n    make_page(client, scene, who=\"member\", title=\"Secret thoughts\", visibility=\"private\")\n    feed = client.get(\n        f\"/api/workspaces/{scene['wid']}/activity\", headers=headers(scene[\"tokens\"][\"owner\"])\n    ).json()\n    summaries = [row[\"summary\"] for row in feed]\n    assert any(\"Shared thoughts\" in s for s in summaries)",
+        "detail": "backend.tests.test_notes",
+        "documentation": {}
+    },
+    {
+        "label": "test_only_the_owner_of_a_page_decides_who_sees_it",
+        "kind": 2,
+        "importPath": "backend.tests.test_notes",
+        "description": "backend.tests.test_notes",
+        "peekOfCode": "def test_only_the_owner_of_a_page_decides_who_sees_it(client, scene):\n    page = make_page(client, scene, who=\"member\", title=\"Draft\")\n    url = f\"/api/notes/{page['id']}/visibility\"\n    # An admin may administer the workspace, but a page's audience is its author's call.\n    refused = client.put(url, json={\"visibility\": \"private\"}, headers=headers(scene[\"tokens\"][\"admin\"]))\n    assert refused.status_code == 403\n    mine = headers(scene[\"tokens\"][\"member\"])\n    assert client.put(url, json={\"visibility\": \"private\"}, headers=mine).json()[\"visibility\"] == \"private\"\n    assert client.get(f\"/api/notes/{page['id']}\", headers=headers(scene[\"tokens\"][\"admin\"])).status_code == 404\n    assert client.put(url, json={\"visibility\": \"workspace\"}, headers=mine).json()[\"visibility\"] == \"workspace\"",
+        "detail": "backend.tests.test_notes",
+        "documentation": {}
+    },
+    {
+        "label": "test_privacy_is_inherited_by_the_subtree",
+        "kind": 2,
+        "importPath": "backend.tests.test_notes",
+        "description": "backend.tests.test_notes",
+        "peekOfCode": "def test_privacy_is_inherited_by_the_subtree(client, scene):\n    \"\"\"A shared page inside a private one would be listed and unreachable, so it cannot exist.\"\"\"\n    mine = headers(scene[\"tokens\"][\"member\"])\n    parent = make_page(client, scene, who=\"member\", title=\"Journal\", visibility=\"private\")\n    # Asking for a shared subpage of a private page gets a private one.\n    child = make_page(\n        client, scene, who=\"member\", title=\"Week 1\", parent_id=parent[\"id\"], visibility=\"workspace\"\n    )\n    assert child[\"visibility\"] == \"private\"\n    # And it cannot be shared on its own while it sits there.",
+        "detail": "backend.tests.test_notes",
+        "documentation": {}
+    },
+    {
+        "label": "test_making_a_page_private_takes_its_subpages_with_it",
+        "kind": 2,
+        "importPath": "backend.tests.test_notes",
+        "description": "backend.tests.test_notes",
+        "peekOfCode": "def test_making_a_page_private_takes_its_subpages_with_it(client, scene):\n    mine = headers(scene[\"tokens\"][\"member\"])\n    parent = make_page(client, scene, who=\"member\", title=\"Project\")\n    child = make_page(client, scene, who=\"member\", title=\"Detail\", parent_id=parent[\"id\"])\n    client.put(f\"/api/notes/{parent['id']}/visibility\", json={\"visibility\": \"private\"}, headers=mine)\n    assert client.get(f\"/api/notes/{child['id']}\", headers=mine).json()[\"visibility\"] == \"private\"\n    assert client.get(f\"/api/notes/{child['id']}\", headers=headers(scene[\"tokens\"][\"owner\"])).status_code == 404\ndef test_a_private_page_cannot_be_moved_under_a_shared_parent_by_accident(client, scene):\n    \"\"\"The guard is the other way round too: a shared page may not move into a private one.\"\"\"\n    mine = headers(scene[\"tokens\"][\"member\"])",
+        "detail": "backend.tests.test_notes",
+        "documentation": {}
+    },
+    {
+        "label": "test_a_private_page_cannot_be_moved_under_a_shared_parent_by_accident",
+        "kind": 2,
+        "importPath": "backend.tests.test_notes",
+        "description": "backend.tests.test_notes",
+        "peekOfCode": "def test_a_private_page_cannot_be_moved_under_a_shared_parent_by_accident(client, scene):\n    \"\"\"The guard is the other way round too: a shared page may not move into a private one.\"\"\"\n    mine = headers(scene[\"tokens\"][\"member\"])\n    private = make_page(client, scene, who=\"member\", title=\"Private\", visibility=\"private\")\n    shared = make_page(client, scene, who=\"member\", title=\"Shared\")\n    refused = client.post(\n        f\"/api/notes/{shared['id']}/move\", json={\"parent_id\": private[\"id\"]}, headers=mine\n    )\n    assert refused.status_code == 422\n    assert \"make this page private first\" in refused.json()[\"detail\"]",
+        "detail": "backend.tests.test_notes",
+        "documentation": {}
+    },
+    {
+        "label": "test_a_viewer_reads_pages_but_writes_nothing",
+        "kind": 2,
+        "importPath": "backend.tests.test_notes",
+        "description": "backend.tests.test_notes",
+        "peekOfCode": "def test_a_viewer_reads_pages_but_writes_nothing(client, scene):\n    page = make_page(client, scene, title=\"Readme\", blocks=[{\"text\": \"hello\"}])\n    viewer = headers(scene[\"tokens\"][\"viewer\"])\n    assert client.get(f\"/api/notes/{page['id']}\", headers=viewer).status_code == 200\n    assert client.get(f\"/api/workspaces/{scene['wid']}/notes\", headers=viewer).status_code == 200\n    assert client.post(f\"/api/workspaces/{scene['wid']}/notes\", json={\"title\": \"No\"}, headers=viewer).status_code == 403\n    assert client.patch(f\"/api/notes/{page['id']}\", json={\"title\": \"No\"}, headers=viewer).status_code == 403\n    assert client.put(f\"/api/notes/{page['id']}/blocks\", json={\"blocks\": []}, headers=viewer).status_code == 403\n    assert client.post(f\"/api/notes/{page['id']}/archive\", headers=viewer).status_code == 403\n    assert client.delete(f\"/api/notes/{page['id']}\", headers=viewer).status_code == 403",
+        "detail": "backend.tests.test_notes",
+        "documentation": {}
+    },
+    {
+        "label": "test_an_outsider_sees_no_pages_at_all",
+        "kind": 2,
+        "importPath": "backend.tests.test_notes",
+        "description": "backend.tests.test_notes",
+        "peekOfCode": "def test_an_outsider_sees_no_pages_at_all(client, scene, register_and_login):\n    page = make_page(client, scene, title=\"Internal\")\n    outsider = headers(register_and_login(\"nobody@example.com\"))\n    assert client.get(f\"/api/notes/{page['id']}\", headers=outsider).status_code == 404\n    assert client.get(f\"/api/workspaces/{scene['wid']}/notes\", headers=outsider).status_code == 404\ndef test_a_page_is_deleted_by_its_owner_or_an_admin_and_nobody_else(client, scene):\n    owner_of_page = \"member\"\n    page = make_page(client, scene, who=owner_of_page, title=\"Mine\")\n    other_member = headers(scene[\"tokens\"][\"viewer\"])  # viewer is refused earlier, by role\n    assert client.delete(f\"/api/notes/{page['id']}\", headers=other_member).status_code == 403",
+        "detail": "backend.tests.test_notes",
+        "documentation": {}
+    },
+    {
+        "label": "test_a_page_is_deleted_by_its_owner_or_an_admin_and_nobody_else",
+        "kind": 2,
+        "importPath": "backend.tests.test_notes",
+        "description": "backend.tests.test_notes",
+        "peekOfCode": "def test_a_page_is_deleted_by_its_owner_or_an_admin_and_nobody_else(client, scene):\n    owner_of_page = \"member\"\n    page = make_page(client, scene, who=owner_of_page, title=\"Mine\")\n    other_member = headers(scene[\"tokens\"][\"viewer\"])  # viewer is refused earlier, by role\n    assert client.delete(f\"/api/notes/{page['id']}\", headers=other_member).status_code == 403\n    # The page's own author may delete it.\n    assert client.delete(f\"/api/notes/{page['id']}\", headers=headers(scene[\"tokens\"][owner_of_page])).status_code == 204\n    # So may an admin, for somebody else's page.\n    theirs = make_page(client, scene, who=\"member\", title=\"Theirs\")\n    assert client.delete(f\"/api/notes/{theirs['id']}\", headers=headers(scene[\"tokens\"][\"admin\"])).status_code == 204",
+        "detail": "backend.tests.test_notes",
+        "documentation": {}
+    },
+    {
+        "label": "test_deleting_a_page_takes_its_subpages_and_leaves_the_history",
+        "kind": 2,
+        "importPath": "backend.tests.test_notes",
+        "description": "backend.tests.test_notes",
+        "peekOfCode": "def test_deleting_a_page_takes_its_subpages_and_leaves_the_history(client, scene):\n    owner = headers(scene[\"tokens\"][\"owner\"])\n    parent = make_page(client, scene, title=\"Doomed\")\n    child = make_page(client, scene, title=\"Also doomed\", parent_id=parent[\"id\"])\n    client.delete(f\"/api/notes/{parent['id']}\", headers=owner)\n    assert client.get(f\"/api/notes/{child['id']}\", headers=owner).status_code == 404\n    feed = client.get(f\"/api/workspaces/{scene['wid']}/activity\", headers=owner).json()\n    assert any(row[\"action\"] == \"note.deleted\" for row in feed)\n# --- history and notifications --------------------------------------------------------------\ndef test_creating_and_editing_a_page_is_written_to_the_feed(client, scene):",
+        "detail": "backend.tests.test_notes",
+        "documentation": {}
+    },
+    {
+        "label": "test_creating_and_editing_a_page_is_written_to_the_feed",
+        "kind": 2,
+        "importPath": "backend.tests.test_notes",
+        "description": "backend.tests.test_notes",
+        "peekOfCode": "def test_creating_and_editing_a_page_is_written_to_the_feed(client, scene):\n    owner = headers(scene[\"tokens\"][\"owner\"])\n    page = make_page(client, scene, title=\"Plan\")\n    client.put(\n        f\"/api/notes/{page['id']}/blocks\", json={\"blocks\": [{\"text\": \"body\"}]}, headers=owner\n    )\n    feed = client.get(f\"/api/workspaces/{scene['wid']}/activity\", headers=owner).json()\n    actions = [row[\"action\"] for row in feed]\n    assert \"note.created\" in actions\n    assert \"note.updated\" in actions",
+        "detail": "backend.tests.test_notes",
+        "documentation": {}
+    },
+    {
+        "label": "test_repeated_autosaves_do_not_flood_the_feed",
+        "kind": 2,
+        "importPath": "backend.tests.test_notes",
+        "description": "backend.tests.test_notes",
+        "peekOfCode": "def test_repeated_autosaves_do_not_flood_the_feed(client, scene):\n    \"\"\"Editing is autosaved; one history row per burst is what the feed is for.\"\"\"\n    owner = headers(scene[\"tokens\"][\"owner\"])\n    page = make_page(client, scene, title=\"Plan\")\n    for n in range(5):\n        client.put(\n            f\"/api/notes/{page['id']}/blocks\",\n            json={\"blocks\": [{\"text\": f\"draft {n}\"}]},\n            headers=owner,\n        )",
+        "detail": "backend.tests.test_notes",
+        "documentation": {}
+    },
+    {
+        "label": "test_a_mention_in_a_shared_page_notifies_once",
+        "kind": 2,
+        "importPath": "backend.tests.test_notes",
+        "description": "backend.tests.test_notes",
+        "peekOfCode": "def test_a_mention_in_a_shared_page_notifies_once(client, scene):\n    owner = headers(scene[\"tokens\"][\"owner\"])\n    page = make_page(\n        client, scene, title=\"Standup\", blocks=[{\"text\": \"@member@example.com please review\"}]\n    )\n    them = headers(scene[\"tokens\"][\"member\"])\n    notes = client.get(\"/api/notifications\", headers=them).json()\n    mentions = [n for n in notes if n[\"kind\"] == \"note.mentioned\"]\n    assert len(mentions) == 1\n    assert mentions[0][\"entity_type\"] == \"note\"",
+        "detail": "backend.tests.test_notes",
+        "documentation": {}
+    },
+    {
+        "label": "test_a_mention_in_a_private_page_notifies_nobody",
+        "kind": 2,
+        "importPath": "backend.tests.test_notes",
+        "description": "backend.tests.test_notes",
+        "peekOfCode": "def test_a_mention_in_a_private_page_notifies_nobody(client, scene):\n    make_page(\n        client,\n        scene,\n        who=\"owner\",\n        title=\"Private\",\n        visibility=\"private\",\n        blocks=[{\"text\": \"@member@example.com\"}],\n    )\n    them = headers(scene[\"tokens\"][\"member\"])",
+        "detail": "backend.tests.test_notes",
+        "documentation": {}
+    },
+    {
+        "label": "test_an_embedded_card_gives_the_card_a_backlink",
+        "kind": 2,
+        "importPath": "backend.tests.test_notes",
+        "description": "backend.tests.test_notes",
+        "peekOfCode": "def test_an_embedded_card_gives_the_card_a_backlink(client, scene):\n    owner = headers(scene[\"tokens\"][\"owner\"])\n    card_id = scene[\"card\"][\"id\"]\n    page = make_page(\n        client,\n        scene,\n        title=\"Release notes\",\n        blocks=[{\"type\": \"card_embed\", \"ref_card_id\": card_id}],\n    )\n    back = client.get(f\"/api/cards/{card_id}/notes\", headers=owner).json()",
+        "detail": "backend.tests.test_notes",
+        "documentation": {}
+    },
+    {
+        "label": "test_an_embed_block_carries_the_current_title_of_what_it_points_at",
+        "kind": 2,
+        "importPath": "backend.tests.test_notes",
+        "description": "backend.tests.test_notes",
+        "peekOfCode": "def test_an_embed_block_carries_the_current_title_of_what_it_points_at(client, scene):\n    owner = headers(scene[\"tokens\"][\"owner\"])\n    page = make_page(\n        client,\n        scene,\n        blocks=[{\"type\": \"card_embed\", \"ref_card_id\": scene[\"card\"][\"id\"]}],\n    )\n    assert page[\"blocks\"][0][\"ref_title\"] == \"Fix login\"\n    # The board comes back too, so the UI can link straight to the card on its board.\n    assert page[\"blocks\"][0][\"ref_card_board_id\"] == scene[\"board\"][\"id\"]",
+        "detail": "backend.tests.test_notes",
+        "documentation": {}
+    },
+    {
+        "label": "test_a_backlink_from_someone_elses_private_page_stays_hidden",
+        "kind": 2,
+        "importPath": "backend.tests.test_notes",
+        "description": "backend.tests.test_notes",
+        "peekOfCode": "def test_a_backlink_from_someone_elses_private_page_stays_hidden(client, scene):\n    client.post(\n        f\"/api/workspaces/{scene['wid']}/notes\",\n        json={\n            \"title\": \"My private read\",\n            \"visibility\": \"private\",\n            \"blocks\": [{\"type\": \"card_embed\", \"ref_card_id\": scene[\"card\"][\"id\"]}],\n        },\n        headers=headers(scene[\"tokens\"][\"member\"]),\n    )",
+        "detail": "backend.tests.test_notes",
+        "documentation": {}
+    },
+    {
+        "label": "test_an_embed_must_point_at_something_in_this_workspace",
+        "kind": 2,
+        "importPath": "backend.tests.test_notes",
+        "description": "backend.tests.test_notes",
+        "peekOfCode": "def test_an_embed_must_point_at_something_in_this_workspace(client, scene, register_and_login):\n    elsewhere = register_and_login(\"elsewhere@example.com\")\n    other_board = client.post(\n        \"/api/boards\", json={\"title\": \"Theirs\", \"columns\": [\"Todo\"]}, headers=headers(elsewhere)\n    ).json()\n    other_card = client.post(\n        f\"/api/columns/{other_board['columns'][0]['id']}/cards\",\n        json={\"title\": \"Not yours\"},\n        headers=headers(elsewhere),\n    ).json()",
+        "detail": "backend.tests.test_notes",
+        "documentation": {}
+    },
+    {
+        "label": "test_an_assignee_hears_when_a_page_points_at_their_card",
+        "kind": 2,
+        "importPath": "backend.tests.test_notes",
+        "description": "backend.tests.test_notes",
+        "peekOfCode": "def test_an_assignee_hears_when_a_page_points_at_their_card(client, scene):\n    owner = headers(scene[\"tokens\"][\"owner\"])\n    client.patch(\n        f\"/api/cards/{scene['card']['id']}\",\n        json={\"assignee_id\": client.get(\"/api/me\", headers=headers(scene[\"tokens\"][\"member\"])).json()[\"id\"]},\n        headers=owner,\n    )\n    make_page(\n        client,\n        scene,",
+        "detail": "backend.tests.test_notes",
+        "documentation": {}
+    },
+    {
+        "label": "test_search_finds_pages_by_title_and_body_with_an_excerpt",
+        "kind": 2,
+        "importPath": "backend.tests.test_notes",
+        "description": "backend.tests.test_notes",
+        "peekOfCode": "def test_search_finds_pages_by_title_and_body_with_an_excerpt(client, scene):\n    owner = headers(scene[\"tokens\"][\"owner\"])\n    make_page(client, scene, title=\"Pricing research\", blocks=[{\"text\": \"We should test annual billing\"}])\n    make_page(client, scene, title=\"Unrelated\")\n    by_title = client.get(f\"/api/workspaces/{scene['wid']}/search?q=pricing\", headers=owner).json()\n    assert [p[\"title\"] for p in by_title[\"notes\"]] == [\"Pricing research\"]\n    by_body = client.get(f\"/api/workspaces/{scene['wid']}/search?q=annual\", headers=owner).json()\n    assert [p[\"title\"] for p in by_body[\"notes\"]] == [\"Pricing research\"]\n    assert \"annual billing\" in by_body[\"notes\"][0][\"excerpt\"]\ndef test_an_export_carries_my_pages_and_nobody_elses_private_ones(client, scene):",
+        "detail": "backend.tests.test_notes",
+        "documentation": {}
+    },
+    {
+        "label": "test_an_export_carries_my_pages_and_nobody_elses_private_ones",
+        "kind": 2,
+        "importPath": "backend.tests.test_notes",
+        "description": "backend.tests.test_notes",
+        "peekOfCode": "def test_an_export_carries_my_pages_and_nobody_elses_private_ones(client, scene):\n    make_page(client, scene, who=\"member\", title=\"Team page\")\n    make_page(client, scene, who=\"member\", title=\"Member's private\", visibility=\"private\")\n    make_page(client, scene, who=\"owner\", title=\"Owner's private\", visibility=\"private\")\n    export = client.get(\n        f\"/api/workspaces/{scene['wid']}/export\", headers=headers(scene[\"tokens\"][\"owner\"])\n    ).json()\n    titles = {note[\"title\"] for note in export[\"notes\"]}\n    assert titles == {\"Team page\", \"Owner's private\"}\n    assert \"Member's private\" not in titles",
+        "detail": "backend.tests.test_notes",
+        "documentation": {}
+    },
+    {
+        "label": "test_an_export_carries_the_blocks_of_a_page",
+        "kind": 2,
+        "importPath": "backend.tests.test_notes",
+        "description": "backend.tests.test_notes",
+        "peekOfCode": "def test_an_export_carries_the_blocks_of_a_page(client, scene):\n    make_page(client, scene, title=\"With body\", blocks=[{\"type\": \"todo\", \"text\": \"do it\"}])\n    export = client.get(\n        f\"/api/workspaces/{scene['wid']}/export\", headers=headers(scene[\"tokens\"][\"owner\"])\n    ).json()\n    page = next(n for n in export[\"notes\"] if n[\"title\"] == \"With body\")\n    assert [(b[\"type\"], b[\"text\"]) for b in page[\"blocks\"]] == [(\"todo\", \"do it\")]\n# --- the migration --------------------------------------------------------------------------\ndef test_migration_0019_leaves_existing_board_data_alone(tmp_path, monkeypatch):\n    \"\"\"0019 adds tables and nullable columns, so nothing may be rebuilt - and the rule in",
+        "detail": "backend.tests.test_notes",
+        "documentation": {}
+    },
+    {
+        "label": "test_migration_0019_leaves_existing_board_data_alone",
+        "kind": 2,
+        "importPath": "backend.tests.test_notes",
+        "description": "backend.tests.test_notes",
+        "peekOfCode": "def test_migration_0019_leaves_existing_board_data_alone(tmp_path, monkeypatch):\n    \"\"\"0019 adds tables and nullable columns, so nothing may be rebuilt - and the rule in\n    agents.md is that any migration touching an existing table is tested with child rows\n    already in place.\"\"\"\n    monkeypatch.setenv(\"DATABASE_PATH\", str(tmp_path / \"legacy19.db\"))\n    get_engine.cache_clear()\n    cfg = Config(\"alembic.ini\")\n    command.upgrade(cfg, \"0018\")\n    engine = get_engine()\n    with engine.begin() as conn:",
+        "detail": "backend.tests.test_notes",
+        "documentation": {}
+    },
+    {
         "label": "auth",
         "kind": 2,
         "importPath": "backend.tests.test_onboarding",
@@ -16010,7 +18000,7 @@
         "kind": 2,
         "importPath": "backend.tests.test_search",
         "description": "backend.tests.test_search",
-        "peekOfCode": "def test_workspace_search_spans_boards_and_says_where(client, scene):\n    board, _, _, tokens, _, _ = scene\n    owner = headers(tokens[\"owner\"])\n    wid = board[\"workspace_id\"]\n    hits = client.get(f\"/api/workspaces/{wid}/search?q=login\", headers=owner).json()\n    assert titles(hits) == [\"Fix login\", \"Launch campaign\"]\n    by_title = {h[\"title\"]: h for h in hits}\n    assert by_title[\"Launch campaign\"][\"board_title\"] == \"Marketing\"\n    assert by_title[\"Launch campaign\"][\"column_title\"] == \"Ideas\"\n    assert by_title[\"Fix login\"][\"board_id\"] == board[\"id\"]",
+        "peekOfCode": "def test_workspace_search_spans_boards_and_says_where(client, scene):\n    board, _, _, tokens, _, _ = scene\n    owner = headers(tokens[\"owner\"])\n    wid = board[\"workspace_id\"]\n    found = client.get(f\"/api/workspaces/{wid}/search?q=login\", headers=owner).json()\n    # Search answers with one envelope per surface: cards here, pages in test_notes.py.\n    assert titles(found[\"cards\"]) == [\"Fix login\", \"Launch campaign\"]\n    assert found[\"notes\"] == []\n    by_title = {h[\"title\"]: h for h in found[\"cards\"]}\n    assert by_title[\"Launch campaign\"][\"board_title\"] == \"Marketing\"",
         "detail": "backend.tests.test_search",
         "documentation": {}
     },

@@ -11,10 +11,20 @@ Two different failures, deliberately:
 
 from dataclasses import dataclass
 
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
-from app.models import Board, Card, Column, User, Workspace, WorkspaceMember, WorkspaceRole
+from app.models import (
+    Board,
+    Card,
+    Column,
+    Note,
+    NoteVisibility,
+    User,
+    Workspace,
+    WorkspaceMember,
+    WorkspaceRole,
+)
 from app.services.errors import Forbidden, NotFound
 
 VIEWER = WorkspaceRole.VIEWER
@@ -101,3 +111,50 @@ def require_card(db: Session, user: User, card_id: int, minimum: WorkspaceRole =
         return require_column(db, user, column_id, minimum)
     except NotFound:
         raise NotFound("Card") from None
+
+
+# --- notes ------------------------------------------------------------------------------------
+#
+# Notes are the one thing in a workspace that is not automatically readable by every member. A
+# note marked `private` belongs to its owner alone - against admins and owners too - and a
+# non-owner must not even learn that it exists, so it reads as NotFound rather than Forbidden,
+# the same way a workspace you are not in does.
+
+
+def note_visibility_filter(user: User):
+    """The single condition every note read must compose.
+
+    It lives here, not in `services/notes.py`, because this module is the only place allowed to
+    decide access - and because a listing, a search, an export and the AI context builder that
+    each wrote their own version of this is exactly how a private page leaks.
+    """
+    return or_(
+        Note.visibility == NoteVisibility.WORKSPACE.value,
+        Note.owner_id == user.id,
+    )
+
+
+def may_read_note(user: User, note: Note) -> bool:
+    """The in-Python twin of `note_visibility_filter`, for a note already loaded."""
+    return not note.is_private or note.owner_id == user.id
+
+
+def require_note(db: Session, user: User, note_id: int, minimum: WorkspaceRole = VIEWER) -> Access:
+    """Membership, then visibility, then the role - in that order, deliberately.
+
+    Visibility is settled before `minimum` is applied, because a Forbidden for someone else's
+    private note would confirm that the note exists. Anything a user may not see is NotFound
+    first; only a note they can see can produce a role error.
+    """
+    note = db.get(Note, note_id)
+    if note is None:
+        raise NotFound("Note")
+    try:
+        access = require_workspace(db, user, note.workspace_id)
+    except NotFound:
+        raise NotFound("Note") from None
+    if not may_read_note(user, note):
+        raise NotFound("Note")
+    if not access.at_least(minimum):
+        raise Forbidden(f"This action needs {_WHAT_IT_TAKES[minimum]} in this workspace")
+    return access

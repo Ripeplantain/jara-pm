@@ -10,6 +10,7 @@ from app.models import (
     Board,
     Column,
     Label,
+    Note,
     Notification,
     Sprint,
     User,
@@ -40,6 +41,19 @@ def export_workspace(db: Session, user: User, workspace_id: int) -> dict:
         )
     )
     labels = list(db.scalars(select(Label).where(Label.workspace_id == workspace_id)))
+    # Pages the exporter may read: shared ones, plus their own private ones. Somebody else's
+    # private page is not theirs to export, whatever their role in the workspace.
+    notes = list(
+        db.scalars(
+            select(Note)
+            .where(
+                Note.workspace_id == workspace_id,
+                permissions.note_visibility_filter(user),
+            )
+            .options(selectinload(Note.blocks))
+            .order_by(Note.id)
+        )
+    )
     sprints = list(
         db.scalars(
             select(Sprint).join(Board, Sprint.board_id == Board.id).where(Board.workspace_id == workspace_id)
@@ -101,6 +115,34 @@ def export_workspace(db: Session, user: User, workspace_id: int) -> dict:
         "labels": [
             {"id": label.id, "name": label.name, "color": label.color}
             for label in labels
+        ],
+        "notes": [
+            {
+                "id": note.id,
+                "parent_id": note.parent_id,
+                "title": note.title,
+                "icon": note.icon,
+                "visibility": note.visibility,
+                "owner_id": note.owner_id,
+                "position": note.position,
+                "created_at": note.created_at,
+                "updated_at": note.updated_at,
+                "archived_at": note.archived_at,
+                "blocks": [
+                    {
+                        "id": block.id,
+                        "type": block.type,
+                        "text": block.text,
+                        "checked": block.checked,
+                        "indent": block.indent,
+                        "position": block.position,
+                        "ref_card_id": block.ref_card_id,
+                        "ref_board_id": block.ref_board_id,
+                    }
+                    for block in note.blocks
+                ],
+            }
+            for note in notes
         ],
         "sprints": [
             {

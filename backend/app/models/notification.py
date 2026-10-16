@@ -26,6 +26,9 @@ class Notification(Base):
     body: Mapped[str] = mapped_column(String(500), default="")
     board_id: Mapped[int | None] = mapped_column(default=None)
     card_id: Mapped[int | None] = mapped_column(default=None)
+    # Where to go when the subject is neither: ("note", 12).
+    entity_type: Mapped[str | None] = mapped_column(String(20), default=None)
+    entity_id: Mapped[int | None] = mapped_column(default=None)
     actor_id: Mapped[int | None] = mapped_column(
         ForeignKey("users.id", ondelete="SET NULL"), default=None
     )
