@@ -6,7 +6,7 @@ RUN npm ci
 
 FROM deps AS dev
 COPY . .
-RUN mkdir -p /data && chown -R node:node /app /data
+RUN mkdir -p /app/.nuxt /app/.output /data && chown -R node:node /app /data
 USER node
 EXPOSE 3000
 CMD ["npm", "run", "dev"]

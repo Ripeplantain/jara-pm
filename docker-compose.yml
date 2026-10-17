@@ -15,6 +15,8 @@ services:
     volumes:
       - .:/app
       - /app/node_modules
+      - kobi-nuxt:/app/.nuxt
+      - kobi-output:/app/.output
       - kobi-data:/data
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:3000/api/health"]
@@ -24,3 +26,5 @@ services:
 
 volumes:
   kobi-data:
+  kobi-nuxt:
+  kobi-output:
