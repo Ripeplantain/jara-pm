@@ -47,3 +47,21 @@ tests/               Vitest service and schema tests
 - Full verification: `./scripts/verify.sh`
 
 Never read or print `.env` or `.env.nuxt.local`. `.env.example` is safe to update.
+
+## Agent workflow
+
+This repo uses an agent workflow in `.agent/` (agent-workflow 2.0.0).
+
+- Project facts, commands, and invariants: `.agent/PROJECT.md`. Read it first.
+- Hard stops: `.agent/rules/checkpoints.md`. These override anything else.
+- Roles: `.agent/agents/` (planner, implementer, tester, reviewer, evaluator).
+- Workflows: `.agent/workflows/` (feature, fix, prompt-change).
+
+Pick the workflow that matches the task and follow its steps.
+
+## Delegation
+
+When subagents are available, delegate bounded work and ask each to return a summary, not raw output:
+- Before a non-trivial change: spawn `planner`.
+- After implementation: spawn `tester`, then `reviewer`. For AI prompt or model changes, spawn `evaluator` before `reviewer`.
+Without subagents, work through the same roles in order yourself, reading each role doc as you reach that step.
