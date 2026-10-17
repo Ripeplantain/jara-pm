@@ -1,41 +1,26 @@
 services:
-  backend:
+  app:
     build:
-      context: ./backend
+      context: .
       target: dev
     env_file: .env
     environment:
-      DATABASE_PATH: ${DATABASE_PATH:-/data/app.db}
-    ports:
-      - "8000:8000"
-    volumes:
-      - ./backend:/app
-      - db-data:/data
-    healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
-      interval: 5s
-      timeout: 3s
-      retries: 10
-
-  frontend:
-    build:
-      context: ./frontend
-      target: dev
-    env_file: .env
-    environment:
-      BACKEND_INTERNAL_URL: ${BACKEND_INTERNAL_URL:-http://backend:8000}
-      # next-auth v4 reads NEXTAUTH_URL; AUTH_URL stays the single value in .env.
-      NEXTAUTH_URL: ${AUTH_URL:-http://localhost:3000}
+      NUXT_DATABASE_PATH: ${NUXT_DATABASE_PATH:-/data/kobi.db}
+      NUXT_SESSION_PASSWORD: ${NUXT_SESSION_PASSWORD:-}
+      NUXT_LLM_API_KEY: ${NUXT_LLM_API_KEY:-}
+      NUXT_LLM_BASE_URL: ${NUXT_LLM_BASE_URL:-https://openrouter.ai/api/v1}
+      NUXT_LLM_MODEL: ${NUXT_LLM_MODEL:-openai/gpt-4.1-mini}
     ports:
       - "3000:3000"
     volumes:
-      - ./frontend:/app
+      - .:/app
       - /app/node_modules
-      - /app/.next
-    depends_on:
-      backend:
-        condition: service_healthy
+      - kobi-data:/data
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:3000/api/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
 
-# SQLite lives here, mounted into the backend only. `docker compose down -v` deletes it.
 volumes:
-  db-data:
+  kobi-data:
