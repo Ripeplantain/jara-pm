@@ -1,0 +1,5 @@
+services:
+  app:
+    # CI runs against the source copied into the image. Avoid bind mounts so
+    # Nuxt can freely create and replace .nuxt and .output during verification.
+    volumes: !override []
