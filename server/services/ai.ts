@@ -1,4 +1,4 @@
-import type Database from 'better-sqlite3'
+import { and, eq, ne, sql } from 'drizzle-orm'
 import { z } from 'zod'
 import {
   aiProviderResponseSchema,
@@ -8,6 +8,8 @@ import type { AiReply, GoalPlanProposal } from '#shared/types/domain'
 import { createGoal } from '~~/server/services/goals'
 import { createMilestone, createProject } from '~~/server/services/projects'
 import { createTask } from '~~/server/services/tasks'
+import type { KobiDatabase, KobiDb } from '~~/server/db'
+import { aiMessages, aiProposals, goals, projects, tasks } from '~~/server/db/schema'
 import { nowIso, todayIso } from '~~/server/utils/time'
 
 type AiConfig = {
@@ -37,25 +39,32 @@ const checkRateLimit = (userId: string) => {
   current.count += 1
 }
 
-const contextFor = (db: Database.Database, userId: string) => {
-  const taskCounts = db.prepare(`
-    SELECT
-      COUNT(CASE WHEN status != 'done' THEN 1 END) AS open,
-      COUNT(CASE WHEN status != 'done' AND due_date < ? THEN 1 END) AS overdue,
-      COUNT(CASE WHEN status = 'done' THEN 1 END) AS done
-    FROM tasks WHERE user_id = ?
-  `).get(todayIso(), userId) as { open: number, overdue: number, done: number }
-  const projects = db.prepare(`
-    SELECT title, status, target_date FROM projects
-    WHERE user_id = ? AND status != 'archived'
-    ORDER BY COALESCE(target_date, '9999-12-31') LIMIT 12
-  `).all(userId) as Array<{ title: string, status: string, target_date: string | null }>
-  const goals = db.prepare(`
-    SELECT title, status, target_date FROM goals
-    WHERE user_id = ? AND status != 'archived'
-    ORDER BY COALESCE(target_date, '9999-12-31') LIMIT 8
-  `).all(userId) as Array<{ title: string, status: string, target_date: string | null }>
-  return { taskCounts, projects, goals, today: todayIso() }
+const contextFor = (db: KobiDb, userId: string) => {
+  const today = todayIso()
+  const taskCounts = db.select({
+    open: sql<number>`count(case when ${tasks.status} != 'done' then 1 end)`,
+    overdue: sql<number>`count(case when ${tasks.status} != 'done' and ${tasks.dueDate} < ${today} then 1 end)`,
+    done: sql<number>`count(case when ${tasks.status} = 'done' then 1 end)`,
+  }).from(tasks).where(eq(tasks.userId, userId)).get() ?? { open: 0, overdue: 0, done: 0 }
+  const projectContext = db.select({
+    title: projects.title,
+    status: projects.status,
+    target_date: projects.targetDate,
+  }).from(projects)
+    .where(and(eq(projects.userId, userId), ne(projects.status, 'archived')))
+    .orderBy(sql`coalesce(${projects.targetDate}, '9999-12-31')`)
+    .limit(12)
+    .all()
+  const goalContext = db.select({
+    title: goals.title,
+    status: goals.status,
+    target_date: goals.targetDate,
+  }).from(goals)
+    .where(and(eq(goals.userId, userId), ne(goals.status, 'archived')))
+    .orderBy(sql`coalesce(${goals.targetDate}, '9999-12-31')`)
+    .limit(8)
+    .all()
+  return { taskCounts, projects: projectContext, goals: goalContext, today }
 }
 
 const localPlan = (message: string): GoalPlanProposal => {
@@ -154,7 +163,7 @@ const callProvider = async (
 }
 
 export const askKobi = async (
-  db: Database.Database,
+  db: KobiDb,
   userId: string,
   input: { message: string, mode: 'chat' | 'goal_plan' },
   config: AiConfig,
@@ -175,45 +184,72 @@ export const askKobi = async (
   }
 
   const now = nowIso()
-  db.prepare('INSERT INTO ai_messages (id, user_id, role, content, created_at) VALUES (?, ?, ?, ?, ?)')
-    .run(crypto.randomUUID(), userId, 'user', input.message, now)
-  db.prepare('INSERT INTO ai_messages (id, user_id, role, content, created_at) VALUES (?, ?, ?, ?, ?)')
-    .run(crypto.randomUUID(), userId, 'assistant', answer.message, nowIso())
+  db.insert(aiMessages).values({
+    id: crypto.randomUUID(),
+    userId,
+    role: 'user',
+    content: input.message,
+    createdAt: now,
+  }).run()
+  db.insert(aiMessages).values({
+    id: crypto.randomUUID(),
+    userId,
+    role: 'assistant',
+    content: answer.message,
+    createdAt: nowIso(),
+  }).run()
 
   let proposalId: string | null = null
   if (answer.proposal) {
     const validated = goalPlanProposalSchema.parse(answer.proposal)
     proposalId = crypto.randomUUID()
-    db.prepare(`
-      INSERT INTO ai_proposals (id, user_id, kind, payload_json, status, created_at)
-      VALUES (?, ?, 'goal_plan', ?, 'pending', ?)
-    `).run(proposalId, userId, JSON.stringify(validated), nowIso())
+    db.insert(aiProposals).values({
+      id: proposalId,
+      userId,
+      kind: 'goal_plan',
+      payloadJson: JSON.stringify(validated),
+      status: 'pending',
+      createdAt: nowIso(),
+    }).run()
   }
 
   return { message: answer.message, proposalId, proposal: answer.proposal }
 }
 
 export const acceptProposal = (
-  db: Database.Database,
+  db: KobiDatabase,
   userId: string,
   proposalId: string,
 ) => {
-  const row = db.prepare(`
-    SELECT payload_json, status FROM ai_proposals WHERE id = ? AND user_id = ?
-  `).get(proposalId, userId) as { payload_json: string, status: string } | undefined
-  if (!row) throw createError({ status: 404, statusText: 'Proposal not found' })
-  if (row.status !== 'pending') throw createError({ status: 409, statusText: 'Proposal was already resolved' })
+  return db.transaction((tx) => {
+    const row = tx.select({
+      payload_json: aiProposals.payloadJson,
+      status: aiProposals.status,
+    }).from(aiProposals)
+      .where(and(eq(aiProposals.id, proposalId), eq(aiProposals.userId, userId)))
+      .get()
+    if (!row) throw createError({ status: 404, statusText: 'Proposal not found' })
+    if (row.status !== 'pending') throw createError({ status: 409, statusText: 'Proposal was already resolved' })
 
-  const proposal = goalPlanProposalSchema.parse(JSON.parse(row.payload_json) as unknown)
-  return db.transaction(() => {
-    const goal = createGoal(db, userId, {
+    const claimed = tx.update(aiProposals)
+      .set({ status: 'accepted', resolvedAt: nowIso() })
+      .where(and(
+        eq(aiProposals.id, proposalId),
+        eq(aiProposals.userId, userId),
+        eq(aiProposals.status, 'pending'),
+      ))
+      .run()
+    if (!claimed.changes) throw createError({ status: 409, statusText: 'Proposal was already resolved' })
+
+    const proposal = goalPlanProposalSchema.parse(JSON.parse(row.payload_json) as unknown)
+    const goal = createGoal(tx, userId, {
       title: proposal.goal.title,
       description: proposal.goal.description,
       targetDate: proposal.goal.targetDate,
     })
     const projectIds: string[] = []
     for (const projectInput of proposal.projects) {
-      const project = createProject(db, userId, {
+      const project = createProject(tx, userId, {
         title: projectInput.title,
         description: projectInput.description,
         goalId: goal.id,
@@ -221,7 +257,7 @@ export const acceptProposal = (
       })
       projectIds.push(project.id)
       for (const milestoneInput of projectInput.milestones) {
-        const withMilestone = createMilestone(db, userId, project.id, {
+        const withMilestone = createMilestone(tx, userId, project.id, {
           title: milestoneInput.title,
           description: '',
           targetDate: milestoneInput.targetDate,
@@ -229,7 +265,7 @@ export const acceptProposal = (
         const milestone = withMilestone.milestones.at(-1)
         if (!milestone) throw new Error('Milestone creation did not return the created milestone')
         for (const taskInput of milestoneInput.tasks) {
-          createTask(db, userId, {
+          createTask(tx, userId, {
             title: taskInput.title,
             description: '',
             status: 'todo',
@@ -244,9 +280,6 @@ export const acceptProposal = (
         }
       }
     }
-    db.prepare(`
-      UPDATE ai_proposals SET status = 'accepted', resolved_at = ? WHERE id = ? AND user_id = ?
-    `).run(nowIso(), proposalId, userId)
     return { goalId: goal.id, projectIds }
-  })()
+  })
 }

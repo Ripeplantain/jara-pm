@@ -2,8 +2,7 @@
 import { Moon, Sparkles, Sun } from '@lucide/vue'
 
 const { open } = useAskKobi()
-const { theme, initialize, toggle } = useTheme()
-onMounted(initialize)
+const { theme, toggle } = useTheme()
 </script>
 
 <template>

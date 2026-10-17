@@ -4,8 +4,7 @@ import { LogOut, Moon, Sun } from '@lucide/vue'
 definePageMeta({ middleware: ['authenticated'] })
 useSeoMeta({ title: 'Settings · Kobi' })
 const { user, clear } = useUserSession()
-const { theme, initialize, toggle } = useTheme()
-onMounted(initialize)
+const { theme, toggle } = useTheme()
 
 const logout = async () => {
   await clear()

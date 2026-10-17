@@ -44,7 +44,7 @@ const create = async () => {
     </section>
     <LoadingState v-if="status === 'pending'" />
     <ErrorState v-else-if="error" @retry="refresh" />
-    <div v-else-if="projects.length" class="grid"><ProjectCard v-for="project in projects" :key="project.id" :project="project" /></div>
+    <div v-else-if="projects.length" class="entity-grid"><ProjectCard v-for="project in projects" :key="project.id" :project="project" /></div>
     <EmptyState v-else title="No projects yet" message="Projects keep related tasks together without adding unnecessary process."><button type="button" class="button small" @click="isCreating = true">Create your first project</button></EmptyState>
   </main>
 </template>

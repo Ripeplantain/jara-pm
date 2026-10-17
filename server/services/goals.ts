@@ -1,7 +1,9 @@
-import type Database from 'better-sqlite3'
+import { and, desc, eq, ne, sql } from 'drizzle-orm'
 import type { CreateGoalInput, UpdateGoalInput } from '#shared/schemas/goal'
 import type { Goal } from '#shared/types/domain'
 import { calculateProgress } from '#shared/utils/progress'
+import { goals, projects, tasks } from '~~/server/db/schema'
+import type { KobiDb } from '~~/server/db'
 import type { GoalRow } from '~~/server/types/database'
 import { nowIso } from '~~/server/utils/time'
 
@@ -19,63 +21,82 @@ const mapGoal = (row: GoalRow): Goal => ({
   updatedAt: row.updated_at,
 })
 
-const GOAL_SELECT = `
-  SELECT goals.*,
-         COUNT(DISTINCT projects.id) AS project_count,
-         COUNT(DISTINCT tasks.id) AS task_count,
-         COUNT(DISTINCT CASE WHEN tasks.status = 'done' THEN tasks.id END) AS completed_task_count
-  FROM goals
-  LEFT JOIN projects ON projects.goal_id = goals.id AND projects.status != 'archived'
-  LEFT JOIN tasks ON tasks.project_id = projects.id
-`
+const goalSelection = {
+  id: goals.id,
+  user_id: goals.userId,
+  title: goals.title,
+  description: goals.description,
+  status: goals.status,
+  target_date: goals.targetDate,
+  created_at: goals.createdAt,
+  updated_at: goals.updatedAt,
+  project_count: sql<number>`count(distinct ${projects.id})`,
+  task_count: sql<number>`count(distinct ${tasks.id})`,
+  completed_task_count: sql<number>`count(distinct case when ${tasks.status} = 'done' then ${tasks.id} end)`,
+}
 
-export const listGoals = (db: Database.Database, userId: string, includeArchived = false) => {
-  const rows = db.prepare(`
-    ${GOAL_SELECT}
-    WHERE goals.user_id = ? ${includeArchived ? '' : "AND goals.status != 'archived'"}
-    GROUP BY goals.id
-    ORDER BY CASE goals.status WHEN 'active' THEN 0 WHEN 'completed' THEN 1 ELSE 2 END,
-             COALESCE(goals.target_date, '9999-12-31'), goals.created_at DESC
-  `).all(userId) as GoalRow[]
+export const listGoals = (db: KobiDb, userId: string, includeArchived = false) => {
+  const conditions = [eq(goals.userId, userId)]
+  if (!includeArchived) conditions.push(ne(goals.status, 'archived'))
+  const rows = db.select(goalSelection)
+    .from(goals)
+    .leftJoin(projects, and(eq(projects.goalId, goals.id), ne(projects.status, 'archived')))
+    .leftJoin(tasks, eq(tasks.projectId, projects.id))
+    .where(and(...conditions))
+    .groupBy(goals.id)
+    .orderBy(
+      sql`case ${goals.status} when 'active' then 0 when 'completed' then 1 else 2 end`,
+      sql`coalesce(${goals.targetDate}, '9999-12-31')`,
+      desc(goals.createdAt),
+    )
+    .all() as GoalRow[]
   return rows.map(mapGoal)
 }
 
-export const getGoal = (db: Database.Database, userId: string, goalId: string) => {
-  const row = db.prepare(`
-    ${GOAL_SELECT}
-    WHERE goals.id = ? AND goals.user_id = ?
-    GROUP BY goals.id
-  `).get(goalId, userId) as GoalRow | undefined
+export const getGoal = (db: KobiDb, userId: string, goalId: string) => {
+  const row = db.select(goalSelection)
+    .from(goals)
+    .leftJoin(projects, and(eq(projects.goalId, goals.id), ne(projects.status, 'archived')))
+    .leftJoin(tasks, eq(tasks.projectId, projects.id))
+    .where(and(eq(goals.id, goalId), eq(goals.userId, userId)))
+    .groupBy(goals.id)
+    .get() as GoalRow | undefined
   if (!row) throw createError({ status: 404, statusText: 'Goal not found' })
   return mapGoal(row)
 }
 
-export const createGoal = (db: Database.Database, userId: string, input: CreateGoalInput) => {
+export const createGoal = (db: KobiDb, userId: string, input: CreateGoalInput) => {
   const id = crypto.randomUUID()
   const now = nowIso()
-  db.prepare(`
-    INSERT INTO goals (id, user_id, title, description, status, target_date, created_at, updated_at)
-    VALUES (?, ?, ?, ?, 'active', ?, ?, ?)
-  `).run(id, userId, input.title, input.description, input.targetDate, now, now)
+  db.insert(goals).values({
+    id,
+    userId,
+    title: input.title,
+    description: input.description,
+    status: 'active',
+    targetDate: input.targetDate,
+    createdAt: now,
+    updatedAt: now,
+  }).run()
   return getGoal(db, userId, id)
 }
 
 export const updateGoal = (
-  db: Database.Database,
+  db: KobiDb,
   userId: string,
   goalId: string,
   input: UpdateGoalInput,
 ) => {
   const current = getGoal(db, userId, goalId)
-  db.prepare(`
-    UPDATE goals SET title = ?, description = ?, status = ?, target_date = ?, updated_at = ?
-    WHERE id = ? AND user_id = ?
-  `).run(
-    input.title ?? current.title,
-    input.description ?? current.description,
-    input.status ?? current.status,
-    input.targetDate === undefined ? current.targetDate : input.targetDate,
-    nowIso(), goalId, userId,
-  )
+  db.update(goals)
+    .set({
+      title: input.title ?? current.title,
+      description: input.description ?? current.description,
+      status: input.status ?? current.status,
+      targetDate: input.targetDate === undefined ? current.targetDate : input.targetDate,
+      updatedAt: nowIso(),
+    })
+    .where(and(eq(goals.id, goalId), eq(goals.userId, userId)))
+    .run()
   return getGoal(db, userId, goalId)
 }

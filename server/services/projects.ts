@@ -1,4 +1,4 @@
-import type Database from 'better-sqlite3'
+import { and, asc, desc, eq, ne, sql } from 'drizzle-orm'
 import type {
   CreateMilestoneInput,
   CreateProjectInput,
@@ -7,6 +7,8 @@ import type {
 } from '#shared/schemas/project'
 import type { Milestone, Project } from '#shared/types/domain'
 import { calculateProgress } from '#shared/utils/progress'
+import type { KobiDb } from '~~/server/db'
+import { goals, milestones, projects, tasks } from '~~/server/db/schema'
 import type { MilestoneRow, ProjectRow } from '~~/server/types/database'
 import { nowIso } from '~~/server/utils/time'
 
@@ -39,87 +41,113 @@ const mapProject = (row: ProjectRow, milestones: Milestone[]): Project => ({
   updatedAt: row.updated_at,
 })
 
-const PROJECT_SELECT = `
-  SELECT projects.*,
-         goals.title AS goal_title,
-         COUNT(DISTINCT tasks.id) AS task_count,
-         COUNT(DISTINCT CASE WHEN tasks.status = 'done' THEN tasks.id END) AS completed_task_count
-  FROM projects
-  LEFT JOIN goals ON goals.id = projects.goal_id
-  LEFT JOIN tasks ON tasks.project_id = projects.id
-`
+const milestoneSelection = {
+  id: milestones.id,
+  project_id: milestones.projectId,
+  user_id: milestones.userId,
+  title: milestones.title,
+  description: milestones.description,
+  target_date: milestones.targetDate,
+  position: milestones.position,
+  status: milestones.status,
+  task_count: sql<number>`count(distinct ${tasks.id})`,
+  completed_task_count: sql<number>`count(distinct case when ${tasks.status} = 'done' then ${tasks.id} end)`,
+}
 
-const milestonesFor = (db: Database.Database, userId: string, projectId: string) => {
-  const rows = db.prepare(`
-    SELECT milestones.*,
-           COUNT(DISTINCT tasks.id) AS task_count,
-           COUNT(DISTINCT CASE WHEN tasks.status = 'done' THEN tasks.id END) AS completed_task_count
-    FROM milestones
-    LEFT JOIN tasks ON tasks.milestone_id = milestones.id
-    WHERE milestones.user_id = ? AND milestones.project_id = ?
-    GROUP BY milestones.id
-    ORDER BY milestones.position, milestones.created_at
-  `).all(userId, projectId) as MilestoneRow[]
+const projectSelection = {
+  id: projects.id,
+  user_id: projects.userId,
+  goal_id: projects.goalId,
+  goal_title: goals.title,
+  title: projects.title,
+  description: projects.description,
+  status: projects.status,
+  target_date: projects.targetDate,
+  created_at: projects.createdAt,
+  updated_at: projects.updatedAt,
+  task_count: sql<number>`count(distinct ${tasks.id})`,
+  completed_task_count: sql<number>`count(distinct case when ${tasks.status} = 'done' then ${tasks.id} end)`,
+}
+
+const milestonesFor = (db: KobiDb, userId: string, projectId: string) => {
+  const rows = db.select(milestoneSelection)
+    .from(milestones)
+    .leftJoin(tasks, eq(tasks.milestoneId, milestones.id))
+    .where(and(eq(milestones.userId, userId), eq(milestones.projectId, projectId)))
+    .groupBy(milestones.id)
+    .orderBy(asc(milestones.position), asc(milestones.createdAt))
+    .all() as MilestoneRow[]
   return rows.map(mapMilestone)
 }
 
-const assertGoal = (db: Database.Database, userId: string, goalId: string | null) => {
+const assertGoal = (db: KobiDb, userId: string, goalId: string | null) => {
   if (!goalId) return
-  const goal = db.prepare('SELECT id FROM goals WHERE id = ? AND user_id = ?')
-    .get(goalId, userId)
+  const goal = db.select({ id: goals.id })
+    .from(goals)
+    .where(and(eq(goals.id, goalId), eq(goals.userId, userId)))
+    .get()
   if (!goal) throw createError({ status: 422, statusText: 'Goal is not available' })
 }
 
 export const listProjects = (
-  db: Database.Database,
+  db: KobiDb,
   userId: string,
   options: { includeArchived?: boolean, goalId?: string } = {},
 ) => {
-  const clauses = ['projects.user_id = ?']
-  const params = [userId]
-  if (!options.includeArchived) clauses.push("projects.status != 'archived'")
-  if (options.goalId) {
-    clauses.push('projects.goal_id = ?')
-    params.push(options.goalId)
-  }
-  const rows = db.prepare(`
-    ${PROJECT_SELECT}
-    WHERE ${clauses.join(' AND ')}
-    GROUP BY projects.id
-    ORDER BY CASE projects.status WHEN 'active' THEN 0 WHEN 'paused' THEN 1 ELSE 2 END,
-             COALESCE(projects.target_date, '9999-12-31'), projects.created_at DESC
-  `).all(...params) as ProjectRow[]
+  const conditions = [eq(projects.userId, userId)]
+  if (!options.includeArchived) conditions.push(ne(projects.status, 'archived'))
+  if (options.goalId) conditions.push(eq(projects.goalId, options.goalId))
+  const rows = db.select(projectSelection)
+    .from(projects)
+    .leftJoin(goals, eq(goals.id, projects.goalId))
+    .leftJoin(tasks, eq(tasks.projectId, projects.id))
+    .where(and(...conditions))
+    .groupBy(projects.id)
+    .orderBy(
+      sql`case ${projects.status} when 'active' then 0 when 'paused' then 1 else 2 end`,
+      sql`coalesce(${projects.targetDate}, '9999-12-31')`,
+      desc(projects.createdAt),
+    )
+    .all() as ProjectRow[]
   return rows.map(row => mapProject(row, milestonesFor(db, userId, row.id)))
 }
 
-export const getProject = (db: Database.Database, userId: string, projectId: string) => {
-  const row = db.prepare(`
-    ${PROJECT_SELECT}
-    WHERE projects.id = ? AND projects.user_id = ?
-    GROUP BY projects.id
-  `).get(projectId, userId) as ProjectRow | undefined
+export const getProject = (db: KobiDb, userId: string, projectId: string) => {
+  const row = db.select(projectSelection)
+    .from(projects)
+    .leftJoin(goals, eq(goals.id, projects.goalId))
+    .leftJoin(tasks, eq(tasks.projectId, projects.id))
+    .where(and(eq(projects.id, projectId), eq(projects.userId, userId)))
+    .groupBy(projects.id)
+    .get() as ProjectRow | undefined
   if (!row) throw createError({ status: 404, statusText: 'Project not found' })
   return mapProject(row, milestonesFor(db, userId, projectId))
 }
 
 export const createProject = (
-  db: Database.Database,
+  db: KobiDb,
   userId: string,
   input: CreateProjectInput,
 ) => {
   assertGoal(db, userId, input.goalId)
   const id = crypto.randomUUID()
   const now = nowIso()
-  db.prepare(`
-    INSERT INTO projects (
-      id, user_id, goal_id, title, description, status, target_date, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, 'active', ?, ?, ?)
-  `).run(id, userId, input.goalId, input.title, input.description, input.targetDate, now, now)
+  db.insert(projects).values({
+    id,
+    userId,
+    goalId: input.goalId,
+    title: input.title,
+    description: input.description,
+    status: 'active',
+    targetDate: input.targetDate,
+    createdAt: now,
+    updatedAt: now,
+  }).run()
   return getProject(db, userId, id)
 }
 
 export const updateProject = (
-  db: Database.Database,
+  db: KobiDb,
   userId: string,
   projectId: string,
   input: UpdateProjectInput,
@@ -127,22 +155,22 @@ export const updateProject = (
   const current = getProject(db, userId, projectId)
   const goalId = input.goalId === undefined ? current.goalId : input.goalId
   assertGoal(db, userId, goalId)
-  db.prepare(`
-    UPDATE projects SET goal_id = ?, title = ?, description = ?, status = ?, target_date = ?, updated_at = ?
-    WHERE id = ? AND user_id = ?
-  `).run(
-    goalId,
-    input.title ?? current.title,
-    input.description ?? current.description,
-    input.status ?? current.status,
-    input.targetDate === undefined ? current.targetDate : input.targetDate,
-    nowIso(), projectId, userId,
-  )
+  db.update(projects)
+    .set({
+      goalId,
+      title: input.title ?? current.title,
+      description: input.description ?? current.description,
+      status: input.status ?? current.status,
+      targetDate: input.targetDate === undefined ? current.targetDate : input.targetDate,
+      updatedAt: nowIso(),
+    })
+    .where(and(eq(projects.id, projectId), eq(projects.userId, userId)))
+    .run()
   return getProject(db, userId, projectId)
 }
 
 export const createMilestone = (
-  db: Database.Database,
+  db: KobiDb,
   userId: string,
   projectId: string,
   input: CreateMilestoneInput,
@@ -150,42 +178,50 @@ export const createMilestone = (
   getProject(db, userId, projectId)
   const id = crypto.randomUUID()
   const now = nowIso()
-  const row = db.prepare(`
-    SELECT COALESCE(MAX(position), -1) + 1 AS position
-    FROM milestones WHERE project_id = ? AND user_id = ?
-  `).get(projectId, userId) as { position: number }
-  db.prepare(`
-    INSERT INTO milestones (
-      id, user_id, project_id, title, description, status, target_date, position, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, 'active', ?, ?, ?, ?)
-  `).run(id, userId, projectId, input.title, input.description, input.targetDate, row.position, now, now)
+  const row = db.select({ position: sql<number>`coalesce(max(${milestones.position}), -1) + 1` })
+    .from(milestones)
+    .where(and(eq(milestones.projectId, projectId), eq(milestones.userId, userId)))
+    .get()
+  db.insert(milestones).values({
+    id,
+    userId,
+    projectId,
+    title: input.title,
+    description: input.description,
+    status: 'active',
+    targetDate: input.targetDate,
+    position: row?.position ?? 0,
+    createdAt: now,
+    updatedAt: now,
+  }).run()
   return getProject(db, userId, projectId)
 }
 
 export const updateMilestone = (
-  db: Database.Database,
+  db: KobiDb,
   userId: string,
   milestoneId: string,
   input: UpdateMilestoneInput,
 ) => {
-  const row = db.prepare('SELECT * FROM milestones WHERE id = ? AND user_id = ?')
-    .get(milestoneId, userId) as {
-      project_id: string
-      title: string
-      description: string
-      status: 'active' | 'completed'
-      target_date: string | null
-    } | undefined
+  const row = db.select({
+    project_id: milestones.projectId,
+    title: milestones.title,
+    description: milestones.description,
+    status: milestones.status,
+    target_date: milestones.targetDate,
+  }).from(milestones)
+    .where(and(eq(milestones.id, milestoneId), eq(milestones.userId, userId)))
+    .get()
   if (!row) throw createError({ status: 404, statusText: 'Milestone not found' })
-  db.prepare(`
-    UPDATE milestones SET title = ?, description = ?, status = ?, target_date = ?, updated_at = ?
-    WHERE id = ? AND user_id = ?
-  `).run(
-    input.title ?? row.title,
-    input.description ?? row.description,
-    input.status ?? row.status,
-    input.targetDate === undefined ? row.target_date : input.targetDate,
-    nowIso(), milestoneId, userId,
-  )
+  db.update(milestones)
+    .set({
+      title: input.title ?? row.title,
+      description: input.description ?? row.description,
+      status: input.status ?? row.status,
+      targetDate: input.targetDate === undefined ? row.target_date : input.targetDate,
+      updatedAt: nowIso(),
+    })
+    .where(and(eq(milestones.id, milestoneId), eq(milestones.userId, userId)))
+    .run()
   return getProject(db, userId, row.project_id)
 }

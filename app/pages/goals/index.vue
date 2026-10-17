@@ -52,7 +52,7 @@ const create = async () => {
 
     <LoadingState v-if="status === 'pending'" />
     <ErrorState v-else-if="error" @retry="refresh" />
-    <div v-else-if="goals.length" class="grid">
+    <div v-else-if="goals.length" class="entity-grid">
       <GoalCard v-for="goal in goals" :key="goal.id" :goal="goal" />
     </div>
     <EmptyState v-else title="No goals yet" message="Create one manually or ask Kobi to turn an idea into a practical plan.">

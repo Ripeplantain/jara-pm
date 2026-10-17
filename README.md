@@ -11,7 +11,7 @@ Every level is optional: tasks may live in the Inbox and projects may exist with
 ## Stack
 
 - Nuxt 4, Vue 3, TypeScript, and Nitro
-- SQLite with `better-sqlite3`
+- SQLite with `better-sqlite3` and Drizzle ORM
 - Sealed httpOnly sessions with `nuxt-auth-utils`
 - Zod validation for API input and AI output
 - OpenAI-compatible Ask Kobi integration with a local fallback planner
@@ -39,7 +39,15 @@ docker compose up --build
 ```
 
 Open <http://localhost:3000>. SQLite is stored in the `kobi-data` named volume and survives normal
-container restarts. Do not run `docker compose down -v` unless you intend to erase it.
+container restarts. Drizzle applies versioned migrations when Nitro opens the database. Back up
+the volume or database file off the VPS before deploying schema changes. Do not run
+`docker compose down -v` unless you intend to erase it.
+
+Generate a new migration after changing `server/db/schema.ts`:
+
+```sh
+docker compose run --rm --no-deps app npm run db:generate
+```
 
 ## Verification
 
@@ -64,8 +72,11 @@ Set a strong `NUXT_SESSION_PASSWORD`, then run:
 docker compose -f docker-compose.yml -f docker-compose.prod.yml up --build -d
 ```
 
-The production image is multi-stage, runs as a non-root user, contains only Nuxt's generated
-`.output`, and binds port 3000 to loopback by default. Put a TLS reverse proxy in front of it.
+The production image is multi-stage, runs as a non-root user, contains Nuxt's generated `.output`
+plus the checked-in Drizzle migrations, and binds port 3000 to loopback by default. Put a TLS
+reverse proxy in front of it.
+
+The database and ORM choice is documented in [ADR 0001](docs/decisions/database_decision.md).
 
 ## Security model
 

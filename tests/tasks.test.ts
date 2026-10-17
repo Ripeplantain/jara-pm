@@ -1,25 +1,39 @@
 import Database from 'better-sqlite3'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import type { KobiDatabase } from '../server/db'
+import { users } from '../server/db/schema'
 import { createTask, listTasks, updateTask } from '../server/services/tasks'
 import { initializeDatabase } from '../server/utils/database'
 
 describe('task service', () => {
-  let db: Database.Database
+  let sqlite: Database.Database
+  let db: KobiDatabase
 
   beforeEach(() => {
-    db = new Database(':memory:')
-    db.pragma('foreign_keys = ON')
-    initializeDatabase(db)
+    sqlite = new Database(':memory:')
+    db = initializeDatabase(sqlite)
     const now = new Date().toISOString()
-    const insertUser = db.prepare(`
-      INSERT INTO users (id, email, name, password_hash, created_at, updated_at)
-      VALUES (?, ?, ?, 'test-hash', ?, ?)
-    `)
-    insertUser.run('11111111-1111-4111-8111-111111111111', 'one@example.test', 'One', now, now)
-    insertUser.run('22222222-2222-4222-8222-222222222222', 'two@example.test', 'Two', now, now)
+    db.insert(users).values([
+      {
+        id: '11111111-1111-4111-8111-111111111111',
+        email: 'one@example.test',
+        name: 'One',
+        passwordHash: 'test-hash',
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        id: '22222222-2222-4222-8222-222222222222',
+        email: 'two@example.test',
+        name: 'Two',
+        passwordHash: 'test-hash',
+        createdAt: now,
+        updatedAt: now,
+      },
+    ]).run()
   })
 
-  afterEach(() => db.close())
+  afterEach(() => sqlite.close())
 
   it('isolates every task list by the authenticated user', () => {
     createTask(db, '11111111-1111-4111-8111-111111111111', {

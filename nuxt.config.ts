@@ -1,9 +1,16 @@
+import tailwindcss from '@tailwindcss/vite'
+
 export default defineNuxtConfig({
   compatibilityDate: '2026-10-01',
   devtools: { enabled: false },
   modules: ['nuxt-auth-utils'],
   components: [{ path: '~/components', pathPrefix: false }],
   css: ['~/assets/css/main.css'],
+  app: {
+    head: {
+      link: [{ rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }],
+    },
+  },
   runtimeConfig: {
     databasePath: './data/kobi.db',
     llm: {
@@ -23,6 +30,9 @@ export default defineNuxtConfig({
   typescript: {
     strict: true,
     typeCheck: true,
+  },
+  vite: {
+    plugins: [tailwindcss()],
   },
   nitro: {
     compressPublicAssets: true,

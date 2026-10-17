@@ -81,10 +81,25 @@ const accept = async () => {
         <div v-if="proposal" class="proposal">
           <span class="status-badge active">Plan preview</span>
           <h3>{{ proposal.goal.title }}</h3>
-          <p class="form-hint">{{ proposal.goal.description }}</p>
-          <ul>
-            <li v-for="project in proposal.projects" :key="project.title">
-              <strong>{{ project.title }}</strong> · {{ project.milestones.reduce((sum, milestone) => sum + milestone.tasks.length, 0) }} tasks
+          <p class="proposal-description">{{ proposal.goal.description }}</p>
+          <ul class="proposal-projects">
+            <li v-for="project in proposal.projects" :key="project.title" class="proposal-project">
+              <div class="proposal-project-header">
+                <strong>{{ project.title }}</strong>
+                <span class="proposal-task-count">{{ project.milestones.reduce((sum, milestone) => sum + milestone.tasks.length, 0) }} tasks</span>
+              </div>
+              <div class="proposal-milestones">
+                <div v-for="milestone in project.milestones" :key="milestone.title" class="proposal-milestone">
+                  <p class="proposal-milestone-title">{{ milestone.title }}</p>
+                  <ul class="proposal-tasks">
+                    <li v-for="task in milestone.tasks" :key="task.title" class="proposal-task">
+                      <span class="proposal-task-marker" />
+                      <span class="proposal-task-title">{{ task.title }}</span>
+                      <span v-if="task.priority !== 'none'" class="proposal-task-priority" :class="task.priority">{{ task.priority }}</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
             </li>
           </ul>
           <NuxtLink v-if="acceptedGoalId" :to="`/goals/${acceptedGoalId}`" class="button small" @click="emit('close')">

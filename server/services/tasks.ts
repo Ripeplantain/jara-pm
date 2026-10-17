@@ -1,17 +1,31 @@
-import type Database from 'better-sqlite3'
+import { and, asc, eq, gt, isNull, ne, or, sql } from 'drizzle-orm'
 import type { CreateTaskInput, TaskQuery, UpdateTaskInput } from '#shared/schemas/task'
 import type { Task } from '#shared/types/domain'
+import type { KobiDb } from '~~/server/db'
+import { milestones, projects, tasks } from '~~/server/db/schema'
 import type { TaskRow } from '~~/server/types/database'
 import { nowIso, todayIso } from '~~/server/utils/time'
 
-const TASK_SELECT = `
-  SELECT tasks.*,
-         projects.title AS project_title,
-         milestones.title AS milestone_title
-  FROM tasks
-  LEFT JOIN projects ON projects.id = tasks.project_id
-  LEFT JOIN milestones ON milestones.id = tasks.milestone_id
-`
+const taskSelection = {
+  id: tasks.id,
+  user_id: tasks.userId,
+  project_id: tasks.projectId,
+  project_title: projects.title,
+  milestone_id: tasks.milestoneId,
+  milestone_title: milestones.title,
+  parent_id: tasks.parentId,
+  title: tasks.title,
+  description: tasks.description,
+  status: tasks.status,
+  priority: tasks.priority,
+  due_date: tasks.dueDate,
+  scheduled_for: tasks.scheduledFor,
+  selected_for_today: tasks.selectedForToday,
+  completed_at: tasks.completedAt,
+  position: tasks.position,
+  created_at: tasks.createdAt,
+  updated_at: tasks.updatedAt,
+}
 
 const mapTask = (row: TaskRow): Task => ({
   id: row.id,
@@ -21,7 +35,7 @@ const mapTask = (row: TaskRow): Task => ({
   priority: row.priority,
   dueDate: row.due_date,
   scheduledFor: row.scheduled_for,
-  selectedForToday: Boolean(row.selected_for_today),
+  selectedForToday: row.selected_for_today,
   projectId: row.project_id,
   projectTitle: row.project_title,
   milestoneId: row.milestone_id,
@@ -36,108 +50,128 @@ const notFound = () => {
   throw createError({ status: 404, statusText: 'Task not found' })
 }
 
-const assertProject = (db: Database.Database, userId: string, projectId: string | null) => {
+const assertProject = (db: KobiDb, userId: string, projectId: string | null) => {
   if (!projectId) return
-  const project = db.prepare('SELECT id FROM projects WHERE id = ? AND user_id = ?')
-    .get(projectId, userId)
+  const project = db.select({ id: projects.id })
+    .from(projects)
+    .where(and(eq(projects.id, projectId), eq(projects.userId, userId)))
+    .get()
   if (!project) throw createError({ status: 422, statusText: 'Project is not available' })
 }
 
 const assertMilestone = (
-  db: Database.Database,
+  db: KobiDb,
   userId: string,
   milestoneId: string | null,
   projectId: string | null,
 ) => {
   if (!milestoneId) return
-  const milestone = db.prepare('SELECT project_id FROM milestones WHERE id = ? AND user_id = ?')
-    .get(milestoneId, userId) as { project_id: string } | undefined
+  const milestone = db.select({ project_id: milestones.projectId })
+    .from(milestones)
+    .where(and(eq(milestones.id, milestoneId), eq(milestones.userId, userId)))
+    .get()
   if (!milestone || milestone.project_id !== projectId) {
     throw createError({ status: 422, statusText: 'Milestone does not belong to the project' })
   }
 }
 
-export const getTask = (db: Database.Database, userId: string, taskId: string) => {
-  const row = db.prepare(`${TASK_SELECT} WHERE tasks.id = ? AND tasks.user_id = ?`)
-    .get(taskId, userId) as TaskRow | undefined
+export const getTask = (db: KobiDb, userId: string, taskId: string) => {
+  const row = db.select(taskSelection)
+    .from(tasks)
+    .leftJoin(projects, eq(projects.id, tasks.projectId))
+    .leftJoin(milestones, eq(milestones.id, tasks.milestoneId))
+    .where(and(eq(tasks.id, taskId), eq(tasks.userId, userId)))
+    .get() as TaskRow | undefined
   if (!row) return notFound()
   return mapTask(row)
 }
 
-export const listTasks = (db: Database.Database, userId: string, query: TaskQuery): Task[] => {
-  const conditions = ['tasks.user_id = ?']
-  const params: Array<string> = [userId]
+export const listTasks = (db: KobiDb, userId: string, query: TaskQuery): Task[] => {
+  const conditions = [eq(tasks.userId, userId)]
   const today = todayIso()
 
   if (query.projectId) {
-    conditions.push('tasks.project_id = ?')
-    params.push(query.projectId)
+    conditions.push(eq(tasks.projectId, query.projectId))
   }
   if (query.status) {
-    conditions.push('tasks.status = ?')
-    params.push(query.status)
+    conditions.push(eq(tasks.status, query.status))
   }
   if (query.scope === 'inbox') {
-    conditions.push('tasks.project_id IS NULL', "tasks.status != 'done'")
+    conditions.push(isNull(tasks.projectId), ne(tasks.status, 'done'))
   } else if (query.scope === 'today') {
-    conditions.push("tasks.status != 'done'")
-    conditions.push('(tasks.due_date = ? OR tasks.scheduled_for = ? OR tasks.selected_for_today = 1)')
-    params.push(today, today)
+    conditions.push(ne(tasks.status, 'done'))
+    conditions.push(or(
+      eq(tasks.dueDate, today),
+      eq(tasks.scheduledFor, today),
+      eq(tasks.selectedForToday, true),
+    )!)
   } else if (query.scope === 'upcoming') {
-    conditions.push("tasks.status != 'done'", 'tasks.due_date > ?')
-    params.push(today)
+    conditions.push(ne(tasks.status, 'done'), gt(tasks.dueDate, today))
   }
 
-  const rows = db.prepare(`
-    ${TASK_SELECT}
-    WHERE ${conditions.join(' AND ')}
-    ORDER BY
-      CASE tasks.priority WHEN 'high' THEN 0 WHEN 'medium' THEN 1 WHEN 'low' THEN 2 ELSE 3 END,
-      COALESCE(tasks.due_date, '9999-12-31'),
-      tasks.position,
-      tasks.created_at
-  `).all(...params) as TaskRow[]
+  const rows = db.select(taskSelection)
+    .from(tasks)
+    .leftJoin(projects, eq(projects.id, tasks.projectId))
+    .leftJoin(milestones, eq(milestones.id, tasks.milestoneId))
+    .where(and(...conditions))
+    .orderBy(
+      sql`case ${tasks.priority} when 'high' then 0 when 'medium' then 1 when 'low' then 2 else 3 end`,
+      sql`coalesce(${tasks.dueDate}, '9999-12-31')`,
+      asc(tasks.position),
+      asc(tasks.createdAt),
+    )
+    .all() as TaskRow[]
   return rows.map(mapTask)
 }
 
 export const createTask = (
-  db: Database.Database,
+  db: KobiDb,
   userId: string,
   input: CreateTaskInput,
 ) => {
   assertProject(db, userId, input.projectId)
   assertMilestone(db, userId, input.milestoneId, input.projectId)
   if (input.parentId) {
-    const parent = db.prepare('SELECT id FROM tasks WHERE id = ? AND user_id = ?')
-      .get(input.parentId, userId)
+    const parent = db.select({ id: tasks.id })
+      .from(tasks)
+      .where(and(eq(tasks.id, input.parentId), eq(tasks.userId, userId)))
+      .get()
     if (!parent) throw createError({ status: 422, statusText: 'Parent task is not available' })
   }
 
   const id = crypto.randomUUID()
   const now = nowIso()
-  const positionRow = db.prepare(`
-    SELECT COALESCE(MAX(position), -1) + 1 AS position
-    FROM tasks
-    WHERE user_id = ? AND project_id IS ?
-  `).get(userId, input.projectId) as { position: number }
+  const projectCondition = input.projectId === null
+    ? isNull(tasks.projectId)
+    : eq(tasks.projectId, input.projectId)
+  const positionRow = db.select({ position: sql<number>`coalesce(max(${tasks.position}), -1) + 1` })
+    .from(tasks)
+    .where(and(eq(tasks.userId, userId), projectCondition))
+    .get()
 
-  db.prepare(`
-    INSERT INTO tasks (
-      id, user_id, project_id, milestone_id, parent_id, title, description, status,
-      priority, due_date, scheduled_for, selected_for_today, completed_at, position,
-      created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(
-    id, userId, input.projectId, input.milestoneId, input.parentId, input.title,
-    input.description, input.status, input.priority, input.dueDate, input.scheduledFor,
-    input.selectedForToday ? 1 : 0, input.status === 'done' ? now : null,
-    positionRow.position, now, now,
-  )
+  db.insert(tasks).values({
+    id,
+    userId,
+    projectId: input.projectId,
+    milestoneId: input.milestoneId,
+    parentId: input.parentId,
+    title: input.title,
+    description: input.description,
+    status: input.status,
+    priority: input.priority,
+    dueDate: input.dueDate,
+    scheduledFor: input.scheduledFor,
+    selectedForToday: input.selectedForToday,
+    completedAt: input.status === 'done' ? now : null,
+    position: positionRow?.position ?? 0,
+    createdAt: now,
+    updatedAt: now,
+  }).run()
   return getTask(db, userId, id)
 }
 
 export const updateTask = (
-  db: Database.Database,
+  db: KobiDb,
   userId: string,
   taskId: string,
   input: UpdateTaskInput,
@@ -153,34 +187,31 @@ export const updateTask = (
     ? current.completedAt ?? nowIso()
     : null
 
-  db.prepare(`
-    UPDATE tasks SET
-      project_id = ?, milestone_id = ?, parent_id = ?, title = ?, description = ?,
-      status = ?, priority = ?, due_date = ?, scheduled_for = ?, selected_for_today = ?,
-      completed_at = ?, updated_at = ?
-    WHERE id = ? AND user_id = ?
-  `).run(
-    projectId,
-    milestoneId,
-    input.parentId === undefined ? current.parentId : input.parentId,
-    input.title ?? current.title,
-    input.description ?? current.description,
-    status,
-    input.priority ?? current.priority,
-    input.dueDate === undefined ? current.dueDate : input.dueDate,
-    input.scheduledFor === undefined ? current.scheduledFor : input.scheduledFor,
-    input.selectedForToday === undefined
-      ? (current.selectedForToday ? 1 : 0)
-      : (input.selectedForToday ? 1 : 0),
-    completedAt,
-    nowIso(),
-    taskId,
-    userId,
-  )
+  db.update(tasks)
+    .set({
+      projectId,
+      milestoneId,
+      parentId: input.parentId === undefined ? current.parentId : input.parentId,
+      title: input.title ?? current.title,
+      description: input.description ?? current.description,
+      status,
+      priority: input.priority ?? current.priority,
+      dueDate: input.dueDate === undefined ? current.dueDate : input.dueDate,
+      scheduledFor: input.scheduledFor === undefined ? current.scheduledFor : input.scheduledFor,
+      selectedForToday: input.selectedForToday === undefined
+        ? current.selectedForToday
+        : input.selectedForToday,
+      completedAt,
+      updatedAt: nowIso(),
+    })
+    .where(and(eq(tasks.id, taskId), eq(tasks.userId, userId)))
+    .run()
   return getTask(db, userId, taskId)
 }
 
-export const deleteTask = (db: Database.Database, userId: string, taskId: string) => {
-  const result = db.prepare('DELETE FROM tasks WHERE id = ? AND user_id = ?').run(taskId, userId)
+export const deleteTask = (db: KobiDb, userId: string, taskId: string) => {
+  const result = db.delete(tasks)
+    .where(and(eq(tasks.id, taskId), eq(tasks.userId, userId)))
+    .run()
   if (!result.changes) notFound()
 }

@@ -20,6 +20,7 @@ WORKDIR /app
 ENV NODE_ENV=production HOST=0.0.0.0 PORT=3000
 RUN mkdir -p /data && chown -R node:node /app /data
 COPY --from=build --chown=node:node /app/.output ./.output
+COPY --from=build --chown=node:node /app/drizzle ./drizzle
 USER node
 EXPOSE 3000
 CMD ["node", ".output/server/index.mjs"]

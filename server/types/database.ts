@@ -21,7 +21,7 @@ export type TaskRow = {
   priority: 'none' | 'low' | 'medium' | 'high'
   due_date: string | null
   scheduled_for: string | null
-  selected_for_today: number
+  selected_for_today: boolean
   completed_at: string | null
   position: number
   created_at: string

@@ -45,7 +45,7 @@ const setStatus = async (statusValue: Goal['status']) => {
       </section>
       <section class="section">
         <div class="section-heading"><h2>Related projects</h2><NuxtLink to="/projects" class="button secondary small">Manage projects</NuxtLink></div>
-        <div v-if="data.projects.length" class="grid"><ProjectCard v-for="project in data.projects" :key="project.id" :project="project" /></div>
+        <div v-if="data.projects.length" class="entity-grid"><ProjectCard v-for="project in data.projects" :key="project.id" :project="project" /></div>
         <EmptyState v-else title="No projects connected" message="Create a project and connect it to this goal to begin measuring progress." />
       </section>
     </template>
