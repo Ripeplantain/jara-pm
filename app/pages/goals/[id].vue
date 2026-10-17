@@ -29,7 +29,7 @@ const setStatus = async (statusValue: Goal['status']) => {
           <h1>{{ data.goal.title }}</h1>
           <p>{{ data.goal.description || 'A meaningful outcome you are working toward.' }}</p>
         </div>
-        <div style="display:flex;flex-wrap:wrap;gap:8px">
+        <div class="page-actions">
           <button type="button" class="button secondary" @click="open(`Help me make progress on ${data.goal.title}`)"><Sparkles :size="16" /> Ask Kobi</button>
           <button v-if="data.goal.status !== 'completed'" type="button" class="button" @click="setStatus('completed')"><CheckCircle2 :size="16" /> Mark complete</button>
           <button v-else type="button" class="button secondary" @click="setStatus('active')">Reopen</button>
@@ -38,8 +38,8 @@ const setStatus = async (statusValue: Goal['status']) => {
       </header>
       <section class="card card-pad">
         <div class="form-row">
-          <div><span class="field-label">Status</span><p style="margin:5px 0 0;text-transform:capitalize">{{ data.goal.status }}</p></div>
-          <div><span class="field-label">Target date</span><p style="margin:5px 0 0">{{ data.goal.targetDate || 'No target date' }}</p></div>
+          <div><span class="field-label">Status</span><p class="detail-value">{{ data.goal.status }}</p></div>
+          <div><span class="field-label">Target date</span><p class="detail-value">{{ data.goal.targetDate || 'No target date' }}</p></div>
         </div>
         <ProgressBar :value="data.goal.progress" label="Goal progress" />
       </section>

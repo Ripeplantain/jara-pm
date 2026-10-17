@@ -7,7 +7,7 @@ useSeoMeta({ title: 'Kobi — Less planning. More doing.', description: 'Turn me
   <main class="welcome">
     <nav class="welcome-nav">
       <AppLogo />
-      <div style="display:flex;gap:8px">
+      <div class="stack-actions">
         <NuxtLink to="/signin" class="button secondary">Sign in</NuxtLink>
         <NuxtLink to="/signup" class="button">Start for free</NuxtLink>
       </div>

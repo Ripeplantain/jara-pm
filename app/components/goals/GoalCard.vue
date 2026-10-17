@@ -8,7 +8,7 @@ const { formatDate } = useDateFormat()
 <template>
   <NuxtLink :to="`/goals/${goal.id}`" class="card entity-card">
     <div>
-      <div style="display:flex;justify-content:space-between;gap:12px">
+      <div class="entity-header">
         <h2>{{ goal.title }}</h2>
         <span class="status-badge" :class="goal.status">{{ goal.status }}</span>
       </div>

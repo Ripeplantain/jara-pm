@@ -30,7 +30,7 @@ const create = async () => {
       <div><div class="eyebrow">Turn intent into action</div><h1>Projects</h1><p>Focused bodies of work, with or without a larger goal.</p></div>
       <button type="button" class="button" @click="isCreating = true"><Plus :size="16" /> New project</button>
     </header>
-    <section v-if="isCreating" class="card card-pad" style="margin-bottom:24px">
+    <section v-if="isCreating" class="card card-pad form-card">
       <div class="section-heading"><h2>Create a project</h2><button type="button" class="icon-button" aria-label="Close" @click="isCreating = false"><X :size="16" /></button></div>
       <form class="form-grid" @submit.prevent="create">
         <label class="field"><span>Project name</span><input v-model="form.title" class="input" required autofocus></label>

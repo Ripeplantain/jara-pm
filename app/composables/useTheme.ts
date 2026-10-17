@@ -5,6 +5,7 @@ export const useTheme = () => {
     theme.value = value
     if (import.meta.client) {
       document.documentElement.dataset.theme = value
+      document.documentElement.classList.toggle('dark', value === 'dark')
       localStorage.setItem('kobi-theme', value)
     }
   }

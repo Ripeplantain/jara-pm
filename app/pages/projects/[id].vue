@@ -34,7 +34,7 @@ const archive = async () => {
     <template v-else>
       <header class="page-header">
         <div><div class="eyebrow">{{ data.project.goalTitle || 'Independent project' }}</div><h1>{{ data.project.title }}</h1><p>{{ data.project.description || 'Keep the work simple and visible.' }}</p></div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <div class="page-actions">
           <button type="button" class="button secondary" @click="open(`Help me break down ${data.project.title}`)"><Sparkles :size="16" /> Ask Kobi</button>
           <button type="button" class="button ghost" @click="archive"><Archive :size="16" /> Archive</button>
         </div>
@@ -42,7 +42,7 @@ const archive = async () => {
       <section class="card card-pad"><ProgressBar :value="data.project.progress" label="Project progress" /></section>
       <section class="section">
         <div class="section-heading"><h2>Milestones</h2><button type="button" class="button secondary small" @click="isAddingMilestone = !isAddingMilestone"><Plus :size="15" /> Add milestone</button></div>
-        <form v-if="isAddingMilestone" class="capture-main card" style="margin-bottom:12px" @submit.prevent="addMilestone">
+        <form v-if="isAddingMilestone" class="capture-main card milestone-form" @submit.prevent="addMilestone">
           <input v-model="milestoneTitle" placeholder="Milestone title" aria-label="Milestone title" autofocus>
           <button type="submit" class="button small">Add</button>
         </form>

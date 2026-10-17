@@ -9,8 +9,8 @@ defineProps<{ title: string, message: string }>()
     <div>
       <span class="empty-icon"><Inbox :size="20" aria-hidden="true" /></span>
       <strong>{{ title }}</strong>
-      <span>{{ message }}</span>
-      <div v-if="$slots.default" style="margin-top:16px"><slot /></div>
+      <span class="empty-state-message">{{ message }}</span>
+      <div v-if="$slots.default" class="empty-state-action"><slot /></div>
     </div>
   </div>
 </template>

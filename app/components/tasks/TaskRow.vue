@@ -56,7 +56,7 @@ const remove = async () => {
         <span v-if="task.projectTitle">{{ task.projectTitle }}</span>
         <span v-if="task.milestoneTitle">· {{ task.milestoneTitle }}</span>
         <span v-if="task.dueDate">· Due {{ task.dueDate }}</span>
-        <span v-if="task.priority !== 'none'" style="display:inline-flex;align-items:center;gap:5px">
+        <span v-if="task.priority !== 'none'" class="task-priority">
           <span class="priority-dot" :class="task.priority" /> {{ task.priority }}
         </span>
       </span>
