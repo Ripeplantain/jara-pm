@@ -1,7 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
-  <title>Kobi</title>
-  <rect width="64" height="64" rx="18" fill="#f3efe7" />
-  <rect x="5" y="5" width="54" height="54" rx="15" fill="#24211d" />
-  <path d="M22 17v30M22 32l21-15M22 32l21 15" fill="none" stroke="#f3efe7" stroke-linecap="round" stroke-linejoin="round" stroke-width="6" />
-  <circle cx="46" cy="47" r="3" fill="#d9654c" />
-</svg>

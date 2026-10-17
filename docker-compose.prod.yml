@@ -1,54 +1,17 @@
-# Production stack. Use together with the base file:
-#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up --build -d
-# Differences from dev: `prod` image targets, no source mounts, restart policy, and each service
-# only receives the variables it needs (the frontend never sees BACKEND_JWT_SECRET or LLM_API_KEY).
 services:
-  backend:
+  app:
     build:
       target: prod
-    image: jara-pm-backend:prod
+    image: jara-pm-nuxt:prod
     env_file: !reset []
     environment:
-      DATABASE_PATH: ${DATABASE_PATH:-/data/app.db}
-      BACKEND_JWT_SECRET: ${BACKEND_JWT_SECRET:?set BACKEND_JWT_SECRET in .env}
-      FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:-http://localhost:3000}
-      REQUIRE_EMAIL_VERIFICATION: ${REQUIRE_EMAIL_VERIFICATION:-true}
-      LLM_API_KEY: ${LLM_API_KEY:-}
-      LLM_MODEL: ${LLM_MODEL:-}
-      LLM_BASE_URL: ${LLM_BASE_URL:-}
-      RESEND_API_KEY: ${RESEND_API_KEY:-}
-      RESEND_FROM_EMAIL: ${RESEND_FROM_EMAIL:-}
-      RESEND_REPLY_TO: ${RESEND_REPLY_TO:-}
-      AI_MONTHLY_ACTION_LIMIT: ${AI_MONTHLY_ACTION_LIMIT:-500}
-      POSTHOG_PROJECT_TOKEN: ${POSTHOG_PROJECT_TOKEN:-}
-      POSTHOG_HOST: ${POSTHOG_HOST:-}
-      APP_ENV: ${APP_ENV:-production}
-      APP_RELEASE: ${APP_RELEASE:-}
-    volumes: !override
-      - db-data:/data
-    # Only the frontend server calls the backend (over the compose network): don't publish it.
-    ports: !reset []
-    restart: unless-stopped
-
-  frontend:
-    build:
-      target: prod
-      # Baked into the client bundle at build time, so changing one needs a rebuild.
-      args:
-        NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN: ${NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN:-}
-        NEXT_PUBLIC_POSTHOG_HOST: ${NEXT_PUBLIC_POSTHOG_HOST:-}
-        NEXT_PUBLIC_POSTHOG_SESSION_REPLAY: ${NEXT_PUBLIC_POSTHOG_SESSION_REPLAY:-false}
-    image: jara-pm-frontend:prod
-    env_file: !reset []
-    environment:
-      AUTH_SECRET: ${AUTH_SECRET:?set AUTH_SECRET in .env}
-      NEXTAUTH_URL: ${AUTH_URL:-http://localhost:3000}
-      BACKEND_INTERNAL_URL: ${BACKEND_INTERNAL_URL:-http://backend:8000}
-      # The Next server reports its own render errors (instrumentation.ts).
-      NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN: ${NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN:-}
-      NEXT_PUBLIC_POSTHOG_HOST: ${NEXT_PUBLIC_POSTHOG_HOST:-}
-      APP_ENV: ${APP_ENV:-production}
+      NUXT_DATABASE_PATH: ${NUXT_DATABASE_PATH:-/data/kobi.db}
+      NUXT_SESSION_PASSWORD: ${NUXT_SESSION_PASSWORD:?set NUXT_SESSION_PASSWORD in .env}
+      NUXT_LLM_API_KEY: ${NUXT_LLM_API_KEY:-}
+      NUXT_LLM_BASE_URL: ${NUXT_LLM_BASE_URL:-https://openrouter.ai/api/v1}
+      NUXT_LLM_MODEL: ${NUXT_LLM_MODEL:-openai/gpt-4.1-mini}
     ports: !override
       - "127.0.0.1:3000:3000"
-    volumes: !reset []
+    volumes: !override
+      - kobi-data:/data
     restart: unless-stopped

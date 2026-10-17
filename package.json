@@ -1,0 +1,33 @@
+{
+  "name": "kobi",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "nuxt dev --host 0.0.0.0 --port 3000",
+    "build": "nuxt build",
+    "preview": "nuxt preview --host 0.0.0.0 --port 3000",
+    "typecheck": "nuxt typecheck",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@lucide/vue": "latest",
+    "better-sqlite3": "latest",
+    "date-fns": "latest",
+    "nuxt": "4.6.2",
+    "nuxt-auth-utils": "latest",
+    "vue": "latest",
+    "vue-router": "5.4.0",
+    "zod": "latest"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "latest",
+    "typescript": "5.9.3",
+    "vitest": "latest",
+    "vue-tsc": "latest"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}
