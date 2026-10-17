@@ -4,6 +4,7 @@ useSeoMeta({ title: 'Sign in · Kobi' })
 
 const route = useRoute()
 const { fetch: refreshSession } = useUserSession()
+const { capture } = useProductAnalytics()
 const email = ref('')
 const password = ref('')
 const isSubmitting = ref(false)
@@ -20,6 +21,7 @@ const submit = async () => {
       : '/'
     await navigateTo(redirect)
   } catch {
+    capture('auth_login_failed', { method: 'password' })
     errorMessage.value = 'The email or password is not correct.'
   } finally {
     isSubmitting.value = false

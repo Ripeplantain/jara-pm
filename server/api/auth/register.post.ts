@@ -3,6 +3,7 @@ import { registerSchema } from '#shared/schemas/auth'
 import { users } from '~~/server/db/schema'
 import type { UserRow } from '~~/server/types/database'
 import { useDatabase } from '~~/server/utils/database'
+import { captureServerEvent } from '~~/server/utils/posthog'
 import { nowIso } from '~~/server/utils/time'
 
 export default defineEventHandler(async (event) => {
@@ -38,6 +39,7 @@ export default defineEventHandler(async (event) => {
   }).from(users).where(eq(users.id, id)).get() as UserRow
   const user = { id: row.id, email: row.email, name: row.name }
   await setUserSession(event, { user, loggedInAt: now })
+  captureServerEvent(event, user.id, 'user_signed_up', { method: 'password' })
   setResponseStatus(event, 201)
   return user
 })

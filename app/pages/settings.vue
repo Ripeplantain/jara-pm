@@ -5,10 +5,18 @@ definePageMeta({ middleware: ['authenticated'] })
 useSeoMeta({ title: 'Settings · Kobi' })
 const { user, clear } = useUserSession()
 const { theme, toggle } = useTheme()
+const { capture, reset } = useProductAnalytics()
 
 const logout = async () => {
+  capture('user_logged_out')
+  reset()
   await clear()
   await navigateTo('/welcome')
+}
+
+const toggleTheme = () => {
+  toggle()
+  capture('theme_changed', { theme: theme.value === 'dark' ? 'light' : 'dark' })
 }
 </script>
 
@@ -21,7 +29,7 @@ const logout = async () => {
     </section>
     <section class="card card-pad section">
       <div class="section-heading"><h2>Appearance</h2></div>
-      <button type="button" class="button secondary" @click="toggle"><Sun v-if="theme === 'dark'" :size="16" /><Moon v-else :size="16" /> Use {{ theme === 'dark' ? 'light' : 'dark' }} mode</button>
+      <button type="button" class="button secondary" @click="toggleTheme"><Sun v-if="theme === 'dark'" :size="16" /><Moon v-else :size="16" /> Use {{ theme === 'dark' ? 'light' : 'dark' }} mode</button>
     </section>
     <section class="card card-pad section">
       <div class="section-heading"><h2>Account</h2></div>

@@ -3,6 +3,7 @@ definePageMeta({ layout: 'public', middleware: ['guest'] })
 useSeoMeta({ title: 'Create an account · Kobi' })
 
 const { fetch: refreshSession } = useUserSession()
+const { capture } = useProductAnalytics()
 const name = ref('')
 const email = ref('')
 const password = ref('')
@@ -19,6 +20,7 @@ const submit = async () => {
     await refreshSession()
     await navigateTo('/')
   } catch (error: unknown) {
+    capture('auth_signup_failed', { method: 'password' })
     errorMessage.value = error instanceof Error ? error.message : 'Could not create the account.'
   } finally {
     isSubmitting.value = false

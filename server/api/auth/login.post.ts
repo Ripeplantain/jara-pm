@@ -3,6 +3,7 @@ import { loginSchema } from '#shared/schemas/auth'
 import { users } from '~~/server/db/schema'
 import type { UserRow } from '~~/server/types/database'
 import { useDatabase } from '~~/server/utils/database'
+import { captureServerEvent } from '~~/server/utils/posthog'
 import { nowIso } from '~~/server/utils/time'
 
 export default defineEventHandler(async (event) => {
@@ -23,5 +24,6 @@ export default defineEventHandler(async (event) => {
 
   const user = { id: row.id, email: row.email, name: row.name }
   await setUserSession(event, { user, loggedInAt: nowIso() })
+  captureServerEvent(event, user.id, 'user_logged_in', { method: 'password' })
   return user
 })

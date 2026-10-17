@@ -13,6 +13,7 @@ const props = withDefaults(defineProps<{
 })
 
 const emit = defineEmits<{ created: [], ask: [message: string] }>()
+const { capture, captureException } = useProductAnalytics()
 const title = ref('')
 const projectId = ref<string | null>(props.defaultProjectId)
 const milestoneId = ref<string | null>(props.defaultMilestoneId)
@@ -52,8 +53,14 @@ const create = async () => {
     title.value = ''
     dueDate.value = null
     priority.value = 'none'
+    capture('task_capture_submitted', {
+      has_project: Boolean(projectId.value),
+      has_due_date: Boolean(dueDate.value),
+      priority: priority.value,
+    })
     emit('created')
   } catch (error: unknown) {
+    captureException(error, { flow: 'task_capture' })
     errorMessage.value = error instanceof Error ? error.message : 'Could not create the task.'
   } finally {
     isSaving.value = false
@@ -62,6 +69,7 @@ const create = async () => {
 
 const ask = () => {
   if (!title.value.trim()) return
+  capture('ask_kobi_opened', { source: 'quick_capture' })
   emit('ask', title.value.trim())
   title.value = ''
 }

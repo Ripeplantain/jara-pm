@@ -14,6 +14,7 @@ const proposalId = ref<string | null>(null)
 const acceptedGoalId = ref<string | null>(null)
 const inputElement = useTemplateRef<HTMLTextAreaElement>('composer')
 const { draft } = useAskKobi()
+const { captureException } = useProductAnalytics()
 
 onMounted(() => {
   input.value = draft.value
@@ -40,6 +41,7 @@ const send = async () => {
     proposal.value = reply.proposal
     proposalId.value = reply.proposalId
   } catch (error: unknown) {
+    captureException(error, { flow: 'ask_kobi_message', mode: mode.value })
     errorMessage.value = error instanceof Error ? error.message : 'Kobi could not respond.'
   } finally {
     isSending.value = false
@@ -55,6 +57,7 @@ const accept = async () => {
     proposalId.value = null
     messages.value.push({ role: 'assistant', content: 'Your plan is saved. I created the goal, projects, milestones, and tasks.' })
   } catch (error: unknown) {
+    captureException(error, { flow: 'ask_kobi_plan_accept' })
     errorMessage.value = error instanceof Error ? error.message : 'The plan could not be saved.'
   } finally {
     isAccepting.value = false

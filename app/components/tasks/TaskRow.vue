@@ -4,6 +4,7 @@ import type { Task, TaskStatus } from '#shared/types/domain'
 
 const props = withDefaults(defineProps<{ task: Task, showReschedule?: boolean }>(), { showReschedule: false })
 const emit = defineEmits<{ updated: [task: Task], deleted: [id: string] }>()
+const { capture, captureException } = useProductAnalytics()
 const localStatus = ref<TaskStatus>(props.task.status)
 const localDueDate = ref(props.task.dueDate ?? '')
 const isSaving = ref(false)
@@ -19,8 +20,12 @@ const toggle = async () => {
     const task = await $fetch<Task>(`/api/tasks/${props.task.id}`, {
       method: 'PATCH', body: { status: localStatus.value },
     })
+    capture(localStatus.value === 'done' ? 'task_action_completed' : 'task_action_reopened', {
+      has_due_date: Boolean(task.dueDate),
+    })
     emit('updated', task)
-  } catch {
+  } catch (error: unknown) {
+    captureException(error, { flow: 'task_status_update' })
     localStatus.value = previous
   } finally {
     isSaving.value = false
@@ -32,16 +37,23 @@ const reschedule = async () => {
     const task = await $fetch<Task>(`/api/tasks/${props.task.id}`, {
       method: 'PATCH', body: { dueDate: localDueDate.value || null },
     })
+    capture('task_action_rescheduled', { has_due_date: Boolean(task.dueDate) })
     emit('updated', task)
-  } catch {
+  } catch (error: unknown) {
+    captureException(error, { flow: 'task_reschedule' })
     localDueDate.value = props.task.dueDate ?? ''
   }
 }
 
 const remove = async () => {
   if (!window.confirm(`Delete “${props.task.title}”? This cannot be undone.`)) return
-  await $fetch(`/api/tasks/${props.task.id}`, { method: 'DELETE' })
-  emit('deleted', props.task.id)
+  try {
+    await $fetch(`/api/tasks/${props.task.id}`, { method: 'DELETE' })
+    capture('task_action_deleted')
+    emit('deleted', props.task.id)
+  } catch (error: unknown) {
+    captureException(error, { flow: 'task_delete' })
+  }
 }
 </script>
 

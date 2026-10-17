@@ -14,11 +14,13 @@
   },
   "dependencies": {
     "@lucide/vue": "latest",
+    "@posthog/nuxt": "^1.7.91",
     "better-sqlite3": "latest",
     "date-fns": "latest",
     "drizzle-orm": "^0.45.4",
     "nuxt": "4.6.2",
     "nuxt-auth-utils": "latest",
+    "posthog-node": "^5.56.2",
     "vue": "latest",
     "vue-router": "5.4.0",
     "zod": "latest"
