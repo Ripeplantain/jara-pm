@@ -3,6 +3,7 @@ import tailwindcss from '@tailwindcss/vite'
 const posthogProjectToken = process.env.NUXT_PUBLIC_POSTHOG_PROJECT_TOKEN || process.env.POSTHOG_PROJECT_TOKEN || ''
 const posthogHost = process.env.NUXT_PUBLIC_POSTHOG_HOST || process.env.POSTHOG_HOST || 'https://us.i.posthog.com'
 const posthogSessionReplay = process.env.NUXT_PUBLIC_POSTHOG_SESSION_REPLAY === 'true'
+const legacyLlmModel = process.env.NUXT_LLM_MODEL || 'openai/gpt-4.1-mini'
 
 export default defineNuxtConfig({
   compatibilityDate: '2026-10-01',
@@ -20,7 +21,9 @@ export default defineNuxtConfig({
     llm: {
       apiKey: '',
       baseUrl: 'https://openrouter.ai/api/v1',
-      model: 'openai/gpt-4.1-mini',
+      model: legacyLlmModel,
+      chatModel: process.env.NUXT_LLM_CHAT_MODEL || '',
+      planModel: process.env.NUXT_LLM_PLAN_MODEL || 'openai/gpt-4.1',
     },
     public: {
       appName: 'Kobi',

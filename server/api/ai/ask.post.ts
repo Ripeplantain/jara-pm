@@ -11,7 +11,8 @@ export default defineEventHandler(async (event) => {
   const reply = await askKobi(useDatabase(event), user.id, body, {
     apiKey: String(config.llm.apiKey),
     baseUrl: String(config.llm.baseUrl),
-    model: String(config.llm.model),
+    chatModel: String(config.llm.chatModel || config.llm.model),
+    planModel: String(config.llm.planModel),
   })
   captureServerEvent(event, user.id, 'ask_kobi_message_sent', {
     mode: body.mode,
