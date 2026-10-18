@@ -5,7 +5,8 @@ import {
   aiReplyJsonSchema,
   goalPlanProposalSchema,
 } from '#shared/schemas/ai'
-import type { AiReply, GoalPlanProposal } from '#shared/types/domain'
+import { MAX_TITLE_LENGTH } from '#shared/schemas/common'
+import type { AiReply, AiReplySource, GoalPlanProposal } from '#shared/types/domain'
 import { createGoal } from '~~/server/services/goals'
 import { createMilestone, createProject } from '~~/server/services/projects'
 import { createTask } from '~~/server/services/tasks'
@@ -21,6 +22,15 @@ type AiConfig = {
 }
 
 export const PROMPT_VERSION = '2026-10-17-structured-ai-replies-v1'
+
+export const OFFLINE_NOTICE = 'I could not reach my AI model, so this is a basic draft built from your own data rather than a tailored answer.'
+
+// OpenRouter authorises each request against the model's maximum possible
+// completion, so an unset max_tokens makes every call fail with 402 on a
+// budget-limited key. Keep these high enough for a complete reply: a truncated
+// response fails JSON.parse and silently falls back to the local planner.
+export const CHAT_MAX_TOKENS = 800
+export const GOAL_PLAN_MAX_TOKENS = 3000
 
 const providerResponseSchema = z.object({
   choices: z.array(z.object({
@@ -71,12 +81,21 @@ const contextFor = (db: KobiDb, userId: string) => {
   return { taskCounts, projects: projectContext, goals: goalContext, today }
 }
 
-const localPlan = (message: string): GoalPlanProposal => {
+// The local planner derives the title from the raw message, which may be up to
+// MAX_AI_MESSAGE_LENGTH characters, so it has to respect the stored title bound.
+const toTitle = (value: string) => {
+  if (value.length <= MAX_TITLE_LENGTH) return value
+  const cut = value.slice(0, MAX_TITLE_LENGTH)
+  const lastSpace = cut.lastIndexOf(' ')
+  return (lastSpace > 40 ? cut.slice(0, lastSpace) : cut).trimEnd()
+}
+
+export const localPlan = (message: string): GoalPlanProposal => {
   const cleaned = message
     .replace(/^(i want to|help me|create a plan to|plan to)\s+/i, '')
     .replace(/[.!?]+$/, '')
     .trim()
-  const title = cleaned ? cleaned[0]?.toUpperCase() + cleaned.slice(1) : 'Make meaningful progress'
+  const title = cleaned ? toTitle(cleaned[0]?.toUpperCase() + cleaned.slice(1)) : 'Make meaningful progress'
   return {
     kind: 'goal_plan',
     goal: {
@@ -145,6 +164,7 @@ export const buildProviderRequest = (
 ) => ({
   model: mode === 'goal_plan' ? config.planModel : config.chatModel,
   temperature: 0.2,
+  max_tokens: mode === 'goal_plan' ? GOAL_PLAN_MAX_TOKENS : CHAT_MAX_TOKENS,
   response_format: {
     type: 'json_schema',
     json_schema: {
@@ -204,17 +224,24 @@ export const askKobi = async (
   checkRateLimit(userId)
   const context = contextFor(db, userId)
   let answer: { message: string, proposal: GoalPlanProposal | null }
+  let source: AiReplySource = 'model'
 
   if (config.apiKey) {
     try {
       answer = await callProvider(config, input.message, input.mode, context)
     } catch (error: unknown) {
       console.warn('Ask Kobi provider failed; using the local planner.', error instanceof Error ? error.message : 'Unknown error')
+      source = 'offline'
       answer = localReply(input.message, context, input.mode)
     }
   } else {
+    source = 'offline'
     answer = localReply(input.message, context, input.mode)
   }
+
+  // Prefixed rather than badged by the client alone, so stored history also
+  // records that the exchange was a fallback.
+  if (source === 'offline') answer = { ...answer, message: `${OFFLINE_NOTICE}\n\n${answer.message}` }
 
   const now = nowIso()
   db.insert(aiMessages).values({
@@ -246,7 +273,7 @@ export const askKobi = async (
     }).run()
   }
 
-  return { message: answer.message, proposalId, proposal: answer.proposal }
+  return { message: answer.message, proposalId, proposal: answer.proposal, source }
 }
 
 export const acceptProposal = (

@@ -17,6 +17,7 @@ export default defineEventHandler(async (event) => {
   captureServerEvent(event, user.id, 'ask_kobi_message_sent', {
     mode: body.mode,
     has_proposal: Boolean(reply.proposal),
+    reply_source: reply.source,
   })
   return reply
 })

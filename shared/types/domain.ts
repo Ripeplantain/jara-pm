@@ -107,8 +107,14 @@ export type GoalPlanProposal = {
   }>
 }
 
+// 'offline' marks a reply produced by the local fallback because no provider key
+// is configured or the provider call failed. It must stay visible to the client:
+// a fallback that looks like a model reply hides provider outages completely.
+export type AiReplySource = 'model' | 'offline'
+
 export type AiReply = {
   message: string
   proposalId: string | null
   proposal: GoalPlanProposal | null
+  source: AiReplySource
 }

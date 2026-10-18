@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowUp, Check, Sparkles, X } from '@lucide/vue'
+import { ArrowUp, Check, Maximize2, Minimize2, Sparkles, X } from '@lucide/vue'
 import { MAX_AI_MESSAGE_LENGTH } from '#shared/schemas/ai'
 import type { AiReply, GoalPlanProposal } from '#shared/types/domain'
 import { getUserFacingErrorMessage } from '#shared/utils/error-message'
@@ -10,10 +10,12 @@ const input = ref('')
 const isSending = ref(false)
 const isAccepting = ref(false)
 const errorMessage = ref('')
-const messages = ref<Array<{ role: 'user' | 'assistant', content: string }>>([])
+const messages = ref<Array<{ role: 'user' | 'assistant', content: string, offline?: boolean }>>([])
 const proposal = ref<GoalPlanProposal | null>(null)
 const proposalId = ref<string | null>(null)
 const acceptedGoalId = ref<string | null>(null)
+const isOfflineProposal = ref(false)
+const isMaximized = ref(false)
 const inputElement = useTemplateRef<HTMLTextAreaElement>('composer')
 const { draft } = useAskKobi()
 const { captureException } = useProductAnalytics()
@@ -43,9 +45,10 @@ const send = async () => {
   errorMessage.value = ''
   try {
     const reply = await $fetch<AiReply>('/api/ai/ask', { method: 'POST', body: { message, mode: mode.value } })
-    messages.value.push({ role: 'assistant', content: reply.message })
+    messages.value.push({ role: 'assistant', content: reply.message, offline: reply.source === 'offline' })
     proposal.value = reply.proposal
     proposalId.value = reply.proposalId
+    isOfflineProposal.value = reply.source === 'offline'
   } catch (error: unknown) {
     captureException(error, { flow: 'ask_kobi_message', mode: mode.value })
     errorMessage.value = getUserFacingErrorMessage(error, 'Kobi could not respond.', {
@@ -76,10 +79,23 @@ const accept = async () => {
 <template>
   <Teleport to="body">
     <div class="ask-overlay" @click="emit('close')" />
-    <aside class="ask-panel" role="dialog" aria-modal="true" aria-labelledby="ask-title">
+    <aside class="ask-panel" :class="{ 'is-maximized': isMaximized }" role="dialog" aria-modal="true" aria-labelledby="ask-title">
       <header class="ask-header">
         <h2 id="ask-title">Ask Kobi</h2>
-        <button type="button" class="icon-button" aria-label="Close Ask Kobi" @click="emit('close')"><X :size="18" /></button>
+        <div class="ask-header-actions">
+          <button
+            type="button"
+            class="icon-button"
+            :aria-label="isMaximized ? 'Minimize Ask Kobi' : 'Maximize Ask Kobi'"
+            :aria-pressed="isMaximized"
+            :title="isMaximized ? 'Minimize' : 'Maximize'"
+            @click="isMaximized = !isMaximized"
+          >
+            <Minimize2 v-if="isMaximized" :size="18" />
+            <Maximize2 v-else :size="18" />
+          </button>
+          <button type="button" class="icon-button" aria-label="Close Ask Kobi" @click="emit('close')"><X :size="18" /></button>
+        </div>
       </header>
       <div class="ask-body" aria-live="polite">
         <div v-if="messages.length === 0" class="ask-intro">
@@ -87,10 +103,12 @@ const accept = async () => {
           <strong>What would make progress easier?</strong>
           <p>Ask what to focus on, or let Kobi draft a goal plan for you to review.</p>
         </div>
-        <div v-for="(message, index) in messages" :key="index" class="message" :class="message.role">{{ message.content }}</div>
+        <div v-for="(message, index) in messages" :key="index" class="message" :class="message.role">
+          <span v-if="message.offline" class="status-badge message-badge">Offline draft</span>{{ message.content }}
+        </div>
         <div v-if="isSending" class="message assistant">Thinking…</div>
         <div v-if="proposal" class="proposal">
-          <span class="status-badge active">Plan preview</span>
+          <span class="status-badge" :class="{ active: !isOfflineProposal }">{{ isOfflineProposal ? 'Offline draft plan' : 'Plan preview' }}</span>
           <h3>{{ proposal.goal.title }}</h3>
           <p class="proposal-description">{{ proposal.goal.description }}</p>
           <ul class="proposal-projects">

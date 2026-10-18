@@ -606,6 +606,10 @@
     @apply flex items-center justify-between border-b border-border px-[18px] py-4;
   }
 
+  .ask-header-actions {
+    @apply flex items-center gap-1;
+  }
+
   .ask-header h2 {
     @apply m-0 text-base font-semibold;
   }
@@ -636,6 +640,10 @@
 
   .message.assistant {
     @apply border border-border bg-surface;
+  }
+
+  .message-badge {
+    @apply mb-2 block w-fit;
   }
 
   .proposal {
@@ -712,6 +720,22 @@
 
   .ask-composer {
     @apply border-t border-border bg-surface p-3.5;
+  }
+
+  .ask-panel.is-maximized {
+    @apply inset-4 w-auto grid-cols-[minmax(0,1fr)_minmax(300px,360px)] grid-rows-[auto_minmax(0,1fr)] rounded-xl border shadow-lg;
+  }
+
+  .ask-panel.is-maximized .ask-header {
+    @apply col-span-2;
+  }
+
+  .ask-panel.is-maximized .ask-body {
+    @apply mx-auto min-w-0 w-full max-w-[960px];
+  }
+
+  .ask-panel.is-maximized .ask-composer {
+    @apply row-start-2 col-start-2 flex flex-col justify-end overflow-y-auto border-l border-t-0;
   }
 
   .ask-mode {
@@ -964,6 +988,20 @@
   }
 }
 
+@media (max-width: 760px) {
+  .ask-panel.is-maximized {
+    @apply grid-cols-1 grid-rows-[auto_minmax(0,1fr)_auto];
+  }
+
+  .ask-panel.is-maximized .ask-header {
+    @apply col-span-1;
+  }
+
+  .ask-panel.is-maximized .ask-composer {
+    @apply row-start-auto col-start-auto border-l-0 border-t;
+  }
+}
+
 @media (max-width: 620px) {
   .page-header {
     @apply mb-[26px] flex-col gap-4;
@@ -1014,6 +1052,10 @@
 
   .ask-panel {
     @apply border-l-0;
+  }
+
+  .ask-panel.is-maximized {
+    @apply inset-0 rounded-none border-l-0;
   }
 
   .welcome-nav {
