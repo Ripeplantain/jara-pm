@@ -43,11 +43,11 @@ describe('AI proposal validation', () => {
 })
 
 describe('Ask Kobi message validation', () => {
-  it('accepts a 4000-character message', () => {
-    expect(() => askKobiSchema.parse({ message: 'x'.repeat(4000) })).not.toThrow()
+  it('accepts a 16000-character message', () => {
+    expect(() => askKobiSchema.parse({ message: 'x'.repeat(16_000) })).not.toThrow()
   })
 
-  it('rejects a 4001-character message', () => {
-    expect(() => askKobiSchema.parse({ message: 'x'.repeat(4001) })).toThrow()
+  it('rejects a 16001-character message', () => {
+    expect(() => askKobiSchema.parse({ message: 'x'.repeat(16_001) })).toThrow()
   })
 })
