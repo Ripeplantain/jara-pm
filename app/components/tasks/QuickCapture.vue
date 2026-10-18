@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ArrowUp, ChevronDown, ChevronUp, Sparkles } from '@lucide/vue'
 import type { Project, TaskPriority } from '#shared/types/domain'
+import { getUserFacingErrorMessage } from '#shared/utils/error-message'
 
 const props = withDefaults(defineProps<{
   defaultProjectId?: string | null
@@ -61,7 +62,11 @@ const create = async () => {
     emit('created')
   } catch (error: unknown) {
     captureException(error, { flow: 'task_capture' })
-    errorMessage.value = error instanceof Error ? error.message : 'Could not create the task.'
+    errorMessage.value = getUserFacingErrorMessage(error, 'Could not create the task.', {
+      validation: 'Please check the task details and try again.',
+      unprocessable: 'That project or milestone is no longer available. Refresh and try again.',
+      unavailable: 'We could not create the task right now. Please try again in a moment.',
+    })
   } finally {
     isSaving.value = false
   }
@@ -120,7 +125,7 @@ const ask = () => {
         <component :is="isExpanded ? ChevronUp : ChevronDown" :size="14" aria-hidden="true" />
         {{ isExpanded ? 'Fewer details' : 'Add details' }}
       </button>
-      <span v-if="errorMessage" class="form-error">{{ errorMessage }}</span>
+      <span v-if="errorMessage" class="form-error" role="alert">{{ errorMessage }}</span>
       <span v-else class="form-hint">Press Enter to add</span>
     </div>
   </form>

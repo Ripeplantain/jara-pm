@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ArrowUp, Check, Sparkles, X } from '@lucide/vue'
+import { MAX_AI_MESSAGE_LENGTH } from '#shared/schemas/ai'
 import type { AiReply, GoalPlanProposal } from '#shared/types/domain'
+import { getUserFacingErrorMessage } from '#shared/utils/error-message'
 
 const emit = defineEmits<{ close: [] }>()
 const mode = ref<'chat' | 'goal_plan'>('chat')
@@ -31,6 +33,10 @@ function onKeydown(event: KeyboardEvent) {
 const send = async () => {
   const message = input.value.trim()
   if (!message || isSending.value) return
+  if (message.length > MAX_AI_MESSAGE_LENGTH) {
+    errorMessage.value = `Your message is too long. Please keep it to ${MAX_AI_MESSAGE_LENGTH.toLocaleString()} characters or fewer.`
+    return
+  }
   messages.value.push({ role: 'user', content: message })
   input.value = ''
   isSending.value = true
@@ -42,7 +48,9 @@ const send = async () => {
     proposalId.value = reply.proposalId
   } catch (error: unknown) {
     captureException(error, { flow: 'ask_kobi_message', mode: mode.value })
-    errorMessage.value = error instanceof Error ? error.message : 'Kobi could not respond.'
+    errorMessage.value = getUserFacingErrorMessage(error, 'Kobi could not respond.', {
+      validation: `Your message is too long. Please keep it to ${MAX_AI_MESSAGE_LENGTH.toLocaleString()} characters or fewer.`,
+    })
   } finally {
     isSending.value = false
   }
@@ -58,7 +66,7 @@ const accept = async () => {
     messages.value.push({ role: 'assistant', content: 'Your plan is saved. I created the goal, projects, milestones, and tasks.' })
   } catch (error: unknown) {
     captureException(error, { flow: 'ask_kobi_plan_accept' })
-    errorMessage.value = error instanceof Error ? error.message : 'The plan could not be saved.'
+    errorMessage.value = getUserFacingErrorMessage(error, 'The plan could not be saved.')
   } finally {
     isAccepting.value = false
   }
@@ -112,7 +120,7 @@ const accept = async () => {
             {{ isAccepting ? 'Saving…' : 'Accept and save plan' }}
           </button>
         </div>
-        <p v-if="errorMessage" class="form-error">{{ errorMessage }}</p>
+        <p v-if="errorMessage" class="form-error" role="alert">{{ errorMessage }}</p>
       </div>
       <form class="ask-composer" @submit.prevent="send">
         <div class="ask-mode" aria-label="Ask Kobi mode">
@@ -120,8 +128,11 @@ const accept = async () => {
           <button type="button" :class="{ active: mode === 'goal_plan' }" @click="mode = 'goal_plan'">Plan a goal</button>
         </div>
         <div class="ask-input">
-          <textarea ref="composer" v-model="input" :placeholder="mode === 'goal_plan' ? 'I want to…' : 'What should I focus on?'" aria-label="Message Kobi" @keydown.enter.exact.prevent="send" />
+          <textarea ref="composer" v-model="input" :maxlength="MAX_AI_MESSAGE_LENGTH" :placeholder="mode === 'goal_plan' ? 'I want to…' : 'What should I focus on?'" aria-label="Message Kobi" aria-describedby="ask-message-counter" @keydown.enter.exact.prevent="send" />
           <button type="submit" class="button small" :disabled="!input.trim() || isSending" aria-label="Send message"><ArrowUp :size="16" /></button>
+        </div>
+        <div class="mt-1 flex justify-end">
+          <span id="ask-message-counter" class="form-hint" aria-live="polite">{{ input.length.toLocaleString() }} / {{ MAX_AI_MESSAGE_LENGTH.toLocaleString() }} characters</span>
         </div>
       </form>
     </aside>

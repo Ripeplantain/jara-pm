@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { getUserFacingErrorMessage } from '#shared/utils/error-message'
+
 definePageMeta({ layout: 'public', middleware: ['guest'] })
 useSeoMeta({ title: 'Create an account · Kobi' })
 
@@ -21,7 +23,10 @@ const submit = async () => {
     await navigateTo('/')
   } catch (error: unknown) {
     capture('auth_signup_failed', { method: 'password' })
-    errorMessage.value = error instanceof Error ? error.message : 'Could not create the account.'
+    errorMessage.value = getUserFacingErrorMessage(error, 'Could not create the account.', {
+      validation: 'Please check your name, email, and password and try again.',
+      unavailable: 'We could not create your account right now. Please try again in a moment.',
+    })
   } finally {
     isSubmitting.value = false
   }

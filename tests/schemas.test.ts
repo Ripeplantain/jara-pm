@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { goalPlanProposalSchema } from '../shared/schemas/ai'
+import { askKobiSchema, goalPlanProposalSchema } from '../shared/schemas/ai'
 import { createTaskSchema, updateTaskSchema } from '../shared/schemas/task'
 
 describe('task input', () => {
@@ -39,5 +39,15 @@ describe('AI proposal validation', () => {
       }],
     })
     expect(result.projects[0]?.milestones[0]?.tasks).toHaveLength(1)
+  })
+})
+
+describe('Ask Kobi message validation', () => {
+  it('accepts a 4000-character message', () => {
+    expect(() => askKobiSchema.parse({ message: 'x'.repeat(4000) })).not.toThrow()
+  })
+
+  it('rejects a 4001-character message', () => {
+    expect(() => askKobiSchema.parse({ message: 'x'.repeat(4001) })).toThrow()
   })
 })

@@ -2,8 +2,10 @@ import { z } from 'zod'
 import { dateSchema, titleSchema } from '#shared/schemas/common'
 import { TASK_PRIORITIES } from '#shared/types/domain'
 
+export const MAX_AI_MESSAGE_LENGTH = 4000
+
 export const askKobiSchema = z.object({
-  message: z.string().trim().min(1).max(4000),
+  message: z.string().trim().min(1).max(MAX_AI_MESSAGE_LENGTH),
   mode: z.enum(['chat', 'goal_plan']).default('chat'),
 })
 
