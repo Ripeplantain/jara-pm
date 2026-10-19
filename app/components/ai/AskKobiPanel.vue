@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ArrowUp, Check, Maximize2, Minimize2, Sparkles, X } from '@lucide/vue'
 import { MAX_AI_MESSAGE_LENGTH } from '#shared/schemas/ai'
-import type { AiReply, GoalPlanProposal } from '#shared/types/domain'
+import type { AiReply, AiReplySource, GoalPlanProposal } from '#shared/types/domain'
 import { getUserFacingErrorMessage } from '#shared/utils/error-message'
 
 const emit = defineEmits<{ close: [] }>()
@@ -10,7 +10,7 @@ const input = ref('')
 const isSending = ref(false)
 const isAccepting = ref(false)
 const errorMessage = ref('')
-const messages = ref<Array<{ role: 'user' | 'assistant', content: string, offline?: boolean }>>([])
+const messages = ref<Array<{ role: 'user' | 'assistant', content: string, source?: AiReplySource }>>([])
 const proposal = ref<GoalPlanProposal | null>(null)
 const proposalId = ref<string | null>(null)
 const acceptedGoalId = ref<string | null>(null)
@@ -45,7 +45,7 @@ const send = async () => {
   errorMessage.value = ''
   try {
     const reply = await $fetch<AiReply>('/api/ai/ask', { method: 'POST', body: { message, mode: mode.value } })
-    messages.value.push({ role: 'assistant', content: reply.message, offline: reply.source === 'offline' })
+    messages.value.push({ role: 'assistant', content: reply.message, source: reply.source })
     proposal.value = reply.proposal
     proposalId.value = reply.proposalId
     isOfflineProposal.value = reply.source === 'offline'
@@ -104,7 +104,7 @@ const accept = async () => {
           <p>Ask what to focus on, or let Kobi draft a goal plan for you to review.</p>
         </div>
         <div v-for="(message, index) in messages" :key="index" class="message" :class="message.role">
-          <span v-if="message.offline" class="status-badge message-badge">Offline draft</span>{{ message.content }}
+          <span v-if="message.source === 'offline' || message.source === 'invalid'" class="status-badge message-badge">{{ message.source === 'offline' ? 'Offline draft' : 'Reply error' }}</span>{{ message.content }}
         </div>
         <div v-if="isSending" class="message assistant">Thinking…</div>
         <div v-if="proposal" class="proposal">

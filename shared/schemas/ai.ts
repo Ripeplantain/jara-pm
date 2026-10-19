@@ -43,8 +43,9 @@ export const aiReplyJsonSchema = {
   additionalProperties: false,
   required: ['message', 'proposal'],
   properties: {
-    message: { type: 'string' },
+    message: { type: 'string', description: 'The reply shown to the user. When proposal is null because the request is too vague, ask one short question for the missing detail here.' },
     proposal: {
+      description: 'null when the request is too vague to plan — ask for the missing detail in `message` instead',
       anyOf: [
         { type: 'null' },
         {
