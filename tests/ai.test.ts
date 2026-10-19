@@ -94,17 +94,17 @@ describe('Ask Kobi reply source', () => {
 
   afterEach(() => sqlite.close())
 
-  const offlineConfig = { apiKey: '', baseUrl: 'https://openrouter.ai/api/v1', chatModel: 'a', planModel: 'b' }
+  const offlineConfig = { apiKey: '', baseUrl: 'https://openrouter.ai/api/v1', model: 'a' }
 
   it('marks an unconfigured provider as offline and says so in the reply', async () => {
-    const reply = await askKobi(db, userId, { message: 'hello', mode: 'chat' }, offlineConfig)
+    const reply = await askKobi(db, userId, { message: 'hello' }, offlineConfig)
 
     expect(reply.source).toBe('offline')
     expect(reply.message).toContain(OFFLINE_NOTICE)
   })
 
   it('persists the offline notice into stored history', async () => {
-    await askKobi(db, userId, { message: 'hello', mode: 'chat' }, offlineConfig)
+    await askKobi(db, userId, { message: 'hello' }, offlineConfig)
 
     const stored = db.select({ role: aiMessages.role, content: aiMessages.content })
       .from(aiMessages).where(eq(aiMessages.userId, userId)).all()
@@ -114,7 +114,7 @@ describe('Ask Kobi reply source', () => {
   it('still stores a valid proposal for an over-long offline goal plan', async () => {
     const message = `I want to ${'do a great many different things '.repeat(20)}`
 
-    const reply = await askKobi(db, userId, { message, mode: 'goal_plan' }, offlineConfig)
+    const reply = await askKobi(db, userId, { message }, offlineConfig)
 
     expect(reply.source).toBe('offline')
     expect(reply.proposalId).not.toBeNull()
@@ -131,7 +131,7 @@ describe('Ask Kobi provider outcomes (stubbed provider)', () => {
   let warn: ReturnType<typeof vi.spyOn>
   let seq = 0
   const apiKey = 'sk-test-secret-key-do-not-leak'
-  const config = { apiKey, baseUrl: 'https://provider.invalid/api/v1', chatModel: 'a', planModel: 'b' }
+  const config = { apiKey, baseUrl: 'https://provider.invalid/api/v1', model: 'a' }
 
   // The rate limiter is module-level, so every test gets its own user.
   const newUser = () => {
@@ -167,13 +167,13 @@ describe('Ask Kobi provider outcomes (stubbed provider)', () => {
     sqlite.close()
   })
 
-  it('treats a clarifying question in plan mode as a model reply, not an outage', async () => {
+  it('treats a clarifying question as a model reply, not an outage', async () => {
     const userId = newUser()
     const question = 'What would you like to achieve?'
     const fetchStub = vi.fn().mockResolvedValue(completion({ message: question, proposal: null }))
     vi.stubGlobal('$fetch', fetchStub)
 
-    const reply = await askKobi(db, userId, { message: 'hello', mode: 'goal_plan' }, config)
+    const reply = await askKobi(db, userId, { message: 'hello' }, config)
 
     // Proves the stub path ran: the provider was called exactly once.
     expect(fetchStub).toHaveBeenCalledTimes(1)
@@ -197,7 +197,7 @@ describe('Ask Kobi provider outcomes (stubbed provider)', () => {
       data: { error: { message: 'Insufficient credits' } },
     })))
 
-    const reply = await askKobi(db, userId, { message, mode: 'goal_plan' }, config)
+    const reply = await askKobi(db, userId, { message }, config)
 
     expect(reply.source).toBe('offline')
     expect(reply.message.startsWith(OFFLINE_NOTICE)).toBe(true)
@@ -219,7 +219,7 @@ describe('Ask Kobi provider outcomes (stubbed provider)', () => {
       data: 'z'.repeat(5000),
     })))
 
-    await askKobi(db, userId, { message: 'hi', mode: 'chat' }, config)
+    await askKobi(db, userId, { message: 'hi' }, config)
 
     const record = warn.mock.calls[0]?.[1] as { body: string }
     expect(record.body).toHaveLength(500)
@@ -229,7 +229,7 @@ describe('Ask Kobi provider outcomes (stubbed provider)', () => {
     const userId = newUser()
     vi.stubGlobal('$fetch', vi.fn().mockRejectedValue(new Error('fetch failed')))
 
-    const reply = await askKobi(db, userId, { message: 'hi', mode: 'chat' }, config)
+    const reply = await askKobi(db, userId, { message: 'hi' }, config)
 
     expect(reply.source).toBe('offline')
     expect(reply.message.startsWith(OFFLINE_NOTICE)).toBe(true)
@@ -253,7 +253,7 @@ describe('Ask Kobi provider outcomes (stubbed provider)', () => {
     }
     vi.stubGlobal('$fetch', vi.fn().mockResolvedValue(completion(overlong)))
 
-    const reply = await askKobi(db, userId, { message: 'I want to do a thing', mode: 'goal_plan' }, config)
+    const reply = await askKobi(db, userId, { message: 'I want to do a thing' }, config)
 
     expect(reply.source).toBe('invalid')
     expect(reply.message).toBe(INVALID_REPLY_NOTICE)
@@ -272,29 +272,35 @@ describe('Ask Kobi provider outcomes (stubbed provider)', () => {
     const userId = newUser()
     vi.stubGlobal('$fetch', vi.fn().mockResolvedValue(completion('Sure! Happy to help.')))
 
-    const reply = await askKobi(db, userId, { message: 'hello', mode: 'goal_plan' }, config)
+    const reply = await askKobi(db, userId, { message: 'hello' }, config)
 
     expect(reply.source).toBe('invalid')
     expect(reply.message).toBe(INVALID_REPLY_NOTICE)
   })
 
-  it('reports a proposal returned in chat mode as an invalid reply', async () => {
+  it('accepts a model reply with a proposal and one without', async () => {
     const userId = newUser()
     const plan = localPlan('I want to learn basketball')
-    vi.stubGlobal('$fetch', vi.fn().mockResolvedValue(completion({ message: 'Plan.', proposal: plan })))
+    const stub = vi.fn()
+      .mockResolvedValueOnce(completion({ message: 'Plan.', proposal: plan }))
+      .mockResolvedValueOnce(completion({ message: 'Just an answer.', proposal: null }))
+    vi.stubGlobal('$fetch', stub)
 
-    const reply = await askKobi(db, userId, { message: 'hello', mode: 'chat' }, config)
+    const withPlan = await askKobi(db, userId, { message: 'hello' }, config)
+    const withoutPlan = await askKobi(db, userId, { message: 'hello again' }, config)
 
-    expect(reply.source).toBe('invalid')
-    expect(reply.proposalId).toBeNull()
-    expect(proposalRows(userId)).toHaveLength(0)
+    expect(withPlan.source).toBe('model')
+    expect(withPlan.proposalId).not.toBeNull()
+    expect(withoutPlan.source).toBe('model')
+    expect(withoutPlan.proposal).toBeNull()
+    expect(proposalRows(userId)).toHaveLength(1)
   })
 
   it('treats an unusable provider envelope as offline', async () => {
     const userId = newUser()
     vi.stubGlobal('$fetch', vi.fn().mockResolvedValue({ choices: [] }))
 
-    const reply = await askKobi(db, userId, { message: 'hello', mode: 'chat' }, config)
+    const reply = await askKobi(db, userId, { message: 'hello' }, config)
 
     expect(reply.source).toBe('offline')
   })
@@ -304,7 +310,7 @@ describe('Ask Kobi provider outcomes (stubbed provider)', () => {
     const plan = localPlan('I want to learn basketball')
     vi.stubGlobal('$fetch', vi.fn().mockResolvedValue(completion({ message: 'Plan ready.', proposal: plan })))
 
-    const reply = await askKobi(db, userId, { message: 'I want to learn basketball', mode: 'goal_plan' }, config)
+    const reply = await askKobi(db, userId, { message: 'I want to learn basketball' }, config)
 
     expect(reply.source).toBe('model')
     expect(reply.proposalId).not.toBeNull()

@@ -1,0 +1,3 @@
+# Eval run records are local artefacts, never committed.
+*
+!.gitignore

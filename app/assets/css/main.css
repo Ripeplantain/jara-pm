@@ -738,19 +738,6 @@
     @apply row-start-2 col-start-2 flex flex-col justify-end overflow-y-auto border-l border-t-0;
   }
 
-  .ask-mode {
-    @apply mb-[9px] flex gap-1;
-  }
-
-  .ask-mode button {
-    @apply cursor-pointer rounded-sm border border-transparent bg-transparent px-2 py-[5px] text-xs text-text-secondary;
-  }
-
-  .ask-mode button:hover,
-  .ask-mode button.active {
-    @apply border-border bg-surface-hover text-text-primary;
-  }
-
   .ask-input {
     @apply flex items-end gap-[7px] rounded-lg border border-border-strong bg-background p-1.5;
   }

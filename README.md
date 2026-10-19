@@ -14,7 +14,7 @@ Every level is optional: tasks may live in the Inbox and projects may exist with
 - SQLite with `better-sqlite3` and Drizzle ORM
 - Sealed httpOnly sessions with `nuxt-auth-utils`
 - Zod validation for API input and AI output
-- OpenAI-compatible Ask Kobi integration with a local fallback planner
+- OpenRouter-backed Ask Kobi integration with a local fallback planner
 - Docker Compose for development, staging, and production
 
 The complete application lives at the repository root. Nitro is the only API and the only process
@@ -30,7 +30,9 @@ openssl rand -base64 32
 ```
 
 Put the generated value in `NUXT_SESSION_PASSWORD`. `NUXT_LLM_API_KEY` is optional; all manual
-features and the local planning fallback work without it.
+features and the local planning fallback work without it. Ask Kobi uses one model, set by
+`NUXT_LLM_MODEL`; `NUXT_LLM_CHAT_MODEL` and `NUXT_LLM_PLAN_MODEL` were removed and are no longer read, so a
+deployment that still sets them silently gets `NUXT_LLM_MODEL` instead.
 
 Start Kobi:
 

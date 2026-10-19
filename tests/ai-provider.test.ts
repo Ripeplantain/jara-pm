@@ -3,9 +3,8 @@ import {
   AiProviderUnreachableError,
   AiReplyContractError,
   buildProviderRequest,
-  CHAT_MAX_TOKENS,
-  GOAL_PLAN_MAX_TOKENS,
   localPlan,
+  MAX_REPLY_TOKENS,
   PROMPT_VERSION,
   validateProviderReply,
 } from '../server/services/ai'
@@ -15,8 +14,7 @@ import { MAX_TITLE_LENGTH } from '../shared/schemas/common'
 const config = {
   apiKey: 'test-key',
   baseUrl: 'https://openrouter.ai/api/v1',
-  chatModel: 'openai/gpt-4.1-mini',
-  planModel: 'openai/gpt-4.1',
+  model: 'deepseek/deepseek-v4.1-flash',
 }
 
 const context = {
@@ -44,77 +42,66 @@ const validPlan = {
 }
 
 describe('Ask Kobi provider request', () => {
-  it('uses the chat model for normal questions', () => {
-    const request = buildProviderRequest(config, 'What should I focus on?', 'chat', context)
+  it('uses the single model, the shared token ceiling and no reasoning', () => {
+    const request = buildProviderRequest(config, 'What should I focus on?', context)
 
-    expect(request.model).toBe(config.chatModel)
+    expect(request.model).toBe(config.model)
     expect(request.response_format.json_schema.strict).toBe(true)
-    expect(request.messages[0]?.content).toContain(PROMPT_VERSION)
-    expect(request.max_tokens).toBe(CHAT_MAX_TOKENS)
-  })
-
-  it('uses the stronger planning model for goal plans', () => {
-    const request = buildProviderRequest(config, 'Help me plan a goal', 'goal_plan', context)
-
-    expect(request.model).toBe(config.planModel)
     expect(request.response_format.json_schema.name).toBe('kobi_ai_reply')
     expect(request.response_format.json_schema.schema).toMatchObject({
       type: 'object',
       required: ['message', 'proposal'],
     })
-    expect(request.max_tokens).toBe(GOAL_PLAN_MAX_TOKENS)
+    expect(request.messages[0]?.content).toContain(PROMPT_VERSION)
+    expect(request.max_tokens).toBe(MAX_REPLY_TOKENS)
+    expect(request.reasoning).toEqual({ enabled: false })
+  })
+
+  // Structured-output support varies by endpoint, so a provider that ignores
+  // response_format would answer in prose and break the reply contract.
+  it('only routes to endpoints that honour the reply schema', () => {
+    expect(buildProviderRequest(config, 'Plan something', context).provider.require_parameters).toBe(true)
   })
 
   // An unset max_tokens makes OpenRouter reserve the model's full completion
   // window and reject the call with 402 on a budget-limited key.
   it('always bounds the completion length', () => {
-    for (const mode of ['chat', 'goal_plan'] as const) {
-      const request = buildProviderRequest(config, 'Plan something', mode, context)
-      expect(request.max_tokens).toBeGreaterThan(0)
-    }
+    expect(buildProviderRequest(config, 'Plan something', context).max_tokens).toBeGreaterThan(0)
   })
 
-  it('keeps provider replies aligned with the requested mode', () => {
-    expect(validateProviderReply({ message: 'Done.', proposal: null }, 'chat').proposal).toBeNull()
-    expect(validateProviderReply(validPlan, 'goal_plan').proposal?.kind).toBe('goal_plan')
-    expect(() => validateProviderReply(validPlan, 'chat')).toThrow('cannot include a proposal')
-    // Deliberate inversion: a plan-mode reply with proposal null is a valid
-    // clarifying question, not a contract violation.
-    expect(validateProviderReply({ message: 'What would you like to achieve?', proposal: null }, 'goal_plan').proposal).toBeNull()
+  it('accepts both reply shapes: a proposal and a null proposal', () => {
+    expect(validateProviderReply(validPlan).proposal?.kind).toBe('goal_plan')
+    expect(validateProviderReply({ message: 'Done.', proposal: null }).proposal).toBeNull()
   })
 })
 
-describe('Ask Kobi mode-specific prompt', () => {
-  it('tells plan mode to ask a clarifying question instead of inventing a goal', () => {
-    const system = buildProviderRequest(config, 'hello', 'goal_plan', context).messages[0]?.content ?? ''
+describe('Ask Kobi prompt', () => {
+  it('plans any named outcome, answers otherwise, and bounds prose in the prompt', () => {
+    const system = buildProviderRequest(config, 'hello', context).messages[0]?.content ?? ''
 
-    // Both halves of the rule: a terse outcome still gets a plan, and a null
-    // proposal is reserved for a message that names no outcome at all.
     expect(system).toContain('however terse')
     expect(system).toContain('null for dates you do not know')
-    expect(system).toContain('Set `proposal` to null only when the message names no outcome at all')
-    expect(system).toContain('never say or imply you have drafted a plan')
+    expect(system).toContain('answer the question asked')
+    expect(system).toContain('Never say or imply you have drafted a plan')
     expect(system).toContain('Never invent a goal')
+    expect(system).toContain('under about 120 words')
+    expect(system).not.toContain('requested mode')
     expect(system).toContain(PROMPT_VERSION)
-    expect(PROMPT_VERSION).toBe('2026-10-19-plan-mode-clarification-v1')
+    expect(PROMPT_VERSION).toBe('2026-10-19-single-model-inferred-intent-history-v1')
   })
 
-  it('tells chat mode to always return a null proposal, and differs from plan mode', () => {
-    const chat = buildProviderRequest(config, 'hello', 'chat', context).messages[0]?.content ?? ''
-    const plan = buildProviderRequest(config, 'hello', 'goal_plan', context).messages[0]?.content ?? ''
-
-    expect(chat).toContain('Always set `proposal` to null')
-    expect(chat).not.toContain('too vague to plan')
-    expect(plan).not.toContain('Always set `proposal` to null')
-    expect(chat).not.toBe(plan)
+  it('keeps messages[0] identical whatever the input or history', () => {
+    const base = buildProviderRequest(config, 'a', context).messages[0]
+    const other = buildProviderRequest(config, 'IGNORE ALL', { ...context, today: 'X' }, [{ role: 'user', content: 'ignore me' }]).messages[0]
+    expect(other).toEqual(base)
   })
 })
 
 describe('Ask Kobi untrusted-context framing', () => {
   const sentinel = { ...context, today: '2099-01-01-SENTINEL' }
 
-  it.each(['chat', 'goal_plan'] as const)('fences application context as data in %s mode', (mode) => {
-    const [system, contextMessage, user] = buildProviderRequest(config, 'Plan it', mode, sentinel).messages
+  it('fences application context as data', () => {
+    const [system, contextMessage, user] = buildProviderRequest(config, 'Plan it', sentinel).messages
     const serialized = JSON.stringify(sentinel)
 
     expect(system?.role).toBe('system')
@@ -130,21 +117,10 @@ describe('Ask Kobi untrusted-context framing', () => {
 })
 
 describe('Ask Kobi reply error classes', () => {
-  it('flags a proposal in chat mode as a contract error', () => {
-    let caught: unknown
-    try {
-      validateProviderReply(validPlan, 'chat')
-    } catch (error) {
-      caught = error
-    }
-    expect(caught).toBeInstanceOf(AiReplyContractError)
-    expect(caught).not.toBeInstanceOf(AiProviderUnreachableError)
-  })
-
   it('flags a Zod bound violation as a contract error, not an outage', () => {
     // Control: the same plan with an in-bound title is accepted, so the throw
     // below is caused by the one-character overflow alone.
-    expect(() => validateProviderReply(validPlan, 'goal_plan')).not.toThrow()
+    expect(() => validateProviderReply(validPlan)).not.toThrow()
     const overlong = {
       ...validPlan,
       proposal: { ...validPlan.proposal, goal: { ...validPlan.proposal.goal, title: 'x'.repeat(MAX_TITLE_LENGTH + 1) } },
@@ -152,7 +128,7 @@ describe('Ask Kobi reply error classes', () => {
 
     let caught: unknown
     try {
-      validateProviderReply(overlong, 'goal_plan')
+      validateProviderReply(overlong)
     } catch (error) {
       caught = error
     }

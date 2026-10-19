@@ -5,7 +5,6 @@ import type { AiReply, AiReplySource, GoalPlanProposal } from '#shared/types/dom
 import { getUserFacingErrorMessage } from '#shared/utils/error-message'
 
 const emit = defineEmits<{ close: [] }>()
-const mode = ref<'chat' | 'goal_plan'>('chat')
 const input = ref('')
 const isSending = ref(false)
 const isAccepting = ref(false)
@@ -44,13 +43,16 @@ const send = async () => {
   isSending.value = true
   errorMessage.value = ''
   try {
-    const reply = await $fetch<AiReply>('/api/ai/ask', { method: 'POST', body: { message, mode: mode.value } })
+    const reply = await $fetch<AiReply>('/api/ai/ask', { method: 'POST', body: { message } })
     messages.value.push({ role: 'assistant', content: reply.message, source: reply.source })
     proposal.value = reply.proposal
     proposalId.value = reply.proposalId
+    // Any message can now return a proposal, so a stale accepted id would
+    // render "View saved goal" over the new plan's Accept button.
+    acceptedGoalId.value = null
     isOfflineProposal.value = reply.source === 'offline'
   } catch (error: unknown) {
-    captureException(error, { flow: 'ask_kobi_message', mode: mode.value })
+    captureException(error, { flow: 'ask_kobi_message' })
     errorMessage.value = getUserFacingErrorMessage(error, 'Kobi could not respond.', {
       validation: `Your message is too long. Please keep it to ${MAX_AI_MESSAGE_LENGTH.toLocaleString()} characters or fewer.`,
     })
@@ -141,12 +143,8 @@ const accept = async () => {
         <p v-if="errorMessage" class="form-error" role="alert">{{ errorMessage }}</p>
       </div>
       <form class="ask-composer" @submit.prevent="send">
-        <div class="ask-mode" aria-label="Ask Kobi mode">
-          <button type="button" :class="{ active: mode === 'chat' }" @click="mode = 'chat'">Ask a question</button>
-          <button type="button" :class="{ active: mode === 'goal_plan' }" @click="mode = 'goal_plan'">Plan a goal</button>
-        </div>
         <div class="ask-input">
-          <textarea ref="composer" v-model="input" :maxlength="MAX_AI_MESSAGE_LENGTH" :placeholder="mode === 'goal_plan' ? 'I want to…' : 'What should I focus on?'" aria-label="Message Kobi" aria-describedby="ask-message-counter" @keydown.enter.exact.prevent="send" />
+          <textarea ref="composer" v-model="input" :maxlength="MAX_AI_MESSAGE_LENGTH" placeholder="Ask a question, or say what you want to achieve" aria-label="Message Kobi" aria-describedby="ask-message-counter" @keydown.enter.exact.prevent="send" />
           <button type="submit" class="button small" :disabled="!input.trim() || isSending" aria-label="Send message"><ArrowUp :size="16" /></button>
         </div>
         <div class="mt-1 flex justify-end">
