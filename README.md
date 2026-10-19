@@ -57,14 +57,29 @@ docker compose run --rm --no-deps app npm run db:generate
 ./scripts/verify.sh
 ```
 
-This rebuilds the verification image and runs Nuxt type checking, Vitest, and the production
-build. Individual commands are:
+This rebuilds the verification image and runs Biome lint, Nuxt type checking, Vitest, and the
+production build. Individual commands are:
 
 ```sh
+docker compose run --rm --no-deps app npm run lint
+docker compose run --rm --no-deps app npm run lint:fix
 docker compose run --rm --no-deps app npm run typecheck
 docker compose run --rm --no-deps app npm test
 docker compose run --rm --no-deps app npm run build
 ```
+
+### Pre-push hook
+
+`git config core.hooksPath .githooks` enables `scripts/pre-push.sh`, which runs only lint,
+type checking, and tests against the working tree. It takes seconds and performs no image or
+Nuxt build. The production build, production image, and health smoke test run in
+`.github/workflows/deploy.yml` on pull requests and pushes to `main`; the deploy job will not
+run unless they pass. Use `git push --no-verify` to bypass the hook, or `./scripts/verify.sh`
+to run the full gate locally.
+
+Biome lints the `<script>` blocks of `.vue` files using its stable legacy handling, so the
+template and style blocks are not linted. The formatter is disabled; Biome is used only as a
+linter here.
 
 ## Production
 
