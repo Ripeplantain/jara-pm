@@ -332,6 +332,7 @@ export const acceptProposal = (
             priority: taskInput.priority,
             dueDate: taskInput.dueDate,
             scheduledFor: null,
+            recurrence: 'none',
             selectedForToday: false,
             projectId: project.id,
             milestoneId: milestone.id,

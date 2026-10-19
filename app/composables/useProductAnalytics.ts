@@ -7,6 +7,7 @@ export type ProductEventName =
   | 'task_action_reopened'
   | 'task_action_rescheduled'
   | 'task_action_deleted'
+  | 'task_recurrence_paused'
   | 'user_logged_out'
   | 'theme_changed'
 

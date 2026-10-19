@@ -1,10 +1,12 @@
 export const TASK_STATUSES = ['todo', 'in_progress', 'done'] as const
 export const TASK_PRIORITIES = ['none', 'low', 'medium', 'high'] as const
+export const TASK_RECURRENCES = ['none', 'daily', 'weekly'] as const
 export const GOAL_STATUSES = ['active', 'completed', 'archived'] as const
 export const PROJECT_STATUSES = ['active', 'paused', 'completed', 'archived'] as const
 
 export type TaskStatus = (typeof TASK_STATUSES)[number]
 export type TaskPriority = (typeof TASK_PRIORITIES)[number]
+export type TaskRecurrence = (typeof TASK_RECURRENCES)[number]
 export type GoalStatus = (typeof GOAL_STATUSES)[number]
 export type ProjectStatus = (typeof PROJECT_STATUSES)[number]
 
@@ -22,6 +24,7 @@ export type Task = {
   priority: TaskPriority
   dueDate: string | null
   scheduledFor: string | null
+  recurrence: TaskRecurrence
   selectedForToday: boolean
   projectId: string | null
   projectTitle: string | null

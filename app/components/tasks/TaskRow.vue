@@ -55,6 +55,22 @@ const remove = async () => {
     captureException(error, { flow: 'task_delete' })
   }
 }
+
+const pauseRecurrence = async () => {
+  if (isSaving.value || props.task.recurrence === 'none') return
+  isSaving.value = true
+  try {
+    const task = await $fetch<Task>(`/api/tasks/${props.task.id}`, {
+      method: 'PATCH', body: { recurrence: 'none' },
+    })
+    capture('task_recurrence_paused')
+    emit('updated', task)
+  } catch (error: unknown) {
+    captureException(error, { flow: 'task_recurrence_pause' })
+  } finally {
+    isSaving.value = false
+  }
+}
 </script>
 
 <template>
@@ -68,6 +84,7 @@ const remove = async () => {
         <span v-if="task.projectTitle">{{ task.projectTitle }}</span>
         <span v-if="task.milestoneTitle">· {{ task.milestoneTitle }}</span>
         <span v-if="task.dueDate">· Due {{ task.dueDate }}</span>
+        <span v-if="task.recurrence !== 'none'">· Repeats {{ task.recurrence }}</span>
         <span v-if="task.priority !== 'none'" class="task-priority">
           <span class="priority-dot" :class="task.priority" /> {{ task.priority }}
         </span>
@@ -75,6 +92,9 @@ const remove = async () => {
     </div>
     <div class="task-actions">
       <input v-if="showReschedule" v-model="localDueDate" type="date" class="date-input" :aria-label="`Reschedule ${task.title}`" @change="reschedule">
+      <button v-if="task.recurrence !== 'none' && localStatus !== 'done'" type="button" class="button ghost small" :aria-label="`Pause repeating ${task.title}`" @click="pauseRecurrence">
+        Pause
+      </button>
       <button type="button" class="button ghost small" :aria-label="`Delete ${task.title}`" @click="remove">
         <Trash2 :size="15" aria-hidden="true" />
       </button>

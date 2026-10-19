@@ -67,6 +67,7 @@ export const tasks = sqliteTable('tasks', {
   priority: text('priority').notNull().$type<'none' | 'low' | 'medium' | 'high'>().default('none'),
   dueDate: text('due_date'),
   scheduledFor: text('scheduled_for'),
+  recurrence: text('recurrence').notNull().$type<'none' | 'daily' | 'weekly'>().default('none'),
   selectedForToday: integer('selected_for_today', { mode: 'boolean' }).notNull().default(false),
   completedAt: text('completed_at'),
   position: integer('position').notNull().default(0),
@@ -75,6 +76,7 @@ export const tasks = sqliteTable('tasks', {
 }, table => [
   check('tasks_status_check', sql`${table.status} in ('todo', 'in_progress', 'done')`),
   check('tasks_priority_check', sql`${table.priority} in ('none', 'low', 'medium', 'high')`),
+  check('tasks_recurrence_check', sql`${table.recurrence} in ('none', 'daily', 'weekly')`),
   check('tasks_selected_for_today_check', sql`${table.selectedForToday} in (0, 1)`),
   index('idx_tasks_user_status').on(table.userId, table.status),
   index('idx_tasks_user_due').on(table.userId, table.dueDate),

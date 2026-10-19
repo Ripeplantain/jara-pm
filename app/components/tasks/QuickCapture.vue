@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ArrowUp, ChevronDown, ChevronUp, Sparkles } from '@lucide/vue'
-import type { Project, TaskPriority } from '#shared/types/domain'
+import type { Project, TaskPriority, TaskRecurrence } from '#shared/types/domain'
 import { getUserFacingErrorMessage } from '#shared/utils/error-message'
 
 const props = withDefaults(defineProps<{
@@ -20,6 +20,7 @@ const projectId = ref<string | null>(props.defaultProjectId)
 const milestoneId = ref<string | null>(props.defaultMilestoneId)
 const dueDate = ref<string | null>(null)
 const priority = ref<TaskPriority>('none')
+const recurrence = ref<TaskRecurrence>('none')
 const isExpanded = ref(false)
 const isSaving = ref(false)
 const errorMessage = ref('')
@@ -31,13 +32,14 @@ const { data: projects } = await useFetch<Project[]>('/api/projects', {
 })
 
 const selectedProject = computed(() => projects.value.find(project => project.id === projectId.value))
+const canCreate = computed(() => Boolean(title.value.trim()) && (recurrence.value === 'none' || Boolean(dueDate.value)))
 
 watch(projectId, () => {
   if (!selectedProject.value?.milestones.some(item => item.id === milestoneId.value)) milestoneId.value = null
 })
 
 const create = async () => {
-  if (!title.value.trim() || isSaving.value) return
+  if (!canCreate.value || isSaving.value) return
   isSaving.value = true
   errorMessage.value = ''
   try {
@@ -49,15 +51,21 @@ const create = async () => {
         milestoneId: milestoneId.value,
         dueDate: dueDate.value || null,
         priority: priority.value,
+        recurrence: recurrence.value,
       },
     })
+    const capturedDueDate = Boolean(dueDate.value)
+    const capturedPriority = priority.value
+    const capturedRecurrence = recurrence.value
     title.value = ''
     dueDate.value = null
     priority.value = 'none'
+    recurrence.value = 'none'
     capture('task_capture_submitted', {
       has_project: Boolean(projectId.value),
-      has_due_date: Boolean(dueDate.value),
-      priority: priority.value,
+      has_due_date: capturedDueDate,
+      priority: capturedPriority,
+      recurrence: capturedRecurrence,
     })
     emit('created')
   } catch (error: unknown) {
@@ -87,7 +95,7 @@ const ask = () => {
       <button type="button" class="button secondary small" :disabled="!title.trim()" @click="ask">
         <Sparkles :size="15" aria-hidden="true" /> Ask
       </button>
-      <button type="submit" class="button small" :disabled="!title.trim() || isSaving" aria-label="Add task">
+      <button type="submit" class="button small" :disabled="!canCreate || isSaving" aria-label="Add task">
         <ArrowUp :size="16" aria-hidden="true" />
       </button>
     </div>
@@ -112,6 +120,14 @@ const ask = () => {
           <option value="high">High</option>
         </select>
       </label>
+      <label class="field">
+        <span class="field-label">Repeats</span>
+        <select v-model="recurrence" class="select">
+          <option value="none">Does not repeat</option>
+          <option value="daily">Daily</option>
+          <option value="weekly">Weekly</option>
+        </select>
+      </label>
       <label v-if="selectedProject?.milestones.length" class="field">
         <span class="field-label">Milestone</span>
         <select v-model="milestoneId" class="select">
@@ -126,7 +142,7 @@ const ask = () => {
         {{ isExpanded ? 'Fewer details' : 'Add details' }}
       </button>
       <span v-if="errorMessage" class="form-error" role="alert">{{ errorMessage }}</span>
-      <span v-else class="form-hint">Press Enter to add</span>
+      <span v-else class="form-hint">{{ recurrence !== 'none' && !dueDate ? 'Choose a due date for recurring tasks' : 'Press Enter to add' }}</span>
     </div>
   </form>
 </template>

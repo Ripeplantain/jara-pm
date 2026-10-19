@@ -7,10 +7,32 @@ describe('task input', () => {
     const task = createTaskSchema.parse({ title: 'Book the appointment' })
     expect(task.projectId).toBeNull()
     expect(task.status).toBe('todo')
+    expect(task.recurrence).toBe('none')
   })
 
   it('does not apply create defaults to a partial update', () => {
     expect(updateTaskSchema.parse({ status: 'done' })).toEqual({ status: 'done' })
+  })
+
+  it('requires a due date for recurring tasks', () => {
+    expect(() => createTaskSchema.parse({ title: 'Exercise', recurrence: 'daily' })).toThrow()
+    expect(createTaskSchema.parse({ title: 'Exercise', dueDate: '2099-01-01', recurrence: 'daily' }).recurrence)
+      .toBe('daily')
+  })
+
+  it('rejects unsupported recurrence values at the schema boundary', () => {
+    expect(() => createTaskSchema.parse({ title: 'Exercise', recurrence: 'monthly', dueDate: '2099-01-01' })).toThrow()
+    expect(() => updateTaskSchema.parse({ recurrence: 'monthly' })).toThrow()
+  })
+
+  it('requires recurring tasks to start open', () => {
+    expect(() => createTaskSchema.parse({
+      title: 'Exercise', dueDate: '2099-01-01', recurrence: 'daily', status: 'done',
+    })).toThrow()
+  })
+
+  it('rejects invalid calendar dates', () => {
+    expect(() => createTaskSchema.parse({ title: 'Exercise', dueDate: '2099-02-29' })).toThrow()
   })
 })
 

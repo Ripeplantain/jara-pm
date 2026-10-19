@@ -8,6 +8,13 @@
       "when": 1792237189387,
       "tag": "0000_married_silver_surfer",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1792369471024,
+      "tag": "0001_typical_gamma_corps",
+      "breakpoints": true
     }
   ]
 }

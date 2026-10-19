@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { dateSchema, descriptionSchema, idSchema, titleSchema } from '#shared/schemas/common'
-import { TASK_PRIORITIES, TASK_STATUSES } from '#shared/types/domain'
+import { TASK_PRIORITIES, TASK_RECURRENCES, TASK_STATUSES } from '#shared/types/domain'
 
 export const taskQuerySchema = z.object({
   scope: z.enum(['all', 'inbox', 'today', 'upcoming']).default('all'),
@@ -15,6 +15,7 @@ const taskFields = {
   priority: z.enum(TASK_PRIORITIES),
   dueDate: dateSchema,
   scheduledFor: dateSchema,
+  recurrence: z.enum(TASK_RECURRENCES),
   selectedForToday: z.boolean(),
   projectId: idSchema.nullable(),
   milestoneId: idSchema.nullable(),
@@ -28,10 +29,18 @@ export const createTaskSchema = z.object({
   priority: taskFields.priority.default('none'),
   dueDate: taskFields.dueDate.optional().default(null),
   scheduledFor: taskFields.scheduledFor.optional().default(null),
+  recurrence: taskFields.recurrence.default('none'),
   selectedForToday: taskFields.selectedForToday.default(false),
   projectId: taskFields.projectId.optional().default(null),
   milestoneId: taskFields.milestoneId.optional().default(null),
   parentId: taskFields.parentId.optional().default(null),
+}).superRefine((value, ctx) => {
+  if (value.recurrence !== 'none' && !value.dueDate) {
+    ctx.addIssue({ code: 'custom', path: ['dueDate'], message: 'Recurring tasks need a due date' })
+  }
+  if (value.recurrence !== 'none' && value.status === 'done') {
+    ctx.addIssue({ code: 'custom', path: ['status'], message: 'Recurring tasks must start open' })
+  }
 })
 
 export const updateTaskSchema = z.object({
@@ -41,6 +50,7 @@ export const updateTaskSchema = z.object({
   priority: taskFields.priority.optional(),
   dueDate: taskFields.dueDate.optional(),
   scheduledFor: taskFields.scheduledFor.optional(),
+  recurrence: taskFields.recurrence.optional(),
   selectedForToday: taskFields.selectedForToday.optional(),
   projectId: taskFields.projectId.optional(),
   milestoneId: taskFields.milestoneId.optional(),

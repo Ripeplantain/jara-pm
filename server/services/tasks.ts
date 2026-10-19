@@ -1,9 +1,11 @@
 import { and, asc, eq, gt, isNull, ne, or, sql } from 'drizzle-orm'
+import { createError } from 'h3'
 import type { CreateTaskInput, TaskQuery, UpdateTaskInput } from '#shared/schemas/task'
 import type { Task } from '#shared/types/domain'
-import type { KobiDb } from '~~/server/db'
+import type { KobiDatabase, KobiDb } from '~~/server/db'
 import { milestones, projects, tasks } from '~~/server/db/schema'
 import type { TaskRow } from '~~/server/types/database'
+import { nextRecurringDate } from '#shared/utils/recurrence'
 import { nowIso, todayIso } from '~~/server/utils/time'
 
 const taskSelection = {
@@ -20,6 +22,7 @@ const taskSelection = {
   priority: tasks.priority,
   due_date: tasks.dueDate,
   scheduled_for: tasks.scheduledFor,
+  recurrence: tasks.recurrence,
   selected_for_today: tasks.selectedForToday,
   completed_at: tasks.completedAt,
   position: tasks.position,
@@ -35,6 +38,7 @@ const mapTask = (row: TaskRow): Task => ({
   priority: row.priority,
   dueDate: row.due_date,
   scheduledFor: row.scheduled_for,
+  recurrence: row.recurrence,
   selectedForToday: row.selected_for_today,
   projectId: row.project_id,
   projectTitle: row.project_title,
@@ -73,6 +77,15 @@ const assertMilestone = (
   if (!milestone || milestone.project_id !== projectId) {
     throw createError({ status: 422, statusText: 'Milestone does not belong to the project' })
   }
+}
+
+const assertParent = (db: KobiDb, userId: string, parentId: string | null) => {
+  if (!parentId) return
+  const parent = db.select({ id: tasks.id })
+    .from(tasks)
+    .where(and(eq(tasks.id, parentId), eq(tasks.userId, userId)))
+    .get()
+  if (!parent) throw createError({ status: 422, statusText: 'Parent task is not available' })
 }
 
 export const getTask = (db: KobiDb, userId: string, taskId: string) => {
@@ -131,13 +144,13 @@ export const createTask = (
 ) => {
   assertProject(db, userId, input.projectId)
   assertMilestone(db, userId, input.milestoneId, input.projectId)
-  if (input.parentId) {
-    const parent = db.select({ id: tasks.id })
-      .from(tasks)
-      .where(and(eq(tasks.id, input.parentId), eq(tasks.userId, userId)))
-      .get()
-    if (!parent) throw createError({ status: 422, statusText: 'Parent task is not available' })
+  if (input.recurrence !== 'none' && !input.dueDate) {
+    throw createError({ status: 422, statusText: 'Recurring tasks need a due date' })
   }
+  if (input.recurrence !== 'none' && input.status === 'done') {
+    throw createError({ status: 422, statusText: 'Recurring tasks must start open' })
+  }
+  assertParent(db, userId, input.parentId)
 
   const id = crypto.randomUUID()
   const now = nowIso()
@@ -161,6 +174,7 @@ export const createTask = (
     priority: input.priority,
     dueDate: input.dueDate,
     scheduledFor: input.scheduledFor,
+    recurrence: input.recurrence,
     selectedForToday: input.selectedForToday,
     completedAt: input.status === 'done' ? now : null,
     position: positionRow?.position ?? 0,
@@ -171,7 +185,7 @@ export const createTask = (
 }
 
 export const updateTask = (
-  db: KobiDb,
+  db: KobiDatabase,
   userId: string,
   taskId: string,
   input: UpdateTaskInput,
@@ -179,33 +193,102 @@ export const updateTask = (
   const current = getTask(db, userId, taskId)
   const projectId = input.projectId === undefined ? current.projectId : input.projectId
   const milestoneId = input.milestoneId === undefined ? current.milestoneId : input.milestoneId
+  const parentId = input.parentId === undefined ? current.parentId : input.parentId
   assertProject(db, userId, projectId)
   assertMilestone(db, userId, milestoneId, projectId)
+  assertParent(db, userId, parentId)
 
-  const status = input.status ?? current.status
-  const completedAt = status === 'done'
-    ? current.completedAt ?? nowIso()
-    : null
-
-  db.update(tasks)
-    .set({
-      projectId,
-      milestoneId,
-      parentId: input.parentId === undefined ? current.parentId : input.parentId,
-      title: input.title ?? current.title,
-      description: input.description ?? current.description,
-      status,
-      priority: input.priority ?? current.priority,
-      dueDate: input.dueDate === undefined ? current.dueDate : input.dueDate,
-      scheduledFor: input.scheduledFor === undefined ? current.scheduledFor : input.scheduledFor,
+  const valuesFor = (base: Task) => {
+    const values = {
+      projectId: input.projectId === undefined ? base.projectId : input.projectId,
+      milestoneId: input.milestoneId === undefined ? base.milestoneId : input.milestoneId,
+      parentId: input.parentId === undefined ? base.parentId : input.parentId,
+      title: input.title ?? base.title,
+      description: input.description ?? base.description,
+      status: input.status ?? base.status,
+      priority: input.priority ?? base.priority,
+      dueDate: input.dueDate === undefined ? base.dueDate : input.dueDate,
+      scheduledFor: input.scheduledFor === undefined ? base.scheduledFor : input.scheduledFor,
+      recurrence: input.recurrence ?? base.recurrence,
       selectedForToday: input.selectedForToday === undefined
-        ? current.selectedForToday
+        ? base.selectedForToday
         : input.selectedForToday,
-      completedAt,
-      updatedAt: nowIso(),
+      completedAt: (input.status ?? base.status) === 'done'
+        ? base.completedAt ?? nowIso()
+        : null,
+    }
+    if (values.recurrence !== 'none' && !values.dueDate) {
+      throw createError({ status: 422, statusText: 'Recurring tasks need a due date' })
+    }
+    return values
+  }
+
+  const update = (database: KobiDb, values: ReturnType<typeof valuesFor>, updatedAt: string) => {
+    database.update(tasks)
+      .set({ ...values, updatedAt })
+      .where(and(eq(tasks.id, taskId), eq(tasks.userId, userId)))
+      .run()
+  }
+
+  const values = valuesFor(current)
+  if (current.status === 'done' && current.recurrence === 'none' && values.recurrence !== 'none') {
+    throw createError({ status: 422, statusText: 'Completed tasks cannot start recurring' })
+  }
+  const shouldSchedule = values.status === 'done'
+    && current.status !== 'done'
+    && values.recurrence !== 'none'
+    && values.dueDate !== null
+
+  if (shouldSchedule) {
+    db.transaction((tx) => {
+      const latest = getTask(tx, userId, taskId)
+      const latestValues = valuesFor(latest)
+      assertProject(tx, userId, latestValues.projectId)
+      assertMilestone(tx, userId, latestValues.milestoneId, latestValues.projectId)
+      assertParent(tx, userId, latestValues.parentId)
+      const updatedAt = nowIso()
+
+      if (latest.status === 'done') {
+        update(tx, latestValues, updatedAt)
+        return
+      }
+
+      update(tx, latestValues, updatedAt)
+      const nextDueDate = latestValues.dueDate && latestValues.recurrence !== 'none'
+        ? nextRecurringDate(latestValues.dueDate, latestValues.recurrence, todayIso())
+        : null
+      if (!nextDueDate) return
+
+      const projectCondition = latestValues.projectId === null
+        ? isNull(tasks.projectId)
+        : eq(tasks.projectId, latestValues.projectId)
+      const positionRow = tx.select({ position: sql<number>`coalesce(max(${tasks.position}), -1) + 1` })
+        .from(tasks)
+        .where(and(eq(tasks.userId, userId), projectCondition))
+        .get()
+      tx.insert(tasks).values({
+        id: crypto.randomUUID(),
+        userId,
+        projectId: latestValues.projectId,
+        milestoneId: latestValues.milestoneId,
+        parentId: null,
+        title: latestValues.title,
+        description: latestValues.description,
+        status: 'todo',
+        priority: latestValues.priority,
+        dueDate: nextDueDate,
+        scheduledFor: null,
+        recurrence: latestValues.recurrence,
+        selectedForToday: false,
+        completedAt: null,
+        position: positionRow?.position ?? 0,
+        createdAt: updatedAt,
+        updatedAt,
+      }).run()
     })
-    .where(and(eq(tasks.id, taskId), eq(tasks.userId, userId)))
-    .run()
+  } else {
+    update(db, values, nowIso())
+  }
   return getTask(db, userId, taskId)
 }
 
