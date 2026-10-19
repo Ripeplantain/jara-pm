@@ -6,7 +6,6 @@ export const MAX_AI_MESSAGE_LENGTH = 16_000
 
 export const askKobiSchema = z.object({
   message: z.string().trim().min(1).max(MAX_AI_MESSAGE_LENGTH),
-  mode: z.enum(['chat', 'goal_plan']).default('chat'),
 })
 
 export const goalPlanProposalSchema = z.object({
@@ -43,9 +42,9 @@ export const aiReplyJsonSchema = {
   additionalProperties: false,
   required: ['message', 'proposal'],
   properties: {
-    message: { type: 'string', description: 'The reply shown to the user. When proposal is null because the request is too vague, ask one short question for the missing detail here.' },
+    message: { type: 'string', description: 'The reply shown to the user. When proposal is null, answer the question asked, or ask one short question if the message names nothing to answer or plan.' },
     proposal: {
-      description: 'null when the request is too vague to plan — ask for the missing detail in `message` instead',
+      description: 'null when the message names no plannable outcome; `message` then answers the question asked or asks one short question',
       anyOf: [
         { type: 'null' },
         {

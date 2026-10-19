@@ -1,0 +1,42 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.5.15/schema.json",
+  "vcs": { "enabled": false },
+  "files": {
+    "includes": [
+      "**",
+      "!!**/node_modules",
+      "!!**/.nuxt",
+      "!!**/.output",
+      "!!**/coverage",
+      "!!**/evals/results",
+      "!**/drizzle",
+      "!**/package-lock.json"
+    ]
+  },
+  "formatter": { "enabled": false },
+  "css": {
+    "parser": { "tailwindDirectives": true }
+  },
+  "assist": { "enabled": false },
+  "linter": {
+    "enabled": true,
+    "rules": { "recommended": true }
+  },
+  "overrides": [
+    {
+      "includes": ["**/*.vue"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useConst": "off",
+            "useImportType": "off"
+          },
+          "correctness": {
+            "noUnusedVariables": "off",
+            "noUnusedImports": "off"
+          }
+        }
+      }
+    }
+  ]
+}
