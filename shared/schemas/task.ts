@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { dateSchema, descriptionSchema, idSchema, titleSchema } from '#shared/schemas/common'
+import { queryFlagSchema } from '#shared/schemas/query'
 import { TASK_PRIORITIES, TASK_RECURRENCES, TASK_STATUSES } from '#shared/types/domain'
 
 export const taskQuerySchema = z.object({
@@ -7,6 +8,9 @@ export const taskQuerySchema = z.object({
   projectId: idSchema.optional(),
   status: z.enum(TASK_STATUSES).optional(),
   assignee: z.enum(['me', 'everyone', 'unassigned']).optional(),
+  // The scoped views hide completed work by default. This opts a single request back in,
+  // so a list can reveal what it is hiding without needing a separate scope.
+  includeCompleted: queryFlagSchema,
 })
 
 const taskFields = {

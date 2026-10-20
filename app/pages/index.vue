@@ -7,11 +7,18 @@ useSeoMeta({ title: 'Today · Kobi' })
 
 const { open } = useAskKobi()
 const { formatLongDate } = useDateFormat()
-const emptyToday = (): TodayData => ({ date: '', greeting: '', priorities: [], overdue: [], upcoming: [], suggestion: null })
+const { isEnabled, toggle } = useListPreferences()
+const emptyToday = (): TodayData => ({ date: '', greeting: '', priorities: [], overdue: [], upcoming: [], completedToday: [], suggestion: null })
 const { data, status, error, refresh } = await useFetch<TodayData>('/api/today', {
   key: 'today-dashboard',
   default: emptyToday,
 })
+const showCompleted = computed(() => isEnabled('today.showCompleted'))
+const menuItems = computed(() => [{
+  label: 'Show Completed',
+  checked: showCompleted.value,
+  onSelect: () => toggle('today.showCompleted'),
+}])
 </script>
 
 <template>
@@ -22,6 +29,7 @@ const { data, status, error, refresh } = await useFetch<TodayData>('/api/today',
         <h1>{{ data.greeting || 'Here’s what matters today.' }}</h1>
         <p>Here’s what matters today.</p>
       </div>
+      <div class="page-actions"><MenuButton :items="menuItems" label="Today view options" /></div>
     </header>
     <QuickCapture @created="refresh" @ask="open" />
     <LoadingState v-if="status === 'pending'" />
@@ -38,6 +46,10 @@ const { data, status, error, refresh } = await useFetch<TodayData>('/api/today',
       <section v-if="data.overdue.length" class="section" aria-labelledby="overdue-heading">
         <div class="section-heading"><h2 id="overdue-heading">Overdue</h2><span>{{ data.overdue.length }}</span></div>
         <TaskList :tasks="data.overdue" show-reschedule @changed="refresh" />
+      </section>
+      <section v-if="showCompleted && data.completedToday.length" class="section" aria-labelledby="completed-heading">
+        <div class="section-heading"><h2 id="completed-heading">Completed today</h2><span>{{ data.completedToday.length }}</span></div>
+        <TaskList :tasks="data.completedToday" @changed="refresh" />
       </section>
       <section class="section" aria-labelledby="up-next-heading">
         <div class="section-heading"><h2 id="up-next-heading">Up next</h2><NuxtLink to="/upcoming">See all</NuxtLink></div>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 const { initialize } = useTheme()
+const { initialize: initializeListPreferences } = useListPreferences()
 const { loggedIn, user } = useUserSession()
 const { identify, reset } = useProductAnalytics()
 
@@ -8,7 +9,10 @@ watch([loggedIn, user], ([isLoggedIn, currentUser]) => {
   else if (!isLoggedIn) reset()
 }, { immediate: true })
 
-onMounted(initialize)
+onMounted(() => {
+  initialize()
+  initializeListPreferences()
+})
 </script>
 
 <template>

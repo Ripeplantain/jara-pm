@@ -6,7 +6,7 @@ const { formatDate } = useDateFormat()
 </script>
 
 <template>
-  <NuxtLink :to="`/goals/${goal.id}`" class="card entity-card">
+  <NuxtLink :to="`/goals/${goal.id}`" class="card entity-card" :class="{ 'is-archived': goal.status === 'archived' }">
     <div>
       <div class="entity-header">
         <h2>{{ goal.title }}</h2>

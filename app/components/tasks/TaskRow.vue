@@ -5,6 +5,9 @@ import type { Task, TaskStatus, WorkspaceMember } from '#shared/types/domain'
 const props = withDefaults(defineProps<{ task: Task, showReschedule?: boolean, members?: WorkspaceMember[] }>(), { showReschedule: false, members: () => [] })
 const emit = defineEmits<{ updated: [task: Task], deleted: [id: string] }>()
 const { capture, captureException } = useProductAnalytics()
+const { showUndo, hideTask, revealTask } = useToasts()
+const { refreshTaskViews } = useTaskViews()
+const errorMessage = ref('')
 const localStatus = ref<TaskStatus>(props.task.status)
 const localDueDate = ref(props.task.dueDate ?? '')
 const isSaving = ref(false)
@@ -22,12 +25,14 @@ const toggle = async () => {
     const task = await $fetch<Task>(`/api/tasks/${props.task.id}`, {
       method: 'PATCH', body: { status: localStatus.value },
     })
+    void refreshTaskViews()
     capture(localStatus.value === 'done' ? 'task_action_completed' : 'task_action_reopened', {
       has_due_date: Boolean(task.dueDate),
     })
     emit('updated', task)
   } catch (error: unknown) {
     captureException(error, { flow: 'task_status_update' })
+    errorMessage.value = 'Kobi could not save that change.'
     localStatus.value = previous
   } finally {
     isSaving.value = false
@@ -43,19 +48,32 @@ const reschedule = async () => {
     emit('updated', task)
   } catch (error: unknown) {
     captureException(error, { flow: 'task_reschedule' })
+    errorMessage.value = 'Kobi could not reschedule this task.'
     localDueDate.value = props.task.dueDate ?? ''
   }
 }
 
-const remove = async () => {
-  if (!window.confirm(`Delete “${props.task.title}”? This cannot be undone.`)) return
-  try {
-    await $fetch(`/api/tasks/${props.task.id}`, { method: 'DELETE' })
-    capture('task_action_deleted')
-    emit('deleted', props.task.id)
-  } catch (error: unknown) {
-    captureException(error, { flow: 'task_delete' })
-  }
+// A reversible action in place of a confirmation prompt: the row leaves immediately and the
+// DELETE only runs once the undo window closes, so taking it back costs no request at all.
+const remove = () => {
+  errorMessage.value = ''
+  hideTask(props.task.id)
+  capture('task_action_deleted')
+  showUndo({
+    message: `Deleted “${props.task.title}”`,
+    flushOnNavigate: true,
+    onCommit: async () => {
+      await $fetch(`/api/tasks/${props.task.id}`, { method: 'DELETE' })
+      emit('deleted', props.task.id)
+      await refreshTaskViews()
+    },
+    onCommitError: (error: unknown) => {
+      captureException(error, { flow: 'task_delete' })
+      revealTask(props.task.id)
+      errorMessage.value = 'Kobi could not delete this task.'
+    },
+    onUndo: () => revealTask(props.task.id),
+  })
 }
 
 const pauseRecurrence = async () => {
@@ -92,7 +110,7 @@ const assign = async () => {
 </script>
 
 <template>
-  <div class="task-row">
+  <div class="task-row" :class="{ 'is-done': localStatus === 'done' }">
     <button type="button" class="task-check" :class="{ done: localStatus === 'done' }" :disabled="isSaving" :aria-label="localStatus === 'done' ? `Reopen ${task.title}` : `Complete ${task.title}`" @click="toggle">
       <Check v-if="localStatus === 'done'" aria-hidden="true" />
     </button>
@@ -122,5 +140,6 @@ const assign = async () => {
         <Trash2 :size="15" aria-hidden="true" />
       </button>
     </div>
+    <p v-if="errorMessage" class="task-error" role="alert">{{ errorMessage }}</p>
   </div>
 </template>

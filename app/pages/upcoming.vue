@@ -3,9 +3,18 @@ import type { Task } from '#shared/types/domain'
 
 definePageMeta({ middleware: ['authenticated'] })
 useSeoMeta({ title: 'Upcoming · Kobi' })
+const { isEnabled, toggle } = useListPreferences()
+const showCompleted = computed(() => isEnabled('upcoming.showCompleted'))
 const { data: tasks, status, error, refresh } = await useFetch<Task[]>('/api/tasks', {
-  key: 'upcoming-tasks', query: { scope: 'upcoming' }, default: () => [],
+  key: 'upcoming-tasks',
+  query: computed(() => (showCompleted.value ? { scope: 'upcoming', includeCompleted: 'true' } : { scope: 'upcoming' })),
+  default: () => [],
 })
+const menuItems = computed(() => [{
+  label: 'Show Completed',
+  checked: showCompleted.value,
+  onSelect: () => toggle('upcoming.showCompleted'),
+}])
 
 const start = new Date()
 start.setHours(0, 0, 0, 0)
@@ -20,6 +29,7 @@ const later = computed(() => tasks.value.filter(task => task.dueDate && task.due
   <main class="page narrow">
     <header class="page-header">
       <div><div class="eyebrow">What’s ahead</div><h1>Upcoming</h1><p>A chronological view of the work you have committed to.</p></div>
+      <div class="page-actions"><MenuButton :items="menuItems" label="Upcoming view options" /></div>
     </header>
     <LoadingState v-if="status === 'pending'" />
     <ErrorState v-else-if="error" @retry="refresh" />

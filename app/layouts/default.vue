@@ -11,5 +11,6 @@ const { isOpen, close } = useAskKobi()
     </div>
     <MobileNav />
     <AskKobiPanel v-if="isOpen" @close="close" />
+    <ToastHost />
   </div>
 </template>

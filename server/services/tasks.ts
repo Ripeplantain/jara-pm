@@ -165,10 +165,12 @@ export const listTasks = (
   }
   if (query.assignee === 'me') conditions.push(eq(tasks.assigneeId, userId))
   if (query.assignee === 'unassigned') conditions.push(isNull(tasks.assigneeId))
+  const hideDone = !query.includeCompleted
   if (query.scope === 'inbox') {
-    conditions.push(isNull(tasks.projectId), eq(tasks.userId, userId), ne(tasks.status, 'done'))
+    conditions.push(isNull(tasks.projectId), eq(tasks.userId, userId))
+    if (hideDone) conditions.push(ne(tasks.status, 'done'))
   } else if (query.scope === 'today') {
-    conditions.push(ne(tasks.status, 'done'))
+    if (hideDone) conditions.push(ne(tasks.status, 'done'))
     conditions.push(or(
       eq(tasks.dueDate, today),
       eq(tasks.scheduledFor, today),
@@ -177,7 +179,8 @@ export const listTasks = (
       and(isNull(tasks.projectId), eq(tasks.userId, userId)),
     )!)
   } else if (query.scope === 'upcoming') {
-    conditions.push(ne(tasks.status, 'done'), gt(tasks.dueDate, today))
+    conditions.push(gt(tasks.dueDate, today))
+    if (hideDone) conditions.push(ne(tasks.status, 'done'))
     conditions.push(or(eq(tasks.assigneeId, userId), and(isNull(tasks.projectId), eq(tasks.userId, userId)))!)
   }
 
@@ -189,6 +192,7 @@ export const listTasks = (
     .leftJoin(taskDaySelections, and(eq(taskDaySelections.taskId, tasks.id), eq(taskDaySelections.userId, userId)))
     .where(and(...conditions))
     .orderBy(
+      sql`case when ${tasks.status} = 'done' then 1 else 0 end`,
       sql`case ${tasks.priority} when 'high' then 0 when 'medium' then 1 when 'low' then 2 else 3 end`,
       sql`coalesce(${tasks.dueDate}, '9999-12-31')`,
       asc(tasks.position),

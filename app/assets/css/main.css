@@ -591,6 +591,74 @@
     @apply text-success;
   }
 
+  .status-badge.archived {
+    @apply bg-surface-active text-text-muted;
+  }
+
+  .menu {
+    @apply relative;
+  }
+
+  .menu-panel {
+    @apply absolute right-0 top-[calc(100%+6px)] z-[60] min-w-[210px] overflow-hidden rounded-lg border border-border bg-surface py-1 shadow-lg;
+  }
+
+  .menu-item {
+    @apply grid w-full cursor-pointer grid-cols-[18px_minmax(0,1fr)] items-center gap-2 border-0 bg-transparent px-3 py-2 text-left text-[13px] text-text-primary transition-colors duration-150;
+  }
+
+  .menu-item:hover {
+    @apply bg-surface-hover;
+  }
+
+  .menu-item.is-destructive {
+    @apply text-danger;
+  }
+
+  .menu-item-check {
+    @apply text-primary;
+  }
+
+  .toast-host {
+    @apply pointer-events-none fixed inset-x-0 bottom-6 z-[90] flex flex-col items-center gap-2 px-4;
+  }
+
+  .toast {
+    @apply pointer-events-auto flex w-[min(420px,100%)] items-center gap-3 rounded-xl border border-border bg-surface py-2 pl-4 pr-2 shadow-lg;
+  }
+
+  .toast-message {
+    @apply min-w-0 flex-1 text-[13px] text-text-primary;
+  }
+
+  .toast-action {
+    @apply cursor-pointer whitespace-nowrap rounded-md border-0 bg-transparent px-2 py-1 text-[13px] font-semibold text-primary transition-colors duration-150;
+  }
+
+  .toast-action:hover {
+    @apply bg-accent-soft;
+  }
+
+  .toast-dismiss {
+    @apply grid size-7 shrink-0 cursor-pointer place-items-center rounded-md border-0 bg-transparent text-text-secondary transition-colors duration-150;
+  }
+
+  .toast-dismiss:hover {
+    @apply bg-surface-hover text-text-primary;
+  }
+
+  .task-row.is-done {
+    @apply opacity-60;
+  }
+
+  .entity-card.is-archived {
+    @apply opacity-65;
+  }
+
+  .task-error {
+    @apply px-3 pb-2 text-xs text-danger;
+  }
+
   .milestone {
     @apply p-[18px];
   }
@@ -1092,6 +1160,12 @@
 
   .welcome-actions {
     @apply flex-col items-stretch;
+  }
+}
+
+@media (max-width: 860px) {
+  .toast-host {
+    @apply bottom-[96px];
   }
 }
 

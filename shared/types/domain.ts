@@ -104,6 +104,7 @@ export type TodayData = {
   priorities: Task[]
   overdue: Task[]
   upcoming: Task[]
+  completedToday: Task[]
   suggestion: string | null
 }
 

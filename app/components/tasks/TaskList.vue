@@ -8,6 +8,10 @@ const props = withDefaults(defineProps<{ tasks: Task[], showReschedule?: boolean
   enableAssignees: false,
 })
 const emit = defineEmits<{ changed: [] }>()
+const { pendingTaskIds } = useToasts()
+// A task whose delete is still undoable is already gone from the person's point of view, so it
+// is filtered here rather than in each page.
+const visibleTasks = computed(() => props.tasks.filter(task => !pendingTaskIds.value.includes(task.id)))
 const { data: members } = await useFetch<WorkspaceMember[]>('/api/workspace/members', {
   key: 'workspace-members-task-list',
   default: () => [],
@@ -16,8 +20,8 @@ const { data: members } = await useFetch<WorkspaceMember[]>('/api/workspace/memb
 </script>
 
 <template>
-  <div v-if="props.tasks.length" class="task-list">
-    <TaskRow v-for="task in props.tasks" :key="task.id" :task="task" :show-reschedule="props.showReschedule" :members="props.enableAssignees ? members : []" @updated="emit('changed')" @deleted="emit('changed')" />
+  <div v-if="visibleTasks.length" class="task-list">
+    <TaskRow v-for="task in visibleTasks" :key="task.id" :task="task" :show-reschedule="props.showReschedule" :members="props.enableAssignees ? members : []" @updated="emit('changed')" @deleted="emit('changed')" />
   </div>
   <EmptyState v-else :title="props.emptyTitle" :message="props.emptyMessage" />
 </template>

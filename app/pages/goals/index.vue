@@ -9,9 +9,19 @@ const { open } = useAskKobi()
 const isCreating = ref(false)
 const isSaving = ref(false)
 const form = reactive({ title: '', description: '', targetDate: '' })
+const { isEnabled, toggle } = useListPreferences()
+const showArchived = computed(() => isEnabled('goals.showArchived'))
 const { data: goals, status, error, refresh } = await useFetch<Goal[]>('/api/goals', {
-  key: 'goals-list', default: () => [],
+  key: 'goals-list',
+  query: computed(() => (showArchived.value ? { includeArchived: 'true' } : {})),
+  default: () => [],
 })
+const archivedCount = computed(() => goals.value.filter(goal => goal.status === 'archived').length)
+const menuItems = computed(() => [{
+  label: 'Show Archived',
+  checked: showArchived.value,
+  onSelect: () => toggle('goals.showArchived'),
+}])
 
 const create = async () => {
   if (!form.title.trim()) return
@@ -37,6 +47,8 @@ const create = async () => {
       <div class="page-actions">
         <button type="button" class="button secondary" @click="open('Help me create a goal plan')"><Sparkles :size="16" /> Plan with Kobi</button>
         <button type="button" class="button" @click="isCreating = true"><Plus :size="16" /> New goal</button>
+        <span v-if="showArchived && archivedCount" class="status-badge archived">{{ archivedCount }} archived</span>
+        <MenuButton :items="menuItems" label="Goals view options" />
       </div>
     </header>
 

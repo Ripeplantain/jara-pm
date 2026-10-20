@@ -7,7 +7,21 @@ useSeoMeta({ title: 'Projects · Kobi' })
 const isCreating = ref(false)
 const isSaving = ref(false)
 const form = reactive({ title: '', description: '', targetDate: '', goalId: null as string | null })
-const { data: projects, status, error, refresh } = await useFetch<Project[]>('/api/projects', { key: 'projects-list', default: () => [] })
+const { isEnabled, toggle } = useListPreferences()
+const showArchived = computed(() => isEnabled('projects.showArchived'))
+// The endpoint already accepts includeArchived; only the control was missing, which left an
+// archived project with no route back into the UI.
+const { data: projects, status, error, refresh } = await useFetch<Project[]>('/api/projects', {
+  key: 'projects-list',
+  query: computed(() => (showArchived.value ? { includeArchived: 'true' } : {})),
+  default: () => [],
+})
+const archivedCount = computed(() => projects.value.filter(project => project.status === 'archived').length)
+const menuItems = computed(() => [{
+  label: 'Show Archived',
+  checked: showArchived.value,
+  onSelect: () => toggle('projects.showArchived'),
+}])
 const { data: goals } = await useFetch<Goal[]>('/api/goals', { key: 'project-form-goals', default: () => [], lazy: true })
 
 const create = async () => {
@@ -28,7 +42,11 @@ const create = async () => {
   <main class="page">
     <header class="page-header">
       <div><div class="eyebrow">Turn intent into action</div><h1>Projects</h1><p>Focused bodies of work, with or without a larger goal.</p></div>
-      <button type="button" class="button" @click="isCreating = true"><Plus :size="16" /> New project</button>
+      <div class="page-actions">
+        <span v-if="showArchived && archivedCount" class="status-badge archived">{{ archivedCount }} archived</span>
+        <button type="button" class="button" @click="isCreating = true"><Plus :size="16" /> New project</button>
+        <MenuButton :items="menuItems" label="Projects view options" />
+      </div>
     </header>
     <section v-if="isCreating" class="card card-pad form-card">
       <div class="section-heading"><h2>Create a project</h2><button type="button" class="icon-button" aria-label="Close" @click="isCreating = false"><X :size="16" /></button></div>

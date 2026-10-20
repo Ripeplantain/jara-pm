@@ -3,6 +3,8 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import type { KobiDatabase } from '../server/db'
 import { users } from '../server/db/schema'
 import { createTask, listTasks, updateTask } from '../server/services/tasks'
+import { collectionQuerySchema } from '../shared/schemas/query'
+import { taskQuerySchema } from '../shared/schemas/task'
 import { initializeDatabase } from '../server/utils/database'
 import { createWorkspaceForUser } from './workspace-fixtures'
 
@@ -159,6 +161,64 @@ describe('task service', () => {
       .toThrow('next occurrence rejected')
     expect(getTaskRow(sqlite, task.id)).toMatchObject({ status: 'todo', recurrence: 'daily' })
     expect(listTasks(db, '11111111-1111-4111-8111-111111111111', { scope: 'all' })).toHaveLength(1)
+  })
+
+  // The scoped views hide completed work, so a list had no way to show what it was hiding.
+  describe('completed-task visibility', () => {
+    const owner = '11111111-1111-4111-8111-111111111111'
+    const base = {
+      description: '', priority: 'none' as const, scheduledFor: null,
+      recurrence: 'none' as const, selectedForToday: false,
+      projectId: null, milestoneId: null, parentId: null,
+    }
+
+    const seed = () => {
+      const open = createTask(db, owner, { ...base, title: 'Still open', status: 'todo', dueDate: null })
+      const done = createTask(db, owner, { ...base, title: 'Already finished', status: 'todo', dueDate: null })
+      updateTask(db, owner, done.id, { status: 'done' })
+      return { open, done }
+    }
+
+    it('hides completed tasks from the inbox unless they are asked for', () => {
+      seed()
+
+      expect(listTasks(db, owner, { scope: 'inbox' }).map(task => task.title)).toEqual(['Still open'])
+      expect(listTasks(db, owner, { scope: 'inbox', includeCompleted: true }).map(task => task.title))
+        .toEqual(['Still open', 'Already finished'])
+    })
+
+    it('sorts completed tasks below open ones, as the list renders them', () => {
+      seed()
+      const titles = listTasks(db, owner, { scope: 'inbox', includeCompleted: true }).map(task => task.title)
+
+      expect(titles.indexOf('Already finished')).toBeGreaterThan(titles.indexOf('Still open'))
+    })
+
+    it('hides completed tasks from upcoming unless they are asked for', () => {
+      const soon = createTask(db, owner, { ...base, title: 'Due later', status: 'todo', dueDate: '2099-05-01' })
+      updateTask(db, owner, soon.id, { status: 'done' })
+      createTask(db, owner, { ...base, title: 'Open later', status: 'todo', dueDate: '2099-05-02' })
+
+      expect(listTasks(db, owner, { scope: 'upcoming' }).map(task => task.title)).toEqual(['Open later'])
+      expect(listTasks(db, owner, { scope: 'upcoming', includeCompleted: true }).map(task => task.title))
+        .toContain('Due later')
+    })
+
+    it('leaves the all scope unchanged, since it never hid completed work', () => {
+      seed()
+
+      expect(listTasks(db, owner, { scope: 'all' })).toHaveLength(2)
+    })
+
+    // useFetch serializes a false query value as the string "false", which z.coerce.boolean()
+    // would read as true and silently reveal completed work on every list.
+    it('reads a false query flag as false', () => {
+      expect(taskQuerySchema.parse({ scope: 'inbox', includeCompleted: 'false' }).includeCompleted).toBe(false)
+      expect(taskQuerySchema.parse({ scope: 'inbox', includeCompleted: 'true' }).includeCompleted).toBe(true)
+      expect(taskQuerySchema.parse({ scope: 'inbox' }).includeCompleted).toBeUndefined()
+      expect(collectionQuerySchema.parse({ includeArchived: 'false' }).includeArchived).toBe(false)
+      expect(collectionQuerySchema.parse({ includeArchived: 'true' }).includeArchived).toBe(true)
+    })
   })
 
   it('does not let another user complete a recurring task or create its occurrence', () => {

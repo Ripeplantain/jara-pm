@@ -6,7 +6,11 @@ import { listTasks } from '~~/server/services/tasks'
 export const getToday = (db: KobiDb, userId: string, workspaceId: string): TodayData => {
   const today = todayIso()
   const priorities = listTasks(db, userId, workspaceId, { scope: 'today' })
-  const allOpen = listTasks(db, userId, workspaceId, { scope: 'all' }).filter(task => task.status !== 'done')
+  // One pass over every task serves both the overdue list and what was finished today, which
+  // `completedAt` records exactly rather than by inference.
+  const allTasks = listTasks(db, userId, workspaceId, { scope: 'all' })
+  const allOpen = allTasks.filter(task => task.status !== 'done')
+  const completedToday = allTasks.filter(task => task.status === 'done' && task.completedAt?.slice(0, 10) === today)
   const overdue = allOpen
     .filter(task => task.dueDate !== null && task.dueDate < today)
     .sort((left, right) => {
@@ -25,5 +29,5 @@ export const getToday = (db: KobiDb, userId: string, workspaceId: string): Today
       ? 'You have a full day. Pick three tasks that would make today feel complete.'
       : null
 
-  return { date: today, greeting, priorities, overdue, upcoming, suggestion }
+  return { date: today, greeting, priorities, overdue, upcoming, completedToday, suggestion }
 }
