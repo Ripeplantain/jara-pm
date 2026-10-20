@@ -9,6 +9,13 @@ const email = ref('')
 const password = ref('')
 const isSubmitting = ref(false)
 const errorMessage = ref('')
+const inviteToken = computed(() => typeof route.query.invite === 'string' ? route.query.invite : '')
+const invite = ref<{ email?: string } | null>(null)
+const fetchInvite = $fetch as unknown as (url: string) => Promise<{ email?: string }>
+if (inviteToken.value) {
+  try { invite.value = await fetchInvite(`/api/invites/${inviteToken.value}`) } catch { /* keep the normal sign-in form */ }
+}
+if (invite.value?.email) email.value = invite.value.email
 
 const submit = async () => {
   isSubmitting.value = true
@@ -16,7 +23,7 @@ const submit = async () => {
   try {
     await $fetch('/api/auth/login', { method: 'POST', body: { email: email.value, password: password.value } })
     await refreshSession()
-    const redirect = typeof route.query.redirect === 'string' && route.query.redirect.startsWith('/')
+    const redirect = inviteToken.value ? `/invite/${inviteToken.value}` : typeof route.query.redirect === 'string' && route.query.redirect.startsWith('/')
       ? route.query.redirect
       : '/'
     await navigateTo(redirect)
@@ -36,7 +43,7 @@ const submit = async () => {
     <form class="form-grid" @submit.prevent="submit">
       <label class="field">
         <span>Email</span>
-        <input v-model="email" type="email" class="input" autocomplete="email" required>
+        <input v-model="email" type="email" class="input" autocomplete="email" required :readonly="Boolean(invite?.email)">
       </label>
       <label class="field">
         <span>Password</span>

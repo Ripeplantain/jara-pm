@@ -3,6 +3,10 @@ import { CalendarDays, CirclePlus, Inbox, Settings, Sparkles, Target } from '@lu
 
 const { user } = useUserSession()
 const { open } = useAskKobi()
+const { data: account } = await useFetch<{ workspace?: { name: string, role: 'owner' | 'member' } }>('/api/me', {
+  key: 'sidebar-account',
+  default: () => ({}),
+})
 
 const navigation = [
   { label: 'Today', to: '/', icon: CalendarDays },
@@ -18,6 +22,7 @@ const initials = computed(() => user.value?.name.split(/\s+/).map(part => part[0
 <template>
   <aside class="app-sidebar" aria-label="Primary navigation">
     <AppLogo />
+    <div v-if="account?.workspace" class="sidebar-workspace">{{ account.workspace.name }}</div>
     <nav class="sidebar-nav">
       <NuxtLink v-for="item in navigation" :key="item.to" :to="item.to" class="nav-link">
         <component :is="item.icon" aria-hidden="true" />

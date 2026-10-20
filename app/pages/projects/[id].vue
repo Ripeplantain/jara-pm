@@ -5,11 +5,18 @@ import type { Project, Task } from '#shared/types/domain'
 definePageMeta({ middleware: ['authenticated'] })
 const route = useRoute()
 const id = computed(() => String(route.params.id))
+const { user } = useUserSession()
 const { open } = useAskKobi()
 const isAddingMilestone = ref(false)
 const milestoneTitle = ref('')
 const { data, status, error, refresh } = await useFetch<{ project: Project, tasks: Task[] }>(() => `/api/projects/${id.value}`, {
   key: `project-${id.value}`,
+})
+const assigneeFilter = ref<'everyone' | 'me' | 'unassigned'>('everyone')
+const filteredTasks = computed(() => {
+  if (!data.value || assigneeFilter.value === 'everyone') return data.value?.tasks ?? []
+  if (assigneeFilter.value === 'me') return data.value.tasks.filter(task => task.assigneeId === user.value?.id)
+  return data.value.tasks.filter(task => !task.assigneeId)
 })
 useSeoMeta({ title: computed(() => data.value ? `${data.value.project.title} · Kobi` : 'Project · Kobi') })
 
@@ -55,9 +62,9 @@ const archive = async () => {
         <EmptyState v-else title="Milestones are optional" message="Add them when the project has meaningful stages. Tasks can live directly in the project." />
       </section>
       <section class="section">
-        <div class="section-heading"><h2>Tasks</h2><span>{{ data.tasks.length }}</span></div>
+        <div class="section-heading"><h2>Tasks</h2><div class="inline-actions"><select v-model="assigneeFilter" class="task-assignee" aria-label="Filter tasks by assignee"><option value="everyone">Everyone</option><option value="me">Assigned to me</option><option value="unassigned">Unassigned</option></select><span>{{ filteredTasks.length }}</span></div></div>
         <QuickCapture :default-project-id="data.project.id" @created="refresh" @ask="open" />
-        <TaskList :tasks="data.tasks" empty-title="No tasks yet" empty-message="Add the first concrete next step above." @changed="refresh" />
+        <TaskList :tasks="filteredTasks" :enable-assignees="true" empty-title="No tasks yet" empty-message="Add the first concrete next step above." @changed="refresh" />
       </section>
     </template>
   </main>

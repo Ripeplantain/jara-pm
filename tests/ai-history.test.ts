@@ -1,7 +1,7 @@
 import Database from 'better-sqlite3'
 import { afterEach, beforeEach, describe, expect, expectTypeOf, it, vi } from 'vitest'
 import { eq } from 'drizzle-orm'
-import { aiMessages, aiProposals, goals, projects, tasks, users } from '../server/db/schema'
+import { aiMessages, aiProposals, goals, projects, tasks, users, workspaceMembers, workspaces } from '../server/db/schema'
 import type { KobiDatabase } from '../server/db'
 import {
   acceptProposal,
@@ -20,6 +20,8 @@ import type { HistoryTurn } from '../server/services/ai'
 import { MAX_TITLE_LENGTH } from '../shared/schemas/common'
 import type { AiReply } from '../shared/types/domain'
 import { initializeDatabase } from '../server/utils/database'
+import { createWorkspaceForUser } from './workspace-fixtures'
+import { workspaceIdForUser } from '../server/utils/workspace'
 
 import {
   HISTORY_MAX_MESSAGES as MAX_MESSAGES,
@@ -48,6 +50,7 @@ const newUser = () => {
     createdAt: '2026-01-01T00:00:00.000Z',
     updatedAt: '2026-01-01T00:00:00.000Z',
   }).run()
+  createWorkspaceForUser(db, id)
   return id
 }
 
@@ -56,7 +59,14 @@ const minutesAgo = (minutes: number) => new Date(Date.now() - minutes * 60_000).
 let rowSeq = 0
 const addMessage = (userId: string, role: 'user' | 'assistant', content: string, createdAt: string) => {
   rowSeq += 1
-  db.insert(aiMessages).values({ id: `msg-${rowSeq}`, userId, role, content, createdAt }).run()
+  db.insert(aiMessages).values({
+    id: `msg-${rowSeq}`,
+    userId,
+    workspaceId: workspaceIdForUser(db, userId),
+    role,
+    content,
+    createdAt,
+  }).run()
 }
 
 beforeEach(() => {
@@ -70,6 +80,39 @@ afterEach(() => {
 })
 
 describe('historyFor', () => {
+  it('keeps conversation history and proposals inside the selected workspace', () => {
+    const userId = newUser()
+    const firstWorkspace = workspaceIdForUser(db, userId)
+    const secondWorkspace = `workspace-secondary-${userId}`
+    db.insert(workspaces).values({
+      id: secondWorkspace,
+      name: 'Secondary workspace',
+      ownerId: userId,
+      createdAt: '2026-01-01T00:00:00.000Z',
+      updatedAt: '2026-01-01T00:00:00.000Z',
+    }).run()
+    db.insert(workspaceMembers).values({
+      workspaceId: secondWorkspace,
+      userId,
+      role: 'owner',
+      joinedAt: '2026-01-01T00:00:00.000Z',
+    }).run()
+    addMessage(userId, 'user', 'first workspace secret', minutesAgo(2))
+    db.insert(aiMessages).values({
+      id: `msg-${++rowSeq}`,
+      userId,
+      workspaceId: secondWorkspace,
+      role: 'user',
+      content: 'second workspace secret',
+      createdAt: minutesAgo(1),
+    }).run()
+
+    expect(historyFor(db, userId, firstWorkspace).map(turn => turn.content))
+      .toEqual(['first workspace secret'])
+    expect(historyFor(db, userId, secondWorkspace).map(turn => turn.content))
+      .toEqual(['second workspace secret'])
+  })
+
   it('never returns another user\'s messages', () => {
     const me = newUser()
     const other = newUser()

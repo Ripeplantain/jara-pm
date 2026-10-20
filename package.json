@@ -23,6 +23,7 @@
     "nuxt": "4.6.2",
     "nuxt-auth-utils": "latest",
     "posthog-node": "^5.56.2",
+    "resend": "^6.34.1",
     "vue": "latest",
     "vue-router": "5.4.0",
     "zod": "latest"

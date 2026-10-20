@@ -168,6 +168,10 @@
     @apply mt-7 grid gap-0.5;
   }
 
+  .sidebar-workspace {
+    @apply mt-5 truncate rounded-md border border-border bg-surface px-2.5 py-2 text-xs font-semibold text-text-secondary;
+  }
+
   .nav-link {
     @apply flex min-h-9 items-center gap-2.5 rounded-md px-[9px] py-[7px] font-medium text-text-secondary transition-colors duration-150;
   }
@@ -350,6 +354,10 @@
     @apply text-xs text-text-secondary;
   }
 
+  .inline-actions {
+    @apply flex items-center gap-2;
+  }
+
   .detail-value {
     @apply mt-[5px] text-text-primary capitalize;
   }
@@ -444,6 +452,31 @@
 
   .task-actions {
     @apply flex items-center gap-1.5;
+  }
+
+  .task-assignee {
+    @apply min-h-[30px] max-w-[150px] rounded-md border border-border bg-surface px-2 text-xs text-text-secondary;
+  }
+
+  .team-list {
+    @apply mt-4 grid gap-2;
+  }
+
+  .team-row,
+  .invite-link-row {
+    @apply flex items-center justify-between gap-3 rounded-md border border-border bg-background p-3;
+  }
+
+  .team-row > div:first-child {
+    @apply min-w-0;
+  }
+
+  .team-row .form-hint {
+    @apply block;
+  }
+
+  .invite-link-row {
+    @apply mt-3;
   }
 
   .priority-dot {

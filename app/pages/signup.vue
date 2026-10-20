@@ -11,13 +11,21 @@ const email = ref('')
 const password = ref('')
 const isSubmitting = ref(false)
 const errorMessage = ref('')
+const route = useRoute()
+const inviteToken = computed(() => typeof route.query.invite === 'string' ? route.query.invite : '')
+const invite = ref<{ status: string, email?: string, workspaceName?: string } | null>(null)
+const fetchInvite = $fetch as unknown as (url: string) => Promise<{ status: string, email?: string, workspaceName?: string }>
+if (inviteToken.value) {
+  try { invite.value = await fetchInvite(`/api/invites/${inviteToken.value}`) } catch { /* the API response below remains the source of truth */ }
+}
+if (invite.value?.email) email.value = invite.value.email
 
 const submit = async () => {
   isSubmitting.value = true
   errorMessage.value = ''
   try {
     await $fetch('/api/auth/register', {
-      method: 'POST', body: { name: name.value, email: email.value, password: password.value },
+      method: 'POST', body: { name: name.value, email: email.value, password: password.value, inviteToken: inviteToken.value || undefined },
     })
     await refreshSession()
     await navigateTo('/')
@@ -44,8 +52,9 @@ const submit = async () => {
       </label>
       <label class="field">
         <span>Email</span>
-        <input v-model="email" type="email" class="input" autocomplete="email" required>
+        <input v-model="email" type="email" class="input" autocomplete="email" required :readonly="Boolean(invite?.email)">
       </label>
+      <p v-if="invite?.workspaceName" class="form-hint">You are joining {{ invite.workspaceName }}.</p>
       <label class="field">
         <span>Password</span>
         <input v-model="password" type="password" class="input" autocomplete="new-password" minlength="8" required>

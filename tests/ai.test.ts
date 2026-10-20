@@ -1,12 +1,13 @@
 import Database from 'better-sqlite3'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { eq } from 'drizzle-orm'
-import { aiMessages, aiProposals, goals, projects, tasks, users } from '../server/db/schema'
+import { aiMessages, aiProposals, goals, projects, tasks, users, workspaceMembers, workspaces } from '../server/db/schema'
 import type { KobiDatabase } from '../server/db'
 import { acceptProposal, askKobi, INVALID_REPLY_NOTICE, localPlan, OFFLINE_NOTICE } from '../server/services/ai'
 import { goalPlanProposalSchema } from '../shared/schemas/ai'
 import { MAX_TITLE_LENGTH } from '../shared/schemas/common'
 import { initializeDatabase } from '../server/utils/database'
+import { createWorkspaceForUser } from './workspace-fixtures'
 
 describe('AI proposal persistence', () => {
   let sqlite: Database.Database
@@ -26,9 +27,11 @@ describe('AI proposal persistence', () => {
       createdAt: '2026-01-01T00:00:00.000Z',
       updatedAt: '2026-01-01T00:00:00.000Z',
     }).run()
+    createWorkspaceForUser(db, userId)
     db.insert(aiProposals).values({
       id: proposalId,
       userId,
+      workspaceId: `workspace-${userId}`,
       kind: 'goal_plan',
       payloadJson: JSON.stringify({
         kind: 'goal_plan',
@@ -72,6 +75,35 @@ describe('AI proposal persistence', () => {
     expect(db.select({ id: projects.id }).from(projects).where(eq(projects.userId, userId)).all()).toHaveLength(1)
     expect(db.select({ id: tasks.id }).from(tasks).where(eq(tasks.userId, userId)).all()).toHaveLength(1)
   })
+
+  it('does not accept a proposal from another workspace', () => {
+    const otherWorkspace = `workspace-other-${userId}`
+    db.insert(workspaces).values({
+      id: otherWorkspace,
+      name: 'Other workspace',
+      ownerId: userId,
+      createdAt: '2026-01-01T00:00:00.000Z',
+      updatedAt: '2026-01-01T00:00:00.000Z',
+    }).run()
+    db.insert(workspaceMembers).values({
+      workspaceId: otherWorkspace,
+      userId,
+      role: 'owner',
+      joinedAt: '2026-01-01T00:00:00.000Z',
+    }).run()
+    db.insert(aiProposals).values({
+      id: 'proposal-other-workspace',
+      userId,
+      workspaceId: otherWorkspace,
+      kind: 'goal_plan',
+      payloadJson: '{}',
+      status: 'pending',
+      createdAt: '2026-01-01T00:00:00.000Z',
+    }).run()
+
+    expect(() => acceptProposal(db, userId, `workspace-${userId}`, 'proposal-other-workspace')).toThrowError('Proposal not found')
+    expect(db.select({ id: goals.id }).from(goals).where(eq(goals.userId, userId)).all()).toHaveLength(0)
+  })
 })
 
 describe('Ask Kobi reply source', () => {
@@ -90,6 +122,7 @@ describe('Ask Kobi reply source', () => {
       createdAt: '2026-01-01T00:00:00.000Z',
       updatedAt: '2026-01-01T00:00:00.000Z',
     }).run()
+    createWorkspaceForUser(db, userId)
   })
 
   afterEach(() => sqlite.close())
@@ -145,6 +178,7 @@ describe('Ask Kobi provider outcomes (stubbed provider)', () => {
       createdAt: '2026-01-01T00:00:00.000Z',
       updatedAt: '2026-01-01T00:00:00.000Z',
     }).run()
+    createWorkspaceForUser(db, id)
     return id
   }
 

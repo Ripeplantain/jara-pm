@@ -11,4 +11,5 @@ export const loginSchema = credentialsSchema.extend({
 
 export const registerSchema = credentialsSchema.extend({
   name: z.string().trim().min(1).max(120),
+  inviteToken: z.string().trim().min(32).max(128).optional(),
 })

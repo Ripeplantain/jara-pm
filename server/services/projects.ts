@@ -1,4 +1,5 @@
 import { and, asc, desc, eq, ne, sql } from 'drizzle-orm'
+import { createError } from 'h3'
 import type {
   CreateMilestoneInput,
   CreateProjectInput,
@@ -69,22 +70,22 @@ const projectSelection = {
   completed_task_count: sql<number>`count(distinct case when ${tasks.status} = 'done' then ${tasks.id} end)`,
 }
 
-const milestonesFor = (db: KobiDb, userId: string, projectId: string) => {
+const milestonesFor = (db: KobiDb, workspaceId: string, projectId: string) => {
   const rows = db.select(milestoneSelection)
     .from(milestones)
-    .leftJoin(tasks, eq(tasks.milestoneId, milestones.id))
-    .where(and(eq(milestones.userId, userId), eq(milestones.projectId, projectId)))
+    .leftJoin(tasks, and(eq(tasks.milestoneId, milestones.id), eq(tasks.workspaceId, milestones.workspaceId)))
+    .where(and(eq(milestones.workspaceId, workspaceId), eq(milestones.projectId, projectId)))
     .groupBy(milestones.id)
     .orderBy(asc(milestones.position), asc(milestones.createdAt))
     .all() as MilestoneRow[]
   return rows.map(mapMilestone)
 }
 
-const assertGoal = (db: KobiDb, userId: string, goalId: string | null) => {
+const assertGoal = (db: KobiDb, workspaceId: string, goalId: string | null) => {
   if (!goalId) return
   const goal = db.select({ id: goals.id })
     .from(goals)
-    .where(and(eq(goals.id, goalId), eq(goals.userId, userId)))
+    .where(and(eq(goals.id, goalId), eq(goals.workspaceId, workspaceId)))
     .get()
   if (!goal) throw createError({ status: 422, statusText: 'Goal is not available' })
 }
@@ -92,15 +93,16 @@ const assertGoal = (db: KobiDb, userId: string, goalId: string | null) => {
 export const listProjects = (
   db: KobiDb,
   userId: string,
+  workspaceId: string,
   options: { includeArchived?: boolean, goalId?: string } = {},
 ) => {
-  const conditions = [eq(projects.userId, userId)]
+  const conditions = [eq(projects.workspaceId, workspaceId)]
   if (!options.includeArchived) conditions.push(ne(projects.status, 'archived'))
   if (options.goalId) conditions.push(eq(projects.goalId, options.goalId))
   const rows = db.select(projectSelection)
     .from(projects)
-    .leftJoin(goals, eq(goals.id, projects.goalId))
-    .leftJoin(tasks, eq(tasks.projectId, projects.id))
+    .leftJoin(goals, and(eq(goals.id, projects.goalId), eq(goals.workspaceId, projects.workspaceId)))
+    .leftJoin(tasks, and(eq(tasks.projectId, projects.id), eq(tasks.workspaceId, projects.workspaceId)))
     .where(and(...conditions))
     .groupBy(projects.id)
     .orderBy(
@@ -109,32 +111,34 @@ export const listProjects = (
       desc(projects.createdAt),
     )
     .all() as ProjectRow[]
-  return rows.map(row => mapProject(row, milestonesFor(db, userId, row.id)))
+  return rows.map(row => mapProject(row, milestonesFor(db, workspaceId, row.id)))
 }
 
-export const getProject = (db: KobiDb, userId: string, projectId: string) => {
+export const getProject = (db: KobiDb, userId: string, workspaceId: string, projectId: string) => {
   const row = db.select(projectSelection)
     .from(projects)
-    .leftJoin(goals, eq(goals.id, projects.goalId))
-    .leftJoin(tasks, eq(tasks.projectId, projects.id))
-    .where(and(eq(projects.id, projectId), eq(projects.userId, userId)))
+    .leftJoin(goals, and(eq(goals.id, projects.goalId), eq(goals.workspaceId, projects.workspaceId)))
+    .leftJoin(tasks, and(eq(tasks.projectId, projects.id), eq(tasks.workspaceId, projects.workspaceId)))
+    .where(and(eq(projects.id, projectId), eq(projects.workspaceId, workspaceId)))
     .groupBy(projects.id)
     .get() as ProjectRow | undefined
   if (!row) throw createError({ status: 404, statusText: 'Project not found' })
-  return mapProject(row, milestonesFor(db, userId, projectId))
+  return mapProject(row, milestonesFor(db, workspaceId, projectId))
 }
 
 export const createProject = (
   db: KobiDb,
   userId: string,
+  workspaceId: string,
   input: CreateProjectInput,
 ) => {
-  assertGoal(db, userId, input.goalId)
+  assertGoal(db, workspaceId, input.goalId)
   const id = crypto.randomUUID()
   const now = nowIso()
   db.insert(projects).values({
     id,
     userId,
+    workspaceId,
     goalId: input.goalId,
     title: input.title,
     description: input.description,
@@ -143,18 +147,19 @@ export const createProject = (
     createdAt: now,
     updatedAt: now,
   }).run()
-  return getProject(db, userId, id)
+  return getProject(db, userId, workspaceId, id)
 }
 
 export const updateProject = (
   db: KobiDb,
   userId: string,
+  workspaceId: string,
   projectId: string,
   input: UpdateProjectInput,
 ) => {
-  const current = getProject(db, userId, projectId)
+  const current = getProject(db, userId, workspaceId, projectId)
   const goalId = input.goalId === undefined ? current.goalId : input.goalId
-  assertGoal(db, userId, goalId)
+  assertGoal(db, workspaceId, goalId)
   db.update(projects)
     .set({
       goalId,
@@ -164,27 +169,29 @@ export const updateProject = (
       targetDate: input.targetDate === undefined ? current.targetDate : input.targetDate,
       updatedAt: nowIso(),
     })
-    .where(and(eq(projects.id, projectId), eq(projects.userId, userId)))
+    .where(and(eq(projects.id, projectId), eq(projects.workspaceId, workspaceId)))
     .run()
-  return getProject(db, userId, projectId)
+  return getProject(db, userId, workspaceId, projectId)
 }
 
 export const createMilestone = (
   db: KobiDb,
   userId: string,
+  workspaceId: string,
   projectId: string,
   input: CreateMilestoneInput,
 ) => {
-  getProject(db, userId, projectId)
+  getProject(db, userId, workspaceId, projectId)
   const id = crypto.randomUUID()
   const now = nowIso()
   const row = db.select({ position: sql<number>`coalesce(max(${milestones.position}), -1) + 1` })
     .from(milestones)
-    .where(and(eq(milestones.projectId, projectId), eq(milestones.userId, userId)))
+    .where(and(eq(milestones.projectId, projectId), eq(milestones.workspaceId, workspaceId)))
     .get()
   db.insert(milestones).values({
     id,
     userId,
+    workspaceId,
     projectId,
     title: input.title,
     description: input.description,
@@ -194,12 +201,13 @@ export const createMilestone = (
     createdAt: now,
     updatedAt: now,
   }).run()
-  return getProject(db, userId, projectId)
+  return getProject(db, userId, workspaceId, projectId)
 }
 
 export const updateMilestone = (
   db: KobiDb,
   userId: string,
+  workspaceId: string,
   milestoneId: string,
   input: UpdateMilestoneInput,
 ) => {
@@ -210,7 +218,7 @@ export const updateMilestone = (
     status: milestones.status,
     target_date: milestones.targetDate,
   }).from(milestones)
-    .where(and(eq(milestones.id, milestoneId), eq(milestones.userId, userId)))
+    .where(and(eq(milestones.id, milestoneId), eq(milestones.workspaceId, workspaceId)))
     .get()
   if (!row) throw createError({ status: 404, statusText: 'Milestone not found' })
   db.update(milestones)
@@ -221,7 +229,7 @@ export const updateMilestone = (
       targetDate: input.targetDate === undefined ? row.target_date : input.targetDate,
       updatedAt: nowIso(),
     })
-    .where(and(eq(milestones.id, milestoneId), eq(milestones.userId, userId)))
+    .where(and(eq(milestones.id, milestoneId), eq(milestones.workspaceId, workspaceId)))
     .run()
-  return getProject(db, userId, row.project_id)
+  return getProject(db, userId, workspaceId, row.project_id)
 }

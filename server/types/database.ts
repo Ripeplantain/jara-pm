@@ -10,6 +10,9 @@ export type UserRow = {
 export type TaskRow = {
   id: string
   user_id: string
+  assignee_id: string | null
+  assignee_name: string | null
+  assignee_email: string | null
   project_id: string | null
   project_title: string | null
   milestone_id: string | null

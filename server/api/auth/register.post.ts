@@ -1,27 +1,27 @@
-import { eq } from 'drizzle-orm'
 import { registerSchema } from '#shared/schemas/auth'
-import { users } from '~~/server/db/schema'
-import type { UserRow } from '~~/server/types/database'
+import { createUserWithPersonalWorkspace } from '~~/server/services/auth'
+import { acceptInvite, inspectInvite } from '~~/server/services/workspace-invites'
 import { useDatabase } from '~~/server/utils/database'
 import { captureServerEvent } from '~~/server/utils/posthog'
-import { nowIso } from '~~/server/utils/time'
 
 export default defineEventHandler(async (event) => {
   const body = await readValidatedBody(event, registerSchema.parse)
   const db = useDatabase(event)
-  const id = crypto.randomUUID()
-  const now = nowIso()
+  if (body.inviteToken) {
+    const invite = inspectInvite(db, body.inviteToken)
+    if (invite.status !== 'valid' || invite.email !== body.email) {
+      throw createError({ status: 422, statusText: 'Invite is invalid or does not match this email' })
+    }
+  }
   const passwordHash = await hashPassword(body.password)
+  let user: { id: string, email: string, name: string }
 
   try {
-    db.insert(users).values({
-      id,
+    user = createUserWithPersonalWorkspace(db, {
       email: body.email,
       name: body.name,
       passwordHash,
-      createdAt: now,
-      updatedAt: now,
-    }).run()
+    }).user
   } catch (error: unknown) {
     if (error instanceof Error && error.message.includes('UNIQUE')) {
       throw createError({ status: 409, statusText: 'Email already registered' })
@@ -29,16 +29,11 @@ export default defineEventHandler(async (event) => {
     throw error
   }
 
-  const row = db.select({
-    id: users.id,
-    email: users.email,
-    name: users.name,
-    password_hash: users.passwordHash,
-    created_at: users.createdAt,
-    updated_at: users.updatedAt,
-  }).from(users).where(eq(users.id, id)).get() as UserRow
-  const user = { id: row.id, email: row.email, name: row.name }
-  await setUserSession(event, { user, loggedInAt: now })
+  await setUserSession(event, { user, loggedInAt: new Date().toISOString() })
+  if (body.inviteToken) {
+    acceptInvite(db, user, body.inviteToken)
+    captureServerEvent(event, user.id, 'invite_accepted')
+  }
   captureServerEvent(event, user.id, 'user_signed_up', { method: 'password' })
   setResponseStatus(event, 201)
   return user

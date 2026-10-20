@@ -9,11 +9,27 @@ export type TaskPriority = (typeof TASK_PRIORITIES)[number]
 export type TaskRecurrence = (typeof TASK_RECURRENCES)[number]
 export type GoalStatus = (typeof GOAL_STATUSES)[number]
 export type ProjectStatus = (typeof PROJECT_STATUSES)[number]
+export type WorkspaceRole = 'owner' | 'member'
+
+export type WorkspaceSummary = {
+  id: string
+  name: string
+  role: WorkspaceRole
+}
+
+export type WorkspaceMember = {
+  userId: string
+  name: string
+  email: string
+  role: WorkspaceRole
+  joinedAt: string
+}
 
 export type User = {
   id: string
   email: string
   name: string
+  workspace?: WorkspaceSummary
 }
 
 export type Task = {
@@ -26,6 +42,9 @@ export type Task = {
   scheduledFor: string | null
   recurrence: TaskRecurrence
   selectedForToday: boolean
+  assigneeId: string | null
+  assigneeName: string | null
+  assigneeEmail: string | null
   projectId: string | null
   projectTitle: string | null
   milestoneId: string | null

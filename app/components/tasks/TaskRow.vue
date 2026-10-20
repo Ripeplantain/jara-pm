@@ -1,16 +1,18 @@
 <script setup lang="ts">
 import { Check, Trash2 } from '@lucide/vue'
-import type { Task, TaskStatus } from '#shared/types/domain'
+import type { Task, TaskStatus, WorkspaceMember } from '#shared/types/domain'
 
-const props = withDefaults(defineProps<{ task: Task, showReschedule?: boolean }>(), { showReschedule: false })
+const props = withDefaults(defineProps<{ task: Task, showReschedule?: boolean, members?: WorkspaceMember[] }>(), { showReschedule: false, members: () => [] })
 const emit = defineEmits<{ updated: [task: Task], deleted: [id: string] }>()
 const { capture, captureException } = useProductAnalytics()
 const localStatus = ref<TaskStatus>(props.task.status)
 const localDueDate = ref(props.task.dueDate ?? '')
 const isSaving = ref(false)
+const localAssigneeId = ref(props.task.assigneeId ?? '')
 
 watch(() => props.task.status, value => { localStatus.value = value })
 watch(() => props.task.dueDate, value => { localDueDate.value = value ?? '' })
+watch(() => props.task.assigneeId, value => { localAssigneeId.value = value ?? '' })
 
 const toggle = async () => {
   const previous = localStatus.value
@@ -71,6 +73,22 @@ const pauseRecurrence = async () => {
     isSaving.value = false
   }
 }
+
+const assign = async () => {
+  const previous = props.task.assigneeId
+  isSaving.value = true
+  try {
+    const task = await $fetch<Task>(`/api/tasks/${props.task.id}`, {
+      method: 'PATCH', body: { assigneeId: localAssigneeId.value || null },
+    })
+    emit('updated', task)
+  } catch (error: unknown) {
+    captureException(error, { flow: 'task_assignment' })
+    localAssigneeId.value = previous ?? ''
+  } finally {
+    isSaving.value = false
+  }
+}
 </script>
 
 <template>
@@ -88,9 +106,14 @@ const pauseRecurrence = async () => {
         <span v-if="task.priority !== 'none'" class="task-priority">
           <span class="priority-dot" :class="task.priority" /> {{ task.priority }}
         </span>
+        <span v-if="task.assigneeName">· {{ task.assigneeName }}</span>
       </span>
     </div>
     <div class="task-actions">
+      <select v-if="members.length && task.projectId" v-model="localAssigneeId" class="task-assignee" :aria-label="`Assign ${task.title}`" :disabled="isSaving" @change="assign">
+        <option value="">Unassigned</option>
+        <option v-for="member in members" :key="member.userId" :value="member.userId">{{ member.name }}</option>
+      </select>
       <input v-if="showReschedule" v-model="localDueDate" type="date" class="date-input" :aria-label="`Reschedule ${task.title}`" @change="reschedule">
       <button v-if="task.recurrence !== 'none' && localStatus !== 'done'" type="button" class="button ghost small" :aria-label="`Pause repeating ${task.title}`" @click="pauseRecurrence">
         Pause

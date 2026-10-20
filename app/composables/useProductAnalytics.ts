@@ -10,6 +10,11 @@ export type ProductEventName =
   | 'task_recurrence_paused'
   | 'user_logged_out'
   | 'theme_changed'
+  | 'invite_sent'
+  | 'invite_resent'
+  | 'invite_revoked'
+  | 'invite_accepted'
+  | 'member_removed'
 
 type ProductEventProperties = Record<string, string | number | boolean | null | undefined>
 

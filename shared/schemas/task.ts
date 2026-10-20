@@ -6,6 +6,7 @@ export const taskQuerySchema = z.object({
   scope: z.enum(['all', 'inbox', 'today', 'upcoming']).default('all'),
   projectId: idSchema.optional(),
   status: z.enum(TASK_STATUSES).optional(),
+  assignee: z.enum(['me', 'everyone', 'unassigned']).optional(),
 })
 
 const taskFields = {
@@ -17,6 +18,7 @@ const taskFields = {
   scheduledFor: dateSchema,
   recurrence: z.enum(TASK_RECURRENCES),
   selectedForToday: z.boolean(),
+  assigneeId: idSchema.nullable(),
   projectId: idSchema.nullable(),
   milestoneId: idSchema.nullable(),
   parentId: idSchema.nullable(),
@@ -31,6 +33,7 @@ export const createTaskSchema = z.object({
   scheduledFor: taskFields.scheduledFor.optional().default(null),
   recurrence: taskFields.recurrence.default('none'),
   selectedForToday: taskFields.selectedForToday.default(false),
+  assigneeId: taskFields.assigneeId.optional(),
   projectId: taskFields.projectId.optional().default(null),
   milestoneId: taskFields.milestoneId.optional().default(null),
   parentId: taskFields.parentId.optional().default(null),
@@ -52,6 +55,7 @@ export const updateTaskSchema = z.object({
   scheduledFor: taskFields.scheduledFor.optional(),
   recurrence: taskFields.recurrence.optional(),
   selectedForToday: taskFields.selectedForToday.optional(),
+  assigneeId: taskFields.assigneeId.optional(),
   projectId: taskFields.projectId.optional(),
   milestoneId: taskFields.milestoneId.optional(),
   parentId: taskFields.parentId.optional(),

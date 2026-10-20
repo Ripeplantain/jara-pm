@@ -1,4 +1,4 @@
-import { and, desc, eq, gte, ne, sql } from 'drizzle-orm'
+import { and, desc, eq, gte, isNotNull, ne, or, sql } from 'drizzle-orm'
 import { z } from 'zod'
 import {
   aiProviderResponseSchema,
@@ -13,6 +13,7 @@ import { createTask } from '~~/server/services/tasks'
 import type { KobiDatabase, KobiDb } from '~~/server/db'
 import { aiMessages, aiProposals, goals, projects, tasks } from '~~/server/db/schema'
 import { nowIso, todayIso } from '~~/server/utils/time'
+import { workspaceIdForUser } from '~~/server/utils/workspace'
 
 type AiConfig = {
   apiKey: string
@@ -91,19 +92,22 @@ const checkRateLimit = (userId: string) => {
   current.count += 1
 }
 
-const contextFor = (db: KobiDb, userId: string) => {
+const contextFor = (db: KobiDb, userId: string, workspaceId: string) => {
   const today = todayIso()
   const taskCounts = db.select({
     open: sql<number>`count(case when ${tasks.status} != 'done' then 1 end)`,
     overdue: sql<number>`count(case when ${tasks.status} != 'done' and ${tasks.dueDate} < ${today} then 1 end)`,
     done: sql<number>`count(case when ${tasks.status} = 'done' then 1 end)`,
-  }).from(tasks).where(eq(tasks.userId, userId)).get() ?? { open: 0, overdue: 0, done: 0 }
+  }).from(tasks).where(and(
+    eq(tasks.workspaceId, workspaceId),
+    or(isNotNull(tasks.projectId), eq(tasks.userId, userId)),
+  )).get() ?? { open: 0, overdue: 0, done: 0 }
   const projectContext = db.select({
     title: projects.title,
     status: projects.status,
     target_date: projects.targetDate,
   }).from(projects)
-    .where(and(eq(projects.userId, userId), ne(projects.status, 'archived')))
+    .where(and(eq(projects.workspaceId, workspaceId), ne(projects.status, 'archived')))
     .orderBy(sql`coalesce(${projects.targetDate}, '9999-12-31')`)
     .limit(12)
     .all()
@@ -112,7 +116,7 @@ const contextFor = (db: KobiDb, userId: string) => {
     status: goals.status,
     target_date: goals.targetDate,
   }).from(goals)
-    .where(and(eq(goals.userId, userId), ne(goals.status, 'archived')))
+    .where(and(eq(goals.workspaceId, workspaceId), ne(goals.status, 'archived')))
     .orderBy(sql`coalesce(${goals.targetDate}, '9999-12-31')`)
     .limit(8)
     .all()
@@ -132,11 +136,16 @@ export type HistoryTurn = { role: 'user' | 'assistant', content: string }
 // the user and assistant rows of one exchange use separate nowIso() calls and
 // can land in the same millisecond. Every turn is capped, because
 // MAX_AI_MESSAGE_LENGTH would otherwise make history ~100x today's prompt.
-export const historyFor = (db: KobiDb, userId: string): HistoryTurn[] => {
+export const historyFor = (db: KobiDb, userId: string, workspaceId?: string): HistoryTurn[] => {
+  const scopedWorkspaceId = workspaceIdForUser(db, userId, workspaceId)
   const since = new Date(Date.now() - HISTORY_WINDOW_MS).toISOString()
   const rows = db.select({ role: aiMessages.role, content: aiMessages.content })
     .from(aiMessages)
-    .where(and(eq(aiMessages.userId, userId), gte(aiMessages.createdAt, since)))
+    .where(and(
+      eq(aiMessages.userId, userId),
+      eq(aiMessages.workspaceId, scopedWorkspaceId),
+      gte(aiMessages.createdAt, since),
+    ))
     .orderBy(desc(aiMessages.createdAt), desc(sql`rowid`))
     .limit(HISTORY_MAX_MESSAGES)
     .all()
@@ -373,13 +382,21 @@ const callProvider = async (
 export const askKobi = async (
   db: KobiDb,
   userId: string,
-  input: { message: string },
-  config: AiConfig,
+  workspaceIdOrInput: string | { message: string },
+  inputOrConfig: { message: string } | AiConfig,
+  maybeConfig?: AiConfig,
 ): Promise<AiReply & { historyTurns: number }> => {
+  const legacy = typeof workspaceIdOrInput !== 'string'
+  const workspaceId = workspaceIdForUser(db, userId, legacy ? undefined : workspaceIdOrInput)
+  const input = legacy ? workspaceIdOrInput : inputOrConfig
+  const config = legacy ? inputOrConfig : maybeConfig
+  if (!input || !('message' in input) || !config || !('apiKey' in config)) {
+    throw new Error('Ask Kobi input and config are required')
+  }
   checkRateLimit(userId)
-  const context = contextFor(db, userId)
+  const context = contextFor(db, userId, workspaceId)
   // Read before the new pair is inserted, so the live message is never in its own history.
-  const history = historyFor(db, userId)
+  const history = historyFor(db, userId, workspaceId)
   let answer: { message: string, proposal: GoalPlanProposal | null }
   let source: AiReplySource = 'model'
 
@@ -421,6 +438,7 @@ export const askKobi = async (
   db.insert(aiMessages).values({
     id: crypto.randomUUID(),
     userId,
+    workspaceId,
     role: 'user',
     content: input.message,
     createdAt: now,
@@ -428,6 +446,7 @@ export const askKobi = async (
   db.insert(aiMessages).values({
     id: crypto.randomUUID(),
     userId,
+    workspaceId,
     role: 'assistant',
     content: answer.message,
     createdAt: nowIso(),
@@ -440,6 +459,7 @@ export const askKobi = async (
     db.insert(aiProposals).values({
       id: proposalId,
       userId,
+      workspaceId,
       kind: 'goal_plan',
       payloadJson: JSON.stringify(validated),
       status: 'pending',
@@ -453,14 +473,21 @@ export const askKobi = async (
 export const acceptProposal = (
   db: KobiDatabase,
   userId: string,
-  proposalId: string,
+  workspaceIdOrProposalId: string,
+  maybeProposalId?: string,
 ) => {
+  const workspaceId = workspaceIdForUser(db, userId, maybeProposalId ? workspaceIdOrProposalId : undefined)
+  const proposalId = maybeProposalId ?? workspaceIdOrProposalId
   return db.transaction((tx) => {
     const row = tx.select({
       payload_json: aiProposals.payloadJson,
       status: aiProposals.status,
     }).from(aiProposals)
-      .where(and(eq(aiProposals.id, proposalId), eq(aiProposals.userId, userId)))
+      .where(and(
+        eq(aiProposals.id, proposalId),
+        eq(aiProposals.userId, userId),
+        eq(aiProposals.workspaceId, workspaceId),
+      ))
       .get()
     if (!row) throw createError({ status: 404, statusText: 'Proposal not found' })
     if (row.status !== 'pending') throw createError({ status: 409, statusText: 'Proposal was already resolved' })
@@ -470,20 +497,21 @@ export const acceptProposal = (
       .where(and(
         eq(aiProposals.id, proposalId),
         eq(aiProposals.userId, userId),
+        eq(aiProposals.workspaceId, workspaceId),
         eq(aiProposals.status, 'pending'),
       ))
       .run()
     if (!claimed.changes) throw createError({ status: 409, statusText: 'Proposal was already resolved' })
 
     const proposal = goalPlanProposalSchema.parse(JSON.parse(row.payload_json) as unknown)
-    const goal = createGoal(tx, userId, {
+    const goal = createGoal(tx, userId, workspaceId, {
       title: proposal.goal.title,
       description: proposal.goal.description,
       targetDate: proposal.goal.targetDate,
     })
     const projectIds: string[] = []
     for (const projectInput of proposal.projects) {
-      const project = createProject(tx, userId, {
+      const project = createProject(tx, userId, workspaceId, {
         title: projectInput.title,
         description: projectInput.description,
         goalId: goal.id,
@@ -491,7 +519,7 @@ export const acceptProposal = (
       })
       projectIds.push(project.id)
       for (const milestoneInput of projectInput.milestones) {
-        const withMilestone = createMilestone(tx, userId, project.id, {
+        const withMilestone = createMilestone(tx, userId, workspaceId, project.id, {
           title: milestoneInput.title,
           description: '',
           targetDate: milestoneInput.targetDate,
@@ -499,7 +527,7 @@ export const acceptProposal = (
         const milestone = withMilestone.milestones.at(-1)
         if (!milestone) throw new Error('Milestone creation did not return the created milestone')
         for (const taskInput of milestoneInput.tasks) {
-          createTask(tx, userId, {
+          createTask(tx, userId, workspaceId, {
             title: taskInput.title,
             description: '',
             status: 'todo',
@@ -508,6 +536,7 @@ export const acceptProposal = (
             scheduledFor: null,
             recurrence: 'none',
             selectedForToday: false,
+            assigneeId: userId,
             projectId: project.id,
             milestoneId: milestone.id,
             parentId: null,

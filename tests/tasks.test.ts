@@ -4,6 +4,7 @@ import type { KobiDatabase } from '../server/db'
 import { users } from '../server/db/schema'
 import { createTask, listTasks, updateTask } from '../server/services/tasks'
 import { initializeDatabase } from '../server/utils/database'
+import { createWorkspaceForUser } from './workspace-fixtures'
 
 describe('task service', () => {
   let sqlite: Database.Database
@@ -31,6 +32,8 @@ describe('task service', () => {
         updatedAt: now,
       },
     ]).run()
+    createWorkspaceForUser(db, '11111111-1111-4111-8111-111111111111')
+    createWorkspaceForUser(db, '22222222-2222-4222-8222-222222222222')
   })
 
   afterEach(() => sqlite.close())

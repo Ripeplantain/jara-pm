@@ -17,6 +17,11 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     databasePath: './data/kobi.db',
+    publicBaseUrl: process.env.NUXT_PUBLIC_BASE_URL || process.env.PUBLIC_BASE_URL || '',
+    resend: {
+      apiKey: process.env.NUXT_RESEND_API_KEY || process.env.RESEND_API_KEY || '',
+      from: process.env.NUXT_RESEND_FROM || process.env.INVITE_FROM_EMAIL || '',
+    },
     llm: {
       apiKey: '',
       baseUrl: 'https://openrouter.ai/api/v1',

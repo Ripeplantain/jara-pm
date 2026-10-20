@@ -1,4 +1,5 @@
 import { and, desc, eq, ne, sql } from 'drizzle-orm'
+import { createError } from 'h3'
 import type { CreateGoalInput, UpdateGoalInput } from '#shared/schemas/goal'
 import type { Goal } from '#shared/types/domain'
 import { calculateProgress } from '#shared/utils/progress'
@@ -35,13 +36,17 @@ const goalSelection = {
   completed_task_count: sql<number>`count(distinct case when ${tasks.status} = 'done' then ${tasks.id} end)`,
 }
 
-export const listGoals = (db: KobiDb, userId: string, includeArchived = false) => {
-  const conditions = [eq(goals.userId, userId)]
+export const listGoals = (db: KobiDb, userId: string, workspaceId: string, includeArchived = false) => {
+  const conditions = [eq(goals.workspaceId, workspaceId)]
   if (!includeArchived) conditions.push(ne(goals.status, 'archived'))
   const rows = db.select(goalSelection)
     .from(goals)
-    .leftJoin(projects, and(eq(projects.goalId, goals.id), ne(projects.status, 'archived')))
-    .leftJoin(tasks, eq(tasks.projectId, projects.id))
+    .leftJoin(projects, and(
+      eq(projects.goalId, goals.id),
+      eq(projects.workspaceId, goals.workspaceId),
+      ne(projects.status, 'archived'),
+    ))
+    .leftJoin(tasks, and(eq(tasks.projectId, projects.id), eq(tasks.workspaceId, projects.workspaceId)))
     .where(and(...conditions))
     .groupBy(goals.id)
     .orderBy(
@@ -53,24 +58,29 @@ export const listGoals = (db: KobiDb, userId: string, includeArchived = false) =
   return rows.map(mapGoal)
 }
 
-export const getGoal = (db: KobiDb, userId: string, goalId: string) => {
+export const getGoal = (db: KobiDb, userId: string, workspaceId: string, goalId: string) => {
   const row = db.select(goalSelection)
     .from(goals)
-    .leftJoin(projects, and(eq(projects.goalId, goals.id), ne(projects.status, 'archived')))
-    .leftJoin(tasks, eq(tasks.projectId, projects.id))
-    .where(and(eq(goals.id, goalId), eq(goals.userId, userId)))
+    .leftJoin(projects, and(
+      eq(projects.goalId, goals.id),
+      eq(projects.workspaceId, goals.workspaceId),
+      ne(projects.status, 'archived'),
+    ))
+    .leftJoin(tasks, and(eq(tasks.projectId, projects.id), eq(tasks.workspaceId, projects.workspaceId)))
+    .where(and(eq(goals.id, goalId), eq(goals.workspaceId, workspaceId)))
     .groupBy(goals.id)
     .get() as GoalRow | undefined
   if (!row) throw createError({ status: 404, statusText: 'Goal not found' })
   return mapGoal(row)
 }
 
-export const createGoal = (db: KobiDb, userId: string, input: CreateGoalInput) => {
+export const createGoal = (db: KobiDb, userId: string, workspaceId: string, input: CreateGoalInput) => {
   const id = crypto.randomUUID()
   const now = nowIso()
   db.insert(goals).values({
     id,
     userId,
+    workspaceId,
     title: input.title,
     description: input.description,
     status: 'active',
@@ -78,16 +88,17 @@ export const createGoal = (db: KobiDb, userId: string, input: CreateGoalInput) =
     createdAt: now,
     updatedAt: now,
   }).run()
-  return getGoal(db, userId, id)
+  return getGoal(db, userId, workspaceId, id)
 }
 
 export const updateGoal = (
   db: KobiDb,
   userId: string,
+  workspaceId: string,
   goalId: string,
   input: UpdateGoalInput,
 ) => {
-  const current = getGoal(db, userId, goalId)
+  const current = getGoal(db, userId, workspaceId, goalId)
   db.update(goals)
     .set({
       title: input.title ?? current.title,
@@ -96,7 +107,7 @@ export const updateGoal = (
       targetDate: input.targetDate === undefined ? current.targetDate : input.targetDate,
       updatedAt: nowIso(),
     })
-    .where(and(eq(goals.id, goalId), eq(goals.userId, userId)))
+    .where(and(eq(goals.id, goalId), eq(goals.workspaceId, workspaceId)))
     .run()
-  return getGoal(db, userId, goalId)
+  return getGoal(db, userId, workspaceId, goalId)
 }
