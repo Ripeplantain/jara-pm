@@ -21,6 +21,29 @@ export const requireUser = async (event: H3Event) => {
   return { id: row.id, email: row.email, name: row.name }
 }
 
+export const requireWorkspaceMember = async (event: H3Event, workspaceId: string) => {
+  const user = await requireUser(event)
+  const membership = useDatabase(event).select({ role: workspaceMembers.role })
+    .from(workspaceMembers)
+    .where(and(
+      eq(workspaceMembers.workspaceId, workspaceId),
+      eq(workspaceMembers.userId, user.id),
+    ))
+    .get()
+  if (!membership) {
+    throw createError({ status: 403, statusText: 'You are not a member of this workspace' })
+  }
+  return { user, workspaceId, role: membership.role }
+}
+
+export const requireWorkspaceOwner = async (event: H3Event, workspaceId: string) => {
+  const member = await requireWorkspaceMember(event, workspaceId)
+  if (member.role !== 'owner') {
+    throw createError({ status: 403, statusText: 'Workspace owner access required' })
+  }
+  return member
+}
+
 export const requireMember = async (event: H3Event) => {
   const user = await requireUser(event)
   const db = useDatabase(event)

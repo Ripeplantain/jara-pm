@@ -7,7 +7,10 @@ const { theme, toggle } = useTheme()
 
 <template>
   <header class="app-topbar">
-    <AppLogo />
+    <div class="topbar-context">
+      <AppLogo />
+      <WorkspaceSwitcher compact />
+    </div>
     <div class="stack-actions">
       <button type="button" class="icon-button" :aria-label="`Use ${theme === 'dark' ? 'light' : 'dark'} theme`" @click="toggle">
         <Sun v-if="theme === 'dark'" :size="17" aria-hidden="true" />

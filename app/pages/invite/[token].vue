@@ -5,6 +5,7 @@ definePageMeta({ layout: 'public' })
 const route = useRoute()
 const token = computed(() => String(route.params.token))
 const { user, loggedIn, fetch: refreshSession } = useUserSession()
+const { reset: resetAskKobi } = useAskKobi()
 const { data: invite, status, error } = await useFetch<{
   status: 'valid' | 'used' | 'revoked' | 'expired' | 'not_found'
   email?: string
@@ -20,11 +21,17 @@ const accept = async () => {
   accepting.value = true
   acceptError.value = ''
   try {
-    await $fetch(`/api/invites/${token.value}/accept`, { method: 'POST' })
-    await refreshSession()
-    clearNuxtData('sidebar-account')
-    clearNuxtData('settings-account')
+    const result = await $fetch<{ workspaceId: string }>(`/api/invites/${token.value}/accept`, { method: 'POST' })
+    notifyWorkspaceChanged(result.workspaceId)
+    resetAskKobi()
+    clearNuxtData()
+    try {
+      await refreshSession()
+    } catch {
+      // The authenticated account is unchanged; workspace caches are already invalidated.
+    }
     await navigateTo('/')
+    await refreshNuxtData()
   } catch (error: unknown) {
     acceptError.value = getUserFacingErrorMessage(error, 'Could not accept this invite.')
   } finally {

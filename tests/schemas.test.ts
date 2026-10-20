@@ -1,6 +1,38 @@
 import { describe, expect, it } from 'vitest'
 import { askKobiSchema, goalPlanProposalSchema } from '../shared/schemas/ai'
 import { createTaskSchema, updateTaskSchema } from '../shared/schemas/task'
+import {
+  createWorkspaceSchema,
+  workspaceInviteParamsSchema,
+  workspaceInviteSchema,
+  workspaceMemberParamsSchema,
+  workspaceParamsSchema,
+} from '../shared/schemas/workspace'
+
+describe('workspace input', () => {
+  it('trims a valid workspace name', () => {
+    expect(createWorkspaceSchema.parse({ name: '  Product team  ' })).toEqual({ name: 'Product team' })
+  })
+
+  it('rejects empty or oversized workspace names', () => {
+    expect(() => createWorkspaceSchema.parse({ name: '   ' })).toThrow()
+    expect(() => createWorkspaceSchema.parse({ name: 'x'.repeat(121) })).toThrow()
+  })
+
+  it('normalizes workspace invite email addresses', () => {
+    expect(workspaceInviteSchema.parse({ email: ' MEMBER@Example.Test ' }))
+      .toEqual({ email: 'member@example.test' })
+  })
+
+  it('validates workspace-scoped route identifiers', () => {
+    const workspaceId = '8a5c64c8-9fb8-43d8-bf43-7583392d3479'
+    const id = '68e9ef85-4804-47b9-8656-a296a05f3ff9'
+    expect(workspaceParamsSchema.parse({ workspaceId })).toEqual({ workspaceId })
+    expect(workspaceInviteParamsSchema.parse({ workspaceId, id })).toEqual({ workspaceId, id })
+    expect(workspaceMemberParamsSchema.parse({ workspaceId, userId: id })).toEqual({ workspaceId, userId: id })
+    expect(() => workspaceParamsSchema.parse({ workspaceId: 'not-an-id' })).toThrow()
+  })
+})
 
 describe('task input', () => {
   it('allows a title-only inbox task', () => {

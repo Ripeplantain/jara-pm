@@ -6,5 +6,9 @@ export const useAskKobi = () => {
     isOpen.value = true
   }
   const close = () => { isOpen.value = false }
-  return { isOpen, draft, open, close }
+  const reset = () => {
+    draft.value = ''
+    isOpen.value = false
+  }
+  return { isOpen, draft, open, close, reset }
 }

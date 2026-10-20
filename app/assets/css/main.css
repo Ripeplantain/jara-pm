@@ -135,6 +135,10 @@
     @apply max-w-[760px];
   }
 
+  .page.board-page {
+    @apply max-w-[1240px];
+  }
+
   .page-header {
     @apply mb-8 flex items-start justify-between gap-6;
   }
@@ -168,8 +172,122 @@
     @apply mt-7 grid gap-0.5;
   }
 
-  .sidebar-workspace {
-    @apply mt-5 truncate rounded-md border border-border bg-surface px-2.5 py-2 text-xs font-semibold text-text-secondary;
+  .workspace-switcher {
+    @apply relative mt-5;
+  }
+
+  .workspace-trigger {
+    @apply flex min-h-11 w-full cursor-pointer items-center justify-between gap-2 rounded-md border border-border bg-surface px-2.5 py-2 text-left text-text-secondary transition-colors duration-150;
+  }
+
+  .workspace-trigger:hover,
+  .workspace-trigger[aria-expanded='true'] {
+    @apply border-border-strong bg-surface-hover text-text-primary;
+  }
+
+  .workspace-trigger:disabled {
+    @apply cursor-wait opacity-70;
+  }
+
+  .workspace-trigger-copy {
+    @apply min-w-0;
+  }
+
+  .workspace-trigger-label {
+    @apply block text-[10px] font-semibold uppercase tracking-[0.06em] text-text-muted;
+  }
+
+  .workspace-trigger strong {
+    @apply block truncate text-xs font-semibold text-current;
+  }
+
+  .workspace-panel {
+    @apply absolute left-0 top-[calc(100%+6px)] z-[70] w-[280px] max-w-[calc(100vw-2.5rem)] overflow-hidden rounded-lg border border-border bg-surface shadow-lg;
+  }
+
+  .workspace-panel-heading {
+    @apply px-3 pb-1 pt-3 text-[11px] font-semibold uppercase tracking-[0.05em] text-text-muted;
+  }
+
+  .workspace-options {
+    @apply max-h-56 overflow-y-auto p-1;
+  }
+
+  .workspace-option {
+    @apply grid w-full cursor-pointer grid-cols-[18px_minmax(0,1fr)] items-center gap-2 rounded-md border-0 bg-transparent px-2 py-2 text-left text-text-primary transition-colors duration-150;
+  }
+
+  .workspace-option:hover {
+    @apply bg-surface-hover;
+  }
+
+  .workspace-option:disabled {
+    @apply cursor-wait opacity-60;
+  }
+
+  .workspace-option-check {
+    @apply text-primary;
+  }
+
+  .workspace-option-copy {
+    @apply min-w-0;
+  }
+
+  .workspace-option-copy strong,
+  .workspace-option-copy small {
+    @apply block truncate;
+  }
+
+  .workspace-option-copy strong {
+    @apply text-[13px] font-semibold;
+  }
+
+  .workspace-option-copy small {
+    @apply mt-0.5 text-[11px] capitalize text-text-muted;
+  }
+
+  .workspace-create-button {
+    @apply flex w-full cursor-pointer items-center gap-2 border-0 border-t border-border bg-transparent px-3 py-2.5 text-left text-[13px] font-semibold text-primary transition-colors duration-150;
+  }
+
+  .workspace-create-button:hover {
+    @apply bg-surface-hover;
+  }
+
+  .workspace-create {
+    @apply grid gap-2 border-t border-border p-3;
+  }
+
+  .workspace-create label {
+    @apply text-xs font-semibold text-text-secondary;
+  }
+
+  .workspace-create-actions {
+    @apply justify-end;
+  }
+
+  .workspace-error {
+    @apply m-0 border-t border-border px-3 py-2 text-xs text-danger;
+  }
+
+  .workspace-switcher.is-compact {
+    @apply m-0 hidden;
+  }
+
+  .workspace-switcher.is-compact .workspace-trigger {
+    @apply min-h-9 max-w-[150px] border-0 bg-transparent px-2;
+  }
+
+  .workspace-switcher.is-compact .workspace-trigger-label {
+    @apply hidden;
+  }
+
+  .workspace-switcher.is-compact .workspace-panel {
+    @apply left-0 right-auto;
+  }
+
+  .spin {
+    @apply animate-spin;
   }
 
   .nav-link {
@@ -659,6 +777,71 @@
     @apply px-3 pb-2 text-xs text-danger;
   }
 
+  .board {
+    @apply grid grid-cols-3 items-start gap-4;
+  }
+
+  .board-column {
+    @apply min-h-[240px] rounded-xl border border-border bg-sidebar p-3;
+  }
+
+  .board-column-header {
+    @apply mb-3 flex items-center justify-between gap-3 px-1;
+  }
+
+  .board-column-header h2 {
+    @apply m-0 text-sm font-semibold tracking-[-0.01em];
+  }
+
+  .board-column-header span {
+    @apply grid min-w-6 place-items-center rounded-full bg-surface-active px-1.5 text-xs font-semibold text-text-secondary;
+  }
+
+  .board-column-tasks {
+    @apply grid gap-2.5;
+  }
+
+  .board-card {
+    @apply cursor-grab rounded-lg border border-border bg-surface p-3 shadow-sm transition-[border-color,opacity,transform] duration-150;
+  }
+
+  .board-card:hover {
+    @apply border-border-strong;
+    transform: translateY(-1px);
+  }
+
+  .board-card:active {
+    @apply cursor-grabbing;
+  }
+
+  .board-card.is-updating {
+    @apply cursor-wait opacity-55;
+  }
+
+  .board-card-copy h3 {
+    @apply m-0 text-sm font-semibold leading-5;
+  }
+
+  .board-card-copy p {
+    @apply mt-1 line-clamp-3 text-xs leading-5 text-text-secondary;
+  }
+
+  .board-card-meta {
+    @apply mt-3 flex flex-wrap gap-x-2 gap-y-1 text-[11px] text-text-secondary;
+  }
+
+  .board-status-select {
+    @apply mt-3 min-h-8 w-full rounded-md border border-border-strong bg-background px-2 text-xs font-medium text-text-primary;
+  }
+
+  .board-column-empty {
+    @apply m-0 rounded-lg border border-dashed border-border-strong px-3 py-8 text-center text-xs text-text-secondary;
+  }
+
+  .board-error {
+    @apply mb-4 rounded-lg border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-danger;
+  }
+
   .milestone {
     @apply p-[18px];
   }
@@ -1037,6 +1220,18 @@
     @apply h-14 justify-between px-5;
   }
 
+  .topbar-context {
+    @apply flex min-w-0 items-center gap-2;
+  }
+
+  .workspace-switcher.is-compact {
+    @apply block;
+  }
+
+  .workspace-switcher.is-compact .workspace-panel {
+    @apply fixed left-5 right-5 top-[58px] w-auto max-w-none;
+  }
+
   .app-topbar .brand {
     @apply inline-flex;
   }
@@ -1046,7 +1241,7 @@
   }
 
   .mobile-nav {
-    @apply fixed inset-x-3 bottom-3 z-40 grid grid-cols-5 rounded-xl border border-border bg-surface p-1 shadow-lg;
+    @apply fixed inset-x-3 bottom-3 z-40 grid grid-cols-6 rounded-xl border border-border bg-surface p-1 shadow-lg;
   }
 
   .mobile-nav a {
@@ -1071,12 +1266,24 @@
 }
 
 @media (min-width: 861px) {
+  .topbar-context {
+    @apply hidden;
+  }
+
   .app-topbar .brand {
     @apply hidden;
   }
 }
 
 @media (max-width: 760px) {
+  .board {
+    @apply grid-cols-1;
+  }
+
+  .board-column {
+    @apply min-h-0;
+  }
+
   .ask-panel.is-maximized {
     @apply grid-cols-1 grid-rows-[auto_minmax(0,1fr)_auto];
   }

@@ -15,6 +15,8 @@ export type ProductEventName =
   | 'invite_revoked'
   | 'invite_accepted'
   | 'member_removed'
+  | 'workspace_created'
+  | 'workspace_switched'
 
 type ProductEventProperties = Record<string, string | number | boolean | null | undefined>
 

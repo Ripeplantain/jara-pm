@@ -2,7 +2,7 @@ import Database from 'better-sqlite3'
 import { afterEach, describe, expect, it } from 'vitest'
 import { and, eq } from 'drizzle-orm'
 import type { KobiDatabase } from '../server/db'
-import { users, workspaceMembers } from '../server/db/schema'
+import { tasks, users, workspaceMembers } from '../server/db/schema'
 import { acceptInvite, createOrRefreshInvite, inspectInvite, listPendingInvites, removeWorkspaceMember, resendInvite } from '../server/services/workspace-invites'
 import { initializeDatabase } from '../server/utils/database'
 import { createWorkspaceForUser } from './workspace-fixtures'
@@ -85,9 +85,28 @@ describe('workspace invites', () => {
       { id: 'remove-owner', email: 'remove-owner@example.test', name: 'Owner', passwordHash: 'hash', createdAt: now, updatedAt: now },
       { id: 'remove-member', email: 'remove-member@example.test', name: 'Member', passwordHash: 'hash', createdAt: now, updatedAt: now },
     ]).run()
+    const personalWorkspaceId = createWorkspaceForUser(db, 'remove-member')
     const workspaceId = createWorkspaceForUser(db, 'remove-owner')
     db.insert(workspaceMembers).values({ workspaceId, userId: 'remove-member', role: 'member', joinedAt: now }).run()
     db.update(users).set({ activeWorkspaceId: workspaceId }).where(eq(users.id, 'remove-member')).run()
+    db.insert(tasks).values({
+      id: 'assigned-task',
+      userId: 'remove-owner',
+      workspaceId,
+      assigneeId: 'remove-member',
+      title: 'Assigned work',
+      createdAt: now,
+      updatedAt: now,
+    }).run()
+    db.insert(tasks).values({
+      id: 'personal-assigned-task',
+      userId: 'remove-member',
+      workspaceId: personalWorkspaceId,
+      assigneeId: 'remove-member',
+      title: 'Personal assigned work',
+      createdAt: now,
+      updatedAt: now,
+    }).run()
 
     removeWorkspaceMember(db, workspaceId, 'remove-member', 'remove-owner')
     expect(db.select({ userId: workspaceMembers.userId }).from(workspaceMembers).where(and(
@@ -95,7 +114,35 @@ describe('workspace invites', () => {
       eq(workspaceMembers.workspaceId, workspaceId),
     )).get())
       .toEqual(undefined)
-    expect(db.select({ activeWorkspaceId: users.activeWorkspaceId }).from(users).where(eq(users.id, 'remove-member')).get()?.activeWorkspaceId)
-      .not.toBe(workspaceId)
+    expect(db.select({ activeWorkspaceId: users.activeWorkspaceId }).from(users).where(eq(users.id, 'remove-member')).get())
+      .toEqual({ activeWorkspaceId: personalWorkspaceId })
+    expect(db.select({ assigneeId: tasks.assigneeId }).from(tasks).where(eq(tasks.id, 'assigned-task')).get())
+      .toEqual({ assigneeId: null })
+    expect(db.select({ assigneeId: tasks.assigneeId }).from(tasks).where(eq(tasks.id, 'personal-assigned-task')).get())
+      .toEqual({ assigneeId: 'remove-member' })
+  })
+
+  it('uses an existing shared membership as the fallback workspace', () => {
+    const sqlite = new Database(':memory:')
+    databases.push(sqlite)
+    const db = initializeDatabase(sqlite)
+    const now = '2026-01-01T00:00:00.000Z'
+    db.insert(users).values([
+      { id: 'first-owner', email: 'first@example.test', name: 'First', passwordHash: 'hash', createdAt: now, updatedAt: now },
+      { id: 'second-owner', email: 'second@example.test', name: 'Second', passwordHash: 'hash', createdAt: now, updatedAt: now },
+      { id: 'shared-member', email: 'shared@example.test', name: 'Member', passwordHash: 'hash', createdAt: now, updatedAt: now },
+    ]).run()
+    const removedWorkspaceId = createWorkspaceForUser(db, 'first-owner')
+    const remainingWorkspaceId = createWorkspaceForUser(db, 'second-owner')
+    db.insert(workspaceMembers).values([
+      { workspaceId: removedWorkspaceId, userId: 'shared-member', role: 'member', joinedAt: now },
+      { workspaceId: remainingWorkspaceId, userId: 'shared-member', role: 'member', joinedAt: '2026-01-02T00:00:00.000Z' },
+    ]).run()
+    db.update(users).set({ activeWorkspaceId: removedWorkspaceId }).where(eq(users.id, 'shared-member')).run()
+
+    removeWorkspaceMember(db, removedWorkspaceId, 'shared-member', 'first-owner')
+
+    expect(db.select({ activeWorkspaceId: users.activeWorkspaceId }).from(users).where(eq(users.id, 'shared-member')).get())
+      .toEqual({ activeWorkspaceId: remainingWorkspaceId })
   })
 })

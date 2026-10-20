@@ -6,6 +6,7 @@ import { createProject, getProject, listProjects } from '../server/services/proj
 import { createTask, getTask, listTasks, updateTask } from '../server/services/tasks'
 import { users, workspaceMembers } from '../server/db/schema'
 import { initializeDatabase } from '../server/utils/database'
+import { todayIso } from '../server/utils/time'
 import { createWorkspaceForUser } from './workspace-fixtures'
 import { workspaceIdForUser } from '../server/utils/workspace'
 
@@ -153,6 +154,36 @@ describe('workspace-scoped resource access', () => {
       .toEqual([unassigned.id])
     expect(listTasks(db, userTwo, workspaceId, { scope: 'all', assignee: 'everyone' }).map(task => task.id))
       .toEqual([assignedToOne.id, assignedToTwo.id, unassigned.id])
+  })
+
+  it('keeps dated shared project work in the assignee Today view', () => {
+    const sqlite = new Database(':memory:')
+    databases.push(sqlite)
+    const db = initializeDatabase(sqlite)
+    insertUser(db, userOne, 'one@example.test')
+    insertUser(db, userTwo, 'two@example.test')
+    const workspaceId = createWorkspaceForUser(db, userOne)
+    db.insert(workspaceMembers).values({ workspaceId, userId: userTwo, role: 'member', joinedAt: '2026-01-01' }).run()
+    db.update(users).set({ activeWorkspaceId: workspaceId }).where(eq(users.id, userTwo)).run()
+
+    const project = createProject(db, userOne, workspaceId, {
+      title: 'Today assignments', description: '', goalId: null, targetDate: null,
+    })
+    const assignedToOne = createTask(db, userOne, workspaceId, {
+      title: 'Owner work', description: '', status: 'todo', priority: 'none',
+      dueDate: todayIso(), scheduledFor: null, recurrence: 'none', selectedForToday: false,
+      assigneeId: userOne, projectId: project.id, milestoneId: null, parentId: null,
+    })
+    const assignedToTwo = createTask(db, userOne, workspaceId, {
+      title: 'Member work', description: '', status: 'todo', priority: 'none',
+      dueDate: todayIso(), scheduledFor: null, recurrence: 'none', selectedForToday: false,
+      assigneeId: userTwo, projectId: project.id, milestoneId: null, parentId: null,
+    })
+
+    expect(listTasks(db, userOne, workspaceId, { scope: 'today' }).map(task => task.id))
+      .toEqual([assignedToOne.id])
+    expect(listTasks(db, userTwo, workspaceId, { scope: 'today' }).map(task => task.id))
+      .toEqual([assignedToTwo.id])
   })
 
   it('updates a day selection only for the requester who changed it', () => {

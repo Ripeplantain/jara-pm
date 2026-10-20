@@ -18,6 +18,7 @@ const isMaximized = ref(false)
 const inputElement = useTemplateRef<HTMLTextAreaElement>('composer')
 const { draft } = useAskKobi()
 const { captureException } = useProductAnalytics()
+const { refreshTaskViews } = useTaskViews()
 
 onMounted(() => {
   input.value = draft.value
@@ -69,6 +70,7 @@ const accept = async () => {
     acceptedGoalId.value = result.goalId
     proposalId.value = null
     messages.value.push({ role: 'assistant', content: 'Your plan is saved. I created the goal, projects, milestones, and tasks.' })
+    void refreshTaskViews()
   } catch (error: unknown) {
     captureException(error, { flow: 'ask_kobi_plan_accept' })
     errorMessage.value = getUserFacingErrorMessage(error, 'The plan could not be saved.')

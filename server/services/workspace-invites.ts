@@ -2,7 +2,7 @@ import { and, asc, eq, gt, isNull } from 'drizzle-orm'
 import { createError } from 'h3'
 import { createHash, randomBytes } from 'node:crypto'
 import type { KobiDatabase, KobiDb } from '~~/server/db'
-import { users, workspaceInvites, workspaceMembers, workspaces } from '~~/server/db/schema'
+import { tasks, users, workspaceInvites, workspaceMembers, workspaces } from '~~/server/db/schema'
 import { nowIso } from '~~/server/utils/time'
 import { sendInviteEmail } from '~~/server/services/mailer'
 
@@ -248,6 +248,10 @@ export const removeWorkspaceMember = (db: KobiDatabase, workspaceId: string, use
   if (member.role === 'owner') throw createError({ status: 422, statusText: 'The workspace owner cannot be removed' })
 
   db.transaction((tx) => {
+    tx.update(tasks)
+      .set({ assigneeId: null, updatedAt: nowIso() })
+      .where(and(eq(tasks.workspaceId, workspaceId), eq(tasks.assigneeId, userId)))
+      .run()
     tx.delete(workspaceMembers).where(and(
       eq(workspaceMembers.workspaceId, workspaceId),
       eq(workspaceMembers.userId, userId),
@@ -255,8 +259,11 @@ export const removeWorkspaceMember = (db: KobiDatabase, workspaceId: string, use
     const user = tx.select({ activeWorkspaceId: users.activeWorkspaceId, updatedAt: users.updatedAt })
       .from(users).where(eq(users.id, userId)).get()
     if (user?.activeWorkspaceId !== workspaceId) return
-    const fallback = tx.select({ id: workspaces.id }).from(workspaces)
-      .where(eq(workspaces.ownerId, userId)).orderBy(asc(workspaces.createdAt)).get()
+    const fallback = tx.select({ id: workspaceMembers.workspaceId })
+      .from(workspaceMembers)
+      .where(eq(workspaceMembers.userId, userId))
+      .orderBy(asc(workspaceMembers.joinedAt))
+      .get()
     let fallbackId = fallback?.id
     if (!fallbackId) {
       fallbackId = crypto.randomUUID()

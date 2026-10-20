@@ -2,15 +2,18 @@ import Database from 'better-sqlite3'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import type { KobiDatabase } from '../server/db'
 import { users } from '../server/db/schema'
+import { createProject } from '../server/services/projects'
 import { createTask, listTasks, updateTask } from '../server/services/tasks'
 import { collectionQuerySchema } from '../shared/schemas/query'
 import { taskQuerySchema } from '../shared/schemas/task'
 import { initializeDatabase } from '../server/utils/database'
+import { todayIso } from '../server/utils/time'
 import { createWorkspaceForUser } from './workspace-fixtures'
 
 describe('task service', () => {
   let sqlite: Database.Database
   let db: KobiDatabase
+  let workspaceId: string
 
   beforeEach(() => {
     sqlite = new Database(':memory:')
@@ -34,7 +37,7 @@ describe('task service', () => {
         updatedAt: now,
       },
     ]).run()
-    createWorkspaceForUser(db, '11111111-1111-4111-8111-111111111111')
+    workspaceId = createWorkspaceForUser(db, '11111111-1111-4111-8111-111111111111')
     createWorkspaceForUser(db, '22222222-2222-4222-8222-222222222222')
   })
 
@@ -54,6 +57,54 @@ describe('task service', () => {
 
     expect(listTasks(db, '11111111-1111-4111-8111-111111111111', { scope: 'all' }).map(task => task.title))
       .toEqual(['Private to one'])
+  })
+
+  it('keeps future-dated fallback work out of Today while preserving explicit Today work', () => {
+    const owner = '11111111-1111-4111-8111-111111111111'
+    const today = todayIso()
+    const future = '2099-12-31'
+    const project = createProject(db, owner, workspaceId, {
+      title: 'Today filtering', description: '', goalId: null, targetDate: null,
+    })
+    const base = {
+      description: '', status: 'todo' as const, priority: 'none' as const,
+      recurrence: 'none' as const, projectId: null, milestoneId: null, parentId: null,
+    }
+
+    createTask(db, owner, {
+      ...base, title: 'Future inbox', dueDate: future, scheduledFor: null, selectedForToday: false,
+    })
+    createTask(db, owner, {
+      ...base, title: 'Future schedule', dueDate: null, scheduledFor: future, selectedForToday: false,
+    })
+    createTask(db, owner, {
+      ...base, title: 'Future assigned project', dueDate: future, scheduledFor: null,
+      selectedForToday: false, projectId: project.id,
+    })
+    createTask(db, owner, {
+      ...base, title: 'Due today', dueDate: today, scheduledFor: null, selectedForToday: false,
+    })
+    createTask(db, owner, {
+      ...base, title: 'Scheduled today', dueDate: future, scheduledFor: today, selectedForToday: false,
+    })
+    createTask(db, owner, {
+      ...base, title: 'Selected today', dueDate: future, scheduledFor: null, selectedForToday: true,
+    })
+    createTask(db, owner, {
+      ...base, title: 'Undated inbox', dueDate: null, scheduledFor: null, selectedForToday: false,
+    })
+    createTask(db, owner, {
+      ...base, title: 'Undated assigned project', dueDate: null, scheduledFor: null,
+      selectedForToday: false, projectId: project.id,
+    })
+
+    expect(listTasks(db, owner, { scope: 'today' }).map(task => task.title)).toEqual([
+      'Due today',
+      'Scheduled today',
+      'Selected today',
+      'Undated assigned project',
+      'Undated inbox',
+    ])
   })
 
   it('completes a task without changing omitted fields', () => {
@@ -98,6 +149,22 @@ describe('task service', () => {
     updateTask(db, '11111111-1111-4111-8111-111111111111', task.id, { status: 'done' })
 
     expect(listTasks(db, '11111111-1111-4111-8111-111111111111', { scope: 'all' })).toHaveLength(2)
+  })
+
+  it('does not duplicate a recurring successor after reopening and recompleting its occurrence', () => {
+    const owner = '11111111-1111-4111-8111-111111111111'
+    const task = createTask(db, owner, {
+      title: 'Review notes', description: '', status: 'todo', priority: 'none',
+      dueDate: '2099-02-01', scheduledFor: null, recurrence: 'weekly', selectedForToday: false,
+      projectId: null, milestoneId: null, parentId: null,
+    })
+
+    updateTask(db, owner, task.id, { status: 'done' })
+    const reopened = updateTask(db, owner, task.id, { status: 'in_progress' })
+    updateTask(db, owner, task.id, { status: 'done' })
+
+    expect(reopened.completedAt).not.toBeNull()
+    expect(listTasks(db, owner, { scope: 'all' })).toHaveLength(2)
   })
 
   it('requires a due date for recurring tasks', () => {

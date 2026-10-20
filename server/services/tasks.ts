@@ -172,11 +172,18 @@ export const listTasks = (
   } else if (query.scope === 'today') {
     if (hideDone) conditions.push(ne(tasks.status, 'done'))
     conditions.push(or(
-      eq(tasks.dueDate, today),
-      eq(tasks.scheduledFor, today),
-      eq(tasks.assigneeId, userId),
       isNotNull(taskDaySelections.taskId),
-      and(isNull(tasks.projectId), eq(tasks.userId, userId)),
+      and(
+        or(
+          eq(tasks.assigneeId, userId),
+          and(isNull(tasks.projectId), eq(tasks.userId, userId)),
+        ),
+        or(
+          eq(tasks.dueDate, today),
+          eq(tasks.scheduledFor, today),
+          and(isNull(tasks.dueDate), isNull(tasks.scheduledFor)),
+        ),
+      ),
     )!)
   } else if (query.scope === 'upcoming') {
     conditions.push(gt(tasks.dueDate, today))
@@ -284,6 +291,8 @@ export const updateTask = (
   assertAssignee(db, workspaceId, assigneeId)
 
   const valuesFor = (base: Task) => {
+    const status = input.status ?? base.status
+    const recurrence = input.recurrence ?? base.recurrence
     const values = {
       projectId: input.projectId === undefined ? base.projectId : input.projectId,
       milestoneId: input.milestoneId === undefined ? base.milestoneId : input.milestoneId,
@@ -291,17 +300,20 @@ export const updateTask = (
       assigneeId,
       title: input.title ?? base.title,
       description: input.description ?? base.description,
-      status: input.status ?? base.status,
+      status,
       priority: input.priority ?? base.priority,
       dueDate: input.dueDate === undefined ? base.dueDate : input.dueDate,
       scheduledFor: input.scheduledFor === undefined ? base.scheduledFor : input.scheduledFor,
-      recurrence: input.recurrence ?? base.recurrence,
+      recurrence,
       selectedForToday: input.selectedForToday === undefined
         ? base.selectedForToday
         : input.selectedForToday,
-      completedAt: (input.status ?? base.status) === 'done'
+      // Keep the original completion marker while a recurring occurrence is reopened. It records
+      // that its successor was already created, so completing the same occurrence again cannot
+      // duplicate future work. Pausing recurrence restores the normal open-task invariant.
+      completedAt: status === 'done'
         ? base.completedAt ?? nowIso()
-        : null,
+        : recurrence !== 'none' ? base.completedAt : null,
     }
     if (values.recurrence !== 'none' && !values.dueDate) {
       throw createError({ status: 422, statusText: 'Recurring tasks need a due date' })
@@ -328,6 +340,7 @@ export const updateTask = (
   }
   const shouldSchedule = values.status === 'done'
     && current.status !== 'done'
+    && current.completedAt === null
     && values.recurrence !== 'none'
     && values.dueDate !== null
 

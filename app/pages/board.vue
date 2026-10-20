@@ -1,0 +1,31 @@
+<script setup lang="ts">
+import type { Task } from '#shared/types/domain'
+
+definePageMeta({ middleware: ['authenticated'] })
+useSeoMeta({ title: 'Board · Kobi' })
+
+const { data: tasks, status, error, refresh } = await useFetch<Task[]>('/api/tasks', {
+  key: 'board-tasks',
+  query: { scope: 'all', includeCompleted: 'true' },
+  default: () => [],
+})
+
+const replaceTask = (updated: Task) => {
+  tasks.value = tasks.value.map(task => task.id === updated.id ? updated : task)
+}
+</script>
+
+<template>
+  <main class="page board-page">
+    <header class="page-header">
+      <div>
+        <div class="eyebrow">Every task, one workflow</div>
+        <h1>Board</h1>
+        <p>Move work from to do through completion, or use each task’s status menu.</p>
+      </div>
+    </header>
+    <LoadingState v-if="status === 'pending'" />
+    <ErrorState v-else-if="error" @retry="refresh" />
+    <Board v-else :tasks="tasks" @changed="replaceTask" />
+  </main>
+</template>

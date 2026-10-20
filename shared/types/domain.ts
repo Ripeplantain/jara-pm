@@ -17,6 +17,10 @@ export type WorkspaceSummary = {
   role: WorkspaceRole
 }
 
+export type WorkspaceListItem = WorkspaceSummary & {
+  isActive: boolean
+}
+
 export type WorkspaceMember = {
   userId: string
   name: string
