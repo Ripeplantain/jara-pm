@@ -3,6 +3,9 @@ import { dateSchema, MAX_TITLE_LENGTH, titleSchema } from '#shared/schemas/commo
 import { TASK_PRIORITIES } from '#shared/types/domain'
 
 export const MAX_AI_MESSAGE_LENGTH = 16_000
+// Plan descriptions are bounded below descriptionSchema's 10_000, so the editor shares
+// this rather than hardcoding the number a second time.
+export const MAX_PLAN_DESCRIPTION_LENGTH = 5_000
 
 export const askKobiSchema = z.object({
   message: z.string().trim().min(1).max(MAX_AI_MESSAGE_LENGTH),
@@ -24,12 +27,12 @@ export const goalPlanProposalSchema = z.object({
   kind: z.literal('goal_plan'),
   goal: z.object({
     title: titleSchema,
-    description: z.string().trim().max(5000),
+    description: z.string().trim().max(MAX_PLAN_DESCRIPTION_LENGTH),
     targetDate: dateSchema,
   }),
   projects: z.array(z.object({
     title: titleSchema,
-    description: z.string().trim().max(5000),
+    description: z.string().trim().max(MAX_PLAN_DESCRIPTION_LENGTH),
     milestones: z.array(z.object({
       title: titleSchema,
       targetDate: dateSchema,
@@ -40,6 +43,12 @@ export const goalPlanProposalSchema = z.object({
       })).min(1).max(PLAN_BOUNDS.tasksPerMilestone),
     })).min(1).max(PLAN_BOUNDS.milestonesPerProject),
   })).min(1).max(PLAN_BOUNDS.projects),
+})
+
+// Optional user-edited plan sent on accept. Reuses the proposal schema verbatim so
+// the client and server share one set of bounds.
+export const acceptProposalSchema = z.object({
+  plan: goalPlanProposalSchema.optional(),
 })
 
 export const aiProviderResponseSchema = z.object({

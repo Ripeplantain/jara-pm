@@ -1,9 +1,10 @@
 import Database from 'better-sqlite3'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { eq } from 'drizzle-orm'
-import { aiMessages, aiProposals, goals, projects, tasks, users, workspaceMembers, workspaces } from '../server/db/schema'
+import { aiMessages, aiProposals, goals, milestones, projects, tasks, users, workspaceMembers, workspaces } from '../server/db/schema'
 import type { KobiDatabase } from '../server/db'
 import { acceptProposal, askKobi, INVALID_REPLY_NOTICE, localPlan, OFFLINE_NOTICE } from '../server/services/ai'
+import type { GoalPlanProposal } from '../shared/types/domain'
 import { goalPlanProposalSchema, PLAN_BOUNDS } from '../shared/schemas/ai'
 import { MAX_TITLE_LENGTH } from '../shared/schemas/common'
 import { initializeDatabase } from '../server/utils/database'
@@ -103,6 +104,154 @@ describe('AI proposal persistence', () => {
 
     expect(() => acceptProposal(db, userId, `workspace-${userId}`, 'proposal-other-workspace')).toThrowError('Proposal not found')
     expect(db.select({ id: goals.id }).from(goals).where(eq(goals.userId, userId)).all()).toHaveLength(0)
+  })
+})
+
+describe('Edited plan acceptance', () => {
+  let sqlite: Database.Database
+  let db: KobiDatabase
+  const userId = '66666666-6666-4666-8666-666666666666'
+  const workspaceId = `workspace-${userId}`
+  const proposalId = '77777777-7777-4777-8777-777777777777'
+  const original: GoalPlanProposal = {
+    kind: 'goal_plan',
+    goal: { title: 'Ship Kobi', description: 'Release the first version.', targetDate: null },
+    projects: [{
+      title: 'Prepare release',
+      description: '',
+      milestones: [{
+        title: 'Launch checklist',
+        targetDate: '2026-03-01',
+        tasks: [{ title: 'Deploy the app', dueDate: '2026-02-01', priority: 'high' }],
+      }],
+    }],
+  }
+  const edited = (): GoalPlanProposal => ({
+    ...original,
+    goal: { ...original.goal, title: 'Ship Kobi v2' },
+    projects: [{
+      ...original.projects[0]!,
+      milestones: [{
+        ...original.projects[0]!.milestones[0]!,
+        targetDate: '2026-04-15',
+        tasks: [{ title: 'Deploy the app', dueDate: '2026-02-01', priority: 'low' }],
+      }],
+    }],
+  })
+  const statusOf = () => db.select({ status: aiProposals.status }).from(aiProposals)
+    .where(eq(aiProposals.id, proposalId)).get()?.status
+  const rows = () => ({
+    goals: db.select().from(goals).where(eq(goals.userId, userId)).all(),
+    projects: db.select().from(projects).where(eq(projects.userId, userId)).all(),
+    milestones: db.select().from(milestones).where(eq(milestones.userId, userId)).all(),
+    tasks: db.select().from(tasks).where(eq(tasks.userId, userId)).all(),
+  })
+
+  beforeEach(() => {
+    vi.stubGlobal('createError', ({ statusText }: { statusText: string }) => new Error(statusText))
+    sqlite = new Database(':memory:')
+    db = initializeDatabase(sqlite)
+    db.insert(users).values({
+      id: userId,
+      email: 'edit@example.test',
+      name: 'Edit',
+      passwordHash: 'test-hash',
+      createdAt: '2026-01-01T00:00:00.000Z',
+      updatedAt: '2026-01-01T00:00:00.000Z',
+    }).run()
+    createWorkspaceForUser(db, userId)
+    db.insert(aiProposals).values({
+      id: proposalId,
+      userId,
+      workspaceId,
+      kind: 'goal_plan',
+      payloadJson: JSON.stringify(original),
+      status: 'pending',
+      createdAt: '2026-01-01T00:00:00.000Z',
+    }).run()
+  })
+
+  afterEach(() => {
+    sqlite.close()
+    vi.unstubAllGlobals()
+  })
+
+  it('persists the edited values, not the stored payload', () => {
+    acceptProposal(db, userId, workspaceId, proposalId, { plan: edited() })
+
+    const saved = rows()
+    expect(saved.goals.map(row => row.title)).toEqual(['Ship Kobi v2'])
+    expect(saved.milestones.map(row => row.targetDate)).toEqual(['2026-04-15'])
+    expect(saved.tasks.map(row => row.priority)).toEqual(['low'])
+  })
+
+  it('leaves payloadJson untouched and marks the proposal accepted', () => {
+    const before = db.select({ payload: aiProposals.payloadJson }).from(aiProposals)
+      .where(eq(aiProposals.id, proposalId)).get()?.payload
+
+    acceptProposal(db, userId, workspaceId, proposalId, { plan: edited() })
+
+    const after = db.select({ payload: aiProposals.payloadJson }).from(aiProposals)
+      .where(eq(aiProposals.id, proposalId)).get()?.payload
+    expect(after).toBe(before)
+    expect(JSON.parse(after!)).toEqual(original)
+    expect(statusOf()).toBe('accepted')
+  })
+
+  it('persists cleared dates as null without throwing', () => {
+    const plan = edited()
+    plan.goal.targetDate = null
+    plan.projects[0]!.milestones[0]!.targetDate = null
+    plan.projects[0]!.milestones[0]!.tasks[0]!.dueDate = null
+    expect(goalPlanProposalSchema.safeParse(plan).success).toBe(true)
+
+    expect(() => acceptProposal(db, userId, workspaceId, proposalId, { plan })).not.toThrow()
+
+    const saved = rows()
+    expect(saved.goals[0]?.targetDate).toBeNull()
+    expect(saved.milestones[0]?.targetDate).toBeNull()
+    expect(saved.tasks[0]?.dueDate).toBeNull()
+    expect(statusOf()).toBe('accepted')
+  })
+
+  it('rolls back and keeps the proposal pending when the plan fails mid-accept, so a corrected retry succeeds', () => {
+    const bad = edited()
+    // Bypasses the handler's validation to exercise the service transaction directly.
+    bad.projects[0]!.milestones[0]!.tasks[0]!.priority = 'urgent' as never
+
+    expect(() => acceptProposal(db, userId, workspaceId, proposalId, { plan: bad })).toThrow()
+
+    expect(statusOf()).toBe('pending')
+    const after = rows()
+    expect(after.goals).toHaveLength(0)
+    expect(after.projects).toHaveLength(0)
+    expect(after.milestones).toHaveLength(0)
+    expect(after.tasks).toHaveLength(0)
+
+    acceptProposal(db, userId, workspaceId, proposalId, { plan: edited() })
+    expect(statusOf()).toBe('accepted')
+    expect(rows().goals).toHaveLength(1)
+  })
+
+  it('still returns not found for an edited plan on another workspace\'s proposal', () => {
+    const otherWorkspace = `workspace-other-${userId}`
+    const now = '2026-01-01T00:00:00.000Z'
+    db.insert(workspaces).values({ id: otherWorkspace, name: 'Other', ownerId: userId, createdAt: now, updatedAt: now }).run()
+    db.insert(workspaceMembers).values({ workspaceId: otherWorkspace, userId, role: 'owner', joinedAt: now }).run()
+    db.insert(aiProposals).values({
+      id: 'proposal-other-edit',
+      userId,
+      workspaceId: otherWorkspace,
+      kind: 'goal_plan',
+      payloadJson: JSON.stringify(original),
+      status: 'pending',
+      createdAt: now,
+    }).run()
+
+    expect(() => acceptProposal(db, userId, workspaceId, 'proposal-other-edit', { plan: edited() })).toThrowError('Proposal not found')
+    expect(rows().goals).toHaveLength(0)
+    expect(db.select({ status: aiProposals.status }).from(aiProposals)
+      .where(eq(aiProposals.id, 'proposal-other-edit')).get()?.status).toBe('pending')
   })
 })
 

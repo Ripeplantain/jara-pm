@@ -536,6 +536,7 @@ export const acceptProposal = (
   userId: string,
   workspaceIdOrProposalId: string,
   maybeProposalId?: string,
+  options: { plan?: GoalPlanProposal } = {},
 ) => {
   const workspaceId = workspaceIdForUser(db, userId, maybeProposalId ? workspaceIdOrProposalId : undefined)
   const proposalId = maybeProposalId ?? workspaceIdOrProposalId
@@ -564,7 +565,11 @@ export const acceptProposal = (
       .run()
     if (!claimed.changes) throw createError({ status: 409, statusText: 'Proposal was already resolved' })
 
-    const proposal = goalPlanProposalSchema.parse(JSON.parse(row.payload_json) as unknown)
+    // An edited plan replaces the stored one for persistence only; payloadJson stays
+    // the model's original output. Both paths are parsed here rather than trusting the
+    // handler, because the schema is the only thing bounding titles, descriptions and
+    // dates: the CHECK constraints in server/db/schema.ts cover enum columns alone.
+    const proposal = goalPlanProposalSchema.parse(options.plan ?? JSON.parse(row.payload_json) as unknown)
     const goal = createGoal(tx, userId, workspaceId, {
       title: proposal.goal.title,
       description: proposal.goal.description,

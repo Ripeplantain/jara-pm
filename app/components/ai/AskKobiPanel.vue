@@ -12,6 +12,19 @@ const errorMessage = ref('')
 const messages = ref<Array<{ role: 'user' | 'assistant', content: string, source?: AiReplySource }>>([])
 const proposal = ref<GoalPlanProposal | null>(null)
 const proposalId = ref<string | null>(null)
+// Editable mirror of `proposal`; `proposal` itself stays the model's original output.
+const planDraft = ref<DraftPlan | null>(null)
+// Serialized snapshot of the untouched draft. Dirtiness is derived by comparing values
+// rather than by listening for edit events, because a missed event would show the user
+// their edits while the server quietly persisted the model's original plan. Both sides
+// go through toPlan(), so the comparison never depends on key order.
+const planBaseline = ref('')
+const isDirty = computed(() => {
+  const draft = planDraft.value
+  if (!draft) return false
+  return JSON.stringify(toPlan(draft)) !== planBaseline.value
+})
+const planIssue = computed(() => (planDraft.value ? firstPlanIssue(planDraft.value) : ''))
 const acceptedGoalId = ref<string | null>(null)
 const isOfflineProposal = ref(false)
 const isMaximized = ref(false)
@@ -47,6 +60,8 @@ const send = async () => {
     const reply = await $fetch<AiReply>('/api/ai/ask', { method: 'POST', body: { message } })
     messages.value.push({ role: 'assistant', content: reply.message, source: reply.source })
     proposal.value = reply.proposal
+    planDraft.value = reply.proposal ? toDraft(reply.proposal) : null
+    planBaseline.value = planDraft.value ? JSON.stringify(toPlan(planDraft.value)) : ''
     proposalId.value = reply.proposalId
     // Any message can now return a proposal, so a stale accepted id would
     // render "View saved goal" over the new plan's Accept button.
@@ -63,10 +78,14 @@ const send = async () => {
 }
 
 const accept = async () => {
-  if (!proposalId.value || isAccepting.value) return
+  if (!proposalId.value || isAccepting.value || planIssue.value) return
   isAccepting.value = true
   try {
-    const result = await $fetch<{ goalId: string }>(`/api/ai/proposals/${proposalId.value}/accept`, { method: 'POST' })
+    const result = await $fetch<{ goalId: string }>(`/api/ai/proposals/${proposalId.value}/accept`, {
+      method: 'POST',
+      // Always a body object; `plan` only when the user changed something.
+      body: isDirty.value && planDraft.value ? { plan: toPlan(planDraft.value) } : {},
+    })
     acceptedGoalId.value = result.goalId
     proposalId.value = null
     messages.value.push({ role: 'assistant', content: 'Your plan is saved. I created the goal, projects, milestones, and tasks.' })
@@ -113,32 +132,14 @@ const accept = async () => {
         <div v-if="isSending" class="message assistant">Thinking…</div>
         <div v-if="proposal" class="proposal">
           <span class="status-badge" :class="{ active: !isOfflineProposal }">{{ isOfflineProposal ? 'Offline draft plan' : 'Plan preview' }}</span>
-          <h3>{{ proposal.goal.title }}</h3>
-          <p class="proposal-description">{{ proposal.goal.description }}</p>
-          <ul class="proposal-projects">
-            <li v-for="project in proposal.projects" :key="project.title" class="proposal-project">
-              <div class="proposal-project-header">
-                <strong>{{ project.title }}</strong>
-                <span class="proposal-task-count">{{ project.milestones.reduce((sum, milestone) => sum + milestone.tasks.length, 0) }} tasks</span>
-              </div>
-              <div class="proposal-milestones">
-                <div v-for="milestone in project.milestones" :key="milestone.title" class="proposal-milestone">
-                  <p class="proposal-milestone-title">{{ milestone.title }}</p>
-                  <ul class="proposal-tasks">
-                    <li v-for="task in milestone.tasks" :key="task.title" class="proposal-task">
-                      <span class="proposal-task-marker" />
-                      <span class="proposal-task-title">{{ task.title }}</span>
-                      <span v-if="task.priority !== 'none'" class="proposal-task-priority" :class="task.priority">{{ task.priority }}</span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </li>
-          </ul>
+          <fieldset class="proposal-fieldset" :disabled="Boolean(acceptedGoalId) || isAccepting">
+            <ProposalEditor v-if="planDraft" v-model="planDraft" />
+          </fieldset>
+          <p v-if="planIssue && !acceptedGoalId" class="form-error" role="alert">{{ planIssue }}</p>
           <NuxtLink v-if="acceptedGoalId" :to="`/goals/${acceptedGoalId}`" class="button small" @click="emit('close')">
             <Check :size="15" /> View saved goal
           </NuxtLink>
-          <button v-else type="button" class="button small" :disabled="!proposalId || isAccepting" @click="accept">
+          <button v-else type="button" class="button small" :disabled="!proposalId || isAccepting || Boolean(planIssue)" @click="accept">
             {{ isAccepting ? 'Saving…' : 'Accept and save plan' }}
           </button>
         </div>
