@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { dateSchema, titleSchema } from '#shared/schemas/common'
+import { dateSchema, MAX_TITLE_LENGTH, titleSchema } from '#shared/schemas/common'
 import { TASK_PRIORITIES } from '#shared/types/domain'
 
 export const MAX_AI_MESSAGE_LENGTH = 16_000
@@ -7,6 +7,18 @@ export const MAX_AI_MESSAGE_LENGTH = 16_000
 export const askKobiSchema = z.object({
   message: z.string().trim().min(1).max(MAX_AI_MESSAGE_LENGTH),
 })
+
+// The one source of truth for plan shape. These are an outer ceiling, not a
+// target: a plan is also bounded by MAX_REPLY_TOKENS, and at the density models
+// actually write (~250-460 completion tokens per project) a plan at the project
+// ceiling can overrun that budget and truncate. The prompt therefore asks for a
+// smaller shape than this, and server/services/ai.ts trims an overrun to these
+// numbers rather than discarding a usable plan.
+export const PLAN_BOUNDS = {
+  projects: 8,
+  milestonesPerProject: 12,
+  tasksPerMilestone: 20,
+} as const
 
 export const goalPlanProposalSchema = z.object({
   kind: z.literal('goal_plan'),
@@ -25,9 +37,9 @@ export const goalPlanProposalSchema = z.object({
         title: titleSchema,
         dueDate: dateSchema,
         priority: z.enum(TASK_PRIORITIES),
-      })).min(1).max(20),
-    })).min(1).max(12),
-  })).min(1).max(8),
+      })).min(1).max(PLAN_BOUNDS.tasksPerMilestone),
+    })).min(1).max(PLAN_BOUNDS.milestonesPerProject),
+  })).min(1).max(PLAN_BOUNDS.projects),
 })
 
 export const aiProviderResponseSchema = z.object({
@@ -58,37 +70,40 @@ export const aiReplyJsonSchema = {
               additionalProperties: false,
               required: ['title', 'description', 'targetDate'],
               properties: {
-                title: { type: 'string' },
+                title: { type: 'string', description: `A short title, under ${MAX_TITLE_LENGTH} characters.` },
                 description: { type: 'string' },
                 targetDate: { type: ['string', 'null'] },
               },
             },
             projects: {
+              description: `At most ${PLAN_BOUNDS.projects} projects. Merge related areas into one project rather than adding another; anything beyond this is trimmed away.`,
               type: 'array',
               items: {
                 type: 'object',
                 additionalProperties: false,
                 required: ['title', 'description', 'milestones'],
                 properties: {
-                  title: { type: 'string' },
+                  title: { type: 'string', description: `A short title, under ${MAX_TITLE_LENGTH} characters.` },
                   description: { type: 'string' },
                   milestones: {
+                    description: `At most ${PLAN_BOUNDS.milestonesPerProject} milestones in a project; anything beyond this is trimmed away.`,
                     type: 'array',
                     items: {
                       type: 'object',
                       additionalProperties: false,
                       required: ['title', 'targetDate', 'tasks'],
                       properties: {
-                        title: { type: 'string' },
+                        title: { type: 'string', description: `A short title, under ${MAX_TITLE_LENGTH} characters.` },
                         targetDate: { type: ['string', 'null'] },
                         tasks: {
+                          description: `At most ${PLAN_BOUNDS.tasksPerMilestone} tasks in a milestone; anything beyond this is trimmed away.`,
                           type: 'array',
                           items: {
                             type: 'object',
                             additionalProperties: false,
                             required: ['title', 'dueDate', 'priority'],
                             properties: {
-                              title: { type: 'string' },
+                              title: { type: 'string', description: `A short title, under ${MAX_TITLE_LENGTH} characters.` },
                               dueDate: { type: ['string', 'null'] },
                               priority: { type: 'string', enum: ['none', 'low', 'medium', 'high'] },
                             },

@@ -4,7 +4,7 @@ import { eq } from 'drizzle-orm'
 import { aiMessages, aiProposals, goals, projects, tasks, users, workspaceMembers, workspaces } from '../server/db/schema'
 import type { KobiDatabase } from '../server/db'
 import { acceptProposal, askKobi, INVALID_REPLY_NOTICE, localPlan, OFFLINE_NOTICE } from '../server/services/ai'
-import { goalPlanProposalSchema } from '../shared/schemas/ai'
+import { goalPlanProposalSchema, PLAN_BOUNDS } from '../shared/schemas/ai'
 import { MAX_TITLE_LENGTH } from '../shared/schemas/common'
 import { initializeDatabase } from '../server/utils/database'
 import { createWorkspaceForUser } from './workspace-fixtures'
@@ -271,13 +271,41 @@ describe('Ask Kobi provider outcomes (stubbed provider)', () => {
     expect(record.status).toBeUndefined()
   })
 
-  it('reports a bound-violating plan as an invalid reply with no offline prefix and no proposal', async () => {
+  // A plan larger than Kobi stores is trimmed to the bounds, not discarded: the
+  // user keeps a usable plan instead of an apology they cannot act on.
+  it('clamps an oversize plan to the bounds and still drafts a proposal', async () => {
+    const userId = newUser()
+    const oversize = {
+      message: 'Here is your plan.',
+      proposal: {
+        kind: 'goal_plan',
+        goal: { title: 'Become an AI engineer', description: '', targetDate: null },
+        projects: Array.from({ length: PLAN_BOUNDS.projects + 3 }, (_, index) => ({
+          title: index === 0 ? 'x'.repeat(MAX_TITLE_LENGTH + 1) : `Area ${index + 1}`,
+          description: '',
+          milestones: [{ title: 'M', targetDate: null, tasks: [{ title: 'T', dueDate: null, priority: 'high' }] }],
+        })),
+      },
+    }
+    vi.stubGlobal('$fetch', vi.fn().mockResolvedValue(completion(oversize)))
+
+    const reply = await askKobi(db, userId, { message: 'Help me become an AI engineer' }, config)
+
+    expect(reply.source).toBe('model')
+    expect(reply.message).not.toBe(INVALID_REPLY_NOTICE)
+    expect(reply.proposal?.projects).toHaveLength(PLAN_BOUNDS.projects)
+    expect(reply.proposal?.projects[0]?.title.length).toBeLessThanOrEqual(MAX_TITLE_LENGTH)
+    expect(reply.proposalId).not.toBeNull()
+    expect(proposalRows(userId)).toHaveLength(1)
+  })
+
+  it('reports a malformed plan as an invalid reply with no offline prefix and no proposal', async () => {
     const userId = newUser()
     const overlong = {
       message: 'Here is your plan.',
       proposal: {
         kind: 'goal_plan',
-        goal: { title: 'x'.repeat(MAX_TITLE_LENGTH + 1), description: '', targetDate: null },
+        goal: { title: 'Ship the thing', description: '', targetDate: '2026-Q1' },
         projects: [{
           title: 'P',
           description: '',

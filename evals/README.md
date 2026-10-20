@@ -65,7 +65,7 @@ In the order `.agent/rules/evals.md` requires. There is no LLM judge.
 | Check | Severity | What it decides |
 |---|---|---|
 | `schema_valid` | fatal | `JSON.parse`, then the real `validateProviderReply`. Separates truncated JSON from a prose reply - two failure modes the product collapses into one `AiReplyContractError` |
-| `bounded` | fatal | projects 1-8, milestones 1-12, tasks 1-20, titles within `MAX_TITLE_LENGTH`, real calendar dates |
+| `bounded` | fatal | the `PLAN_BOUNDS` ceiling (projects, milestones per project, tasks per milestone), titles within `MAX_TITLE_LENGTH`, real calendar dates. The product clamps an overrun to these bounds before validating, so a failure here means the model overran the shape the prompt asked for, not that a user saw an error |
 | `pending_contract` | fatal | no completed-write claim in `message`; conditional wording ("nothing is saved until you approve") is explicitly not a hit |
 | `proposal_expectation` | fatal | a named outcome must yield a plan; a greeting or filler word must yield `proposal: null` plus exactly one short question; a question (`expect: 'answer'`) must yield `proposal: null` and no plan claim, with no question-mark or length rule |
 | `answer_responsive` | fatal | an `answer` case must contain at least one non-question sentence: a null proposal is not an answer, and handing the question back is the regression the mode tab used to prevent |

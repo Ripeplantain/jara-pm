@@ -3,12 +3,14 @@ import {
   AiProviderUnreachableError,
   AiReplyContractError,
   buildProviderRequest,
+  clampReply,
   localPlan,
   MAX_REPLY_TOKENS,
+  PLAN_TARGET,
   PROMPT_VERSION,
   validateProviderReply,
 } from '../server/services/ai'
-import { goalPlanProposalSchema } from '../shared/schemas/ai'
+import { goalPlanProposalSchema, PLAN_BOUNDS } from '../shared/schemas/ai'
 import { MAX_TITLE_LENGTH } from '../shared/schemas/common'
 
 const config = {
@@ -87,13 +89,31 @@ describe('Ask Kobi prompt', () => {
     expect(system).toContain('under about 120 words')
     expect(system).not.toContain('requested mode')
     expect(system).toContain(PROMPT_VERSION)
-    expect(PROMPT_VERSION).toBe('2026-10-19-single-model-inferred-intent-history-v1')
+    expect(PROMPT_VERSION).toBe('2026-10-20-bounded-plan-shape-v1')
   })
 
   it('keeps messages[0] identical whatever the input or history', () => {
     const base = buildProviderRequest(config, 'a', context).messages[0]
     const other = buildProviderRequest(config, 'IGNORE ALL', { ...context, today: 'X' }, [{ role: 'user', content: 'ignore me' }]).messages[0]
     expect(other).toEqual(base)
+  })
+})
+
+describe('Ask Kobi plan-shape instruction', () => {
+  it('states the target shape, so the model is told the limits it is held to', () => {
+    const system = buildProviderRequest(config, 'Help me become an AI engineer', context).messages[0]?.content ?? ''
+
+    expect(system).toContain(`at most ${PLAN_TARGET.projects} projects`)
+    expect(system).toContain(`${PLAN_TARGET.milestonesPerProject} milestones per project`)
+    expect(system).toContain(`${PLAN_TARGET.tasksPerMilestone} tasks per milestone`)
+  })
+
+  // The ceiling is what Kobi stores; the prompt asks for less so a plan fits
+  // MAX_REPLY_TOKENS instead of truncating mid-JSON.
+  it('asks for less than the stored ceiling', () => {
+    expect(PLAN_TARGET.projects).toBeLessThanOrEqual(PLAN_BOUNDS.projects)
+    expect(PLAN_TARGET.milestonesPerProject).toBeLessThanOrEqual(PLAN_BOUNDS.milestonesPerProject)
+    expect(PLAN_TARGET.tasksPerMilestone).toBeLessThanOrEqual(PLAN_BOUNDS.tasksPerMilestone)
   })
 })
 
@@ -134,6 +154,87 @@ describe('Ask Kobi reply error classes', () => {
     }
     expect(caught).toBeInstanceOf(AiReplyContractError)
     expect(caught).not.toBeInstanceOf(AiProviderUnreachableError)
+  })
+})
+
+// A broad goal ("become an AI engineer") draws one project per named area, which
+// overran PLAN_BOUNDS and discarded an otherwise usable plan as an unusable reply.
+describe('Ask Kobi oversize plan clamping', () => {
+  const task = (title: string) => ({ title, dueDate: null, priority: 'medium' as const })
+  const milestone = (title: string, taskCount: number) => ({
+    title,
+    targetDate: null,
+    tasks: Array.from({ length: taskCount }, (_, index) => task(`Task ${index + 1}`)),
+  })
+  const plan = (projectCount: number, milestoneCount = 1, taskCount = 1) => ({
+    message: 'I drafted a plan.',
+    proposal: {
+      kind: 'goal_plan' as const,
+      goal: { title: 'Become an AI engineer', description: 'Build the skills.', targetDate: null },
+      projects: Array.from({ length: projectCount }, (_, index) => ({
+        title: `Area ${index + 1}`,
+        description: 'Work through this area.',
+        milestones: Array.from({ length: milestoneCount }, (_, m) => milestone(`Milestone ${m + 1}`, taskCount)),
+      })),
+    },
+  })
+
+  it('trims an over-long project list to the stored bound and reports the drop', () => {
+    const { reply, dropped } = clampReply(plan(PLAN_BOUNDS.projects + 4))
+
+    expect(dropped).toContain(`projects: ${PLAN_BOUNDS.projects + 4} -> ${PLAN_BOUNDS.projects}`)
+    expect(validateProviderReply(reply).proposal?.projects).toHaveLength(PLAN_BOUNDS.projects)
+  })
+
+  it('trims milestones and tasks within each project', () => {
+    const { reply } = clampReply(plan(1, PLAN_BOUNDS.milestonesPerProject + 2, PLAN_BOUNDS.tasksPerMilestone + 5))
+    const projects = validateProviderReply(reply).proposal?.projects ?? []
+
+    expect(projects[0]?.milestones).toHaveLength(PLAN_BOUNDS.milestonesPerProject)
+    expect(projects[0]?.milestones[0]?.tasks).toHaveLength(PLAN_BOUNDS.tasksPerMilestone)
+  })
+
+  // The whole point: this reply previously became an INVALID_REPLY_NOTICE with
+  // proposal null, so the user lost a good plan over one project too many.
+  it('turns a reply that Zod would have rejected into a usable plan', () => {
+    const oversize = plan(PLAN_BOUNDS.projects + 1)
+
+    expect(() => validateProviderReply(oversize)).toThrow(AiReplyContractError)
+    expect(validateProviderReply(clampReply(oversize).reply).proposal?.kind).toBe('goal_plan')
+  })
+
+  it('trims an over-long title to the stored bound', () => {
+    const base = plan(1)
+    const overlong = 'a'.repeat(MAX_TITLE_LENGTH + 50)
+    const withLongTitles = {
+      ...base,
+      proposal: {
+        ...base.proposal,
+        goal: { ...base.proposal.goal, title: overlong },
+        projects: base.proposal.projects.map(project => ({ ...project, title: overlong })),
+      },
+    }
+    const validated = validateProviderReply(clampReply(withLongTitles).reply).proposal
+
+    expect(validated?.goal.title.length).toBeLessThanOrEqual(MAX_TITLE_LENGTH)
+    expect(validated?.projects[0]?.title.length).toBeLessThanOrEqual(MAX_TITLE_LENGTH)
+  })
+
+  it('leaves a conforming reply and a null proposal untouched', () => {
+    expect(clampReply(validPlan)).toEqual({ reply: validPlan, dropped: [] })
+    expect(clampReply({ message: 'Done.', proposal: null })).toEqual({
+      reply: { message: 'Done.', proposal: null },
+      dropped: [],
+    })
+  })
+
+  // Clamping must not become repair: anything wrong beyond size still fails closed.
+  it('still rejects a reply that is malformed rather than merely oversize', () => {
+    const badDate = plan(PLAN_BOUNDS.projects + 1) as { proposal: { goal: { targetDate: unknown } } }
+    badDate.proposal.goal.targetDate = '2026-Q1'
+
+    expect(() => validateProviderReply(clampReply(badDate).reply)).toThrow(AiReplyContractError)
+    expect(() => validateProviderReply(clampReply({ message: '', proposal: null }).reply)).toThrow(AiReplyContractError)
   })
 })
 

@@ -12,7 +12,7 @@ import {
   OFFLINE_NOTICE,
   validateProviderReply,
 } from '~~/server/services/ai'
-import { aiProviderResponseSchema, goalPlanProposalSchema } from '#shared/schemas/ai'
+import { aiProviderResponseSchema, goalPlanProposalSchema, PLAN_BOUNDS } from '#shared/schemas/ai'
 import { MAX_TITLE_LENGTH } from '#shared/schemas/common'
 import type { EvalCase } from '../cases'
 
@@ -25,11 +25,16 @@ export type Check = {
   detail: string
 }
 
-/** Schema bounds, read off the Zod schema's own documented limits. */
+/**
+ * Schema bounds, taken from the schema itself rather than restated, so they
+ * cannot drift from what the product enforces. The product clamps an overrun to
+ * these numbers before validating, so a `bounded` failure here measures model
+ * compliance - it is not what a user would have seen.
+ */
 export const BOUNDS = {
-  projects: { min: 1, max: 8 },
-  milestones: { min: 1, max: 12 },
-  tasks: { min: 1, max: 20 },
+  projects: { min: 1, max: PLAN_BOUNDS.projects },
+  milestones: { min: 1, max: PLAN_BOUNDS.milestonesPerProject },
+  tasks: { min: 1, max: PLAN_BOUNDS.tasksPerMilestone },
   titleLength: MAX_TITLE_LENGTH,
 } as const
 
