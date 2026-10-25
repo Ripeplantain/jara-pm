@@ -1,4 +1,12 @@
-export const TASK_STATUSES = ['todo', 'in_progress', 'done'] as const
+/**
+ * The fixed set of status categories. A workspace names and orders its own statuses, but every
+ * status belongs to one of these, and automation reasons about the category rather than the name
+ * -- which is what lets a team rename "Done" without changing what completion means.
+ *
+ * Not user-definable, deliberately: `completed` and `canceled` carry behaviour (progress
+ * exclusion, cycle rollover) that cannot be inferred from a name.
+ */
+export const STATUS_CATEGORIES = ['backlog', 'unstarted', 'started', 'completed', 'canceled'] as const
 export const TASK_PRIORITIES = ['none', 'low', 'medium', 'high'] as const
 export const TASK_RECURRENCES = ['none', 'daily', 'weekly'] as const
 export const GOAL_STATUSES = ['active', 'completed', 'archived'] as const
@@ -17,7 +25,7 @@ export const LABEL_COLORS = [
   'pink',
 ] as const
 
-export type TaskStatus = (typeof TASK_STATUSES)[number]
+export type StatusCategory = (typeof STATUS_CATEGORIES)[number]
 export type TaskPriority = (typeof TASK_PRIORITIES)[number]
 export type TaskRecurrence = (typeof TASK_RECURRENCES)[number]
 export type GoalStatus = (typeof GOAL_STATUSES)[number]
@@ -25,6 +33,15 @@ export type ProjectStatus = (typeof PROJECT_STATUSES)[number]
 export type EstimateScale = (typeof ESTIMATE_SCALES)[number]
 export type LabelColor = (typeof LABEL_COLORS)[number]
 export type WorkspaceRole = 'owner' | 'member'
+
+/** A workspace's named workflow step. */
+export type Status = {
+  id: string
+  name: string
+  category: StatusCategory
+  position: number
+  isDefault: boolean
+}
 
 export type WorkspaceSummary = {
   id: string
@@ -82,7 +99,7 @@ export type Task = {
   key: string
   title: string
   description: string
-  status: TaskStatus
+  status: Status
   priority: TaskPriority
   dueDate: string | null
   scheduledFor: string | null
@@ -98,6 +115,8 @@ export type Task = {
   parentId: string | null
   estimate: number | null
   labels: Label[]
+  // First transition into a `started` category; set once, never cleared.
+  startedAt: string | null
   completedAt: string | null
   createdAt: string
   updatedAt: string

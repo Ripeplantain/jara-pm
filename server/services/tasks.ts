@@ -1,11 +1,12 @@
-import { and, asc, eq, gt, isNotNull, isNull, ne, or, sql } from 'drizzle-orm'
+import { and, asc, eq, gt, isNotNull, isNull, ne, notInArray, or, sql } from 'drizzle-orm'
 import { createError } from 'h3'
 import type { CreateTaskInput, TaskQuery, UpdateTaskInput } from '#shared/schemas/task'
-import type { Label, Task } from '#shared/types/domain'
+import type { Label, Status, Task } from '#shared/types/domain'
 import type { KobiDatabase, KobiDb } from '~~/server/db'
 import { withTransaction } from '~~/server/db'
-import { milestones, projects, taskDaySelections, taskLabels, tasks, users, workspaceMembers, workspaces } from '~~/server/db/schema'
+import { milestones, projects, statuses, taskDaySelections, taskLabels, tasks, users, workspaceMembers, workspaces } from '~~/server/db/schema'
 import { labelsForTasks, setTaskLabels } from '~~/server/services/labels'
+import { defaultStatus } from '~~/server/services/statuses'
 import type { TaskRow } from '~~/server/types/database'
 import { nextRecurringDate } from '#shared/utils/recurrence'
 import { formatTaskKey, parseTaskKey } from '#shared/utils/task-key'
@@ -27,7 +28,12 @@ const taskSelection = {
   workspace_key: workspaces.key,
   title: tasks.title,
   description: tasks.description,
-  status: tasks.status,
+  status_id: statuses.id,
+  status_name: statuses.name,
+  status_category: statuses.category,
+  status_position: statuses.position,
+  status_is_default: statuses.isDefault,
+  started_at: tasks.startedAt,
   priority: tasks.priority,
   due_date: tasks.dueDate,
   scheduled_for: tasks.scheduledFor,
@@ -44,7 +50,13 @@ const mapTask = (row: TaskRow, labels: Label[] = []): Task => ({
   id: row.id,
   title: row.title,
   description: row.description,
-  status: row.status,
+  status: {
+    id: row.status_id,
+    name: row.status_name,
+    category: row.status_category,
+    position: row.status_position,
+    isDefault: Boolean(row.status_is_default),
+  },
   priority: row.priority,
   dueDate: row.due_date,
   scheduledFor: row.scheduled_for,
@@ -62,12 +74,13 @@ const mapTask = (row: TaskRow, labels: Label[] = []): Task => ({
   key: formatTaskKey(row.workspace_key, row.number),
   estimate: row.estimate,
   labels,
+  startedAt: row.started_at,
   completedAt: row.completed_at,
   createdAt: row.created_at,
   updatedAt: row.updated_at,
 })
 
-// Every task read needs the same joins: assignee, project and milestone titles, this user's
+// Every task read needs the same joins: status, assignee, project and milestone titles, this user's
 // day selection, and the workspace key the display identifier is built from. The day-selection
 // join is user-scoped, so the caller's id is part of the shape rather than a filter.
 const selectTasks = (db: KobiDb, userId: string) => db.select(taskSelection)
@@ -77,6 +90,7 @@ const selectTasks = (db: KobiDb, userId: string) => db.select(taskSelection)
   .leftJoin(milestones, and(eq(milestones.id, tasks.milestoneId), eq(milestones.workspaceId, tasks.workspaceId)))
   .leftJoin(taskDaySelections, and(eq(taskDaySelections.taskId, tasks.id), eq(taskDaySelections.userId, userId)))
   .innerJoin(workspaces, eq(workspaces.id, tasks.workspaceId))
+  .innerJoin(statuses, and(eq(statuses.id, tasks.statusId), eq(statuses.workspaceId, tasks.workspaceId)))
 
 const notFound = () => {
   throw createError({ status: 404, statusText: 'Task not found' })
@@ -106,6 +120,32 @@ const assertMilestone = (
     throw createError({ status: 422, statusText: 'Milestone does not belong to the project' })
   }
 }
+
+// An id that exists nowhere is a 404; an id that belongs to another workspace is a 422. That is
+// a deliberate split, and unlike the project and milestone checks above, which answer 422 for an
+// unknown id as well. The cost is that this read is not workspace-scoped, so a caller can learn
+// whether a given UUID is a status in some other workspace; no data from that row is returned,
+// and the ids are unguessable.
+const assertStatus = (db: KobiDb, workspaceId: string, statusId: string): Status => {
+  const row = db.select({
+    id: statuses.id,
+    workspace_id: statuses.workspaceId,
+    name: statuses.name,
+    category: statuses.category,
+    position: statuses.position,
+    is_default: statuses.isDefault,
+  })
+    .from(statuses)
+    .where(eq(statuses.id, statusId))
+    .get()
+  if (!row) throw createError({ status: 404, statusText: 'Status not found' })
+  if (row.workspace_id !== workspaceId) {
+    throw createError({ status: 422, statusText: 'Status is not available in this workspace' })
+  }
+  return { id: row.id, name: row.name, category: row.category, position: row.position, isDefault: Boolean(row.is_default) }
+}
+
+const CLOSED_CATEGORIES = ['completed', 'canceled'] as const
 
 const assertParent = (db: KobiDb, userId: string, workspaceId: string, parentId: string | null) => {
   if (!parentId) return
@@ -207,8 +247,11 @@ export const listTasks = (
   if (query.parentId) {
     conditions.push(eq(tasks.parentId, query.parentId))
   }
-  if (query.status) {
-    conditions.push(eq(tasks.status, query.status))
+  if (query.statusId) {
+    conditions.push(eq(tasks.statusId, query.statusId))
+  }
+  if (query.category) {
+    conditions.push(eq(statuses.category, query.category))
   }
   // AND semantics: one EXISTS per label, so a task must carry every requested label. This is
   // deliberately not `inArray`, which would widen the filter to OR across labels.
@@ -223,9 +266,9 @@ export const listTasks = (
   const hideDone = !query.includeCompleted
   if (query.scope === 'inbox') {
     conditions.push(isNull(tasks.projectId), eq(tasks.userId, userId))
-    if (hideDone) conditions.push(ne(tasks.status, 'done'))
+    if (hideDone) conditions.push(notInArray(statuses.category, [...CLOSED_CATEGORIES]))
   } else if (query.scope === 'today') {
-    if (hideDone) conditions.push(ne(tasks.status, 'done'))
+    if (hideDone) conditions.push(notInArray(statuses.category, [...CLOSED_CATEGORIES]))
     conditions.push(or(
       isNotNull(taskDaySelections.taskId),
       and(
@@ -236,22 +279,26 @@ export const listTasks = (
         or(
           eq(tasks.dueDate, today),
           eq(tasks.scheduledFor, today),
-          and(isNull(tasks.dueDate), isNull(tasks.scheduledFor)),
+          // Parked backlog work is not "undated work for today"; it stays in the Inbox.
+          and(isNull(tasks.dueDate), isNull(tasks.scheduledFor), ne(statuses.category, 'backlog')),
         ),
       ),
     )!)
   } else if (query.scope === 'upcoming') {
     conditions.push(gt(tasks.dueDate, today))
-    if (hideDone) conditions.push(ne(tasks.status, 'done'))
+    if (hideDone) conditions.push(notInArray(statuses.category, [...CLOSED_CATEGORIES]))
     conditions.push(or(eq(tasks.assigneeId, userId), and(isNull(tasks.projectId), eq(tasks.userId, userId)))!)
   }
 
   const rows = selectTasks(db, userId)
     .where(and(...conditions))
     .orderBy(
-      sql`case when ${tasks.status} = 'done' then 1 else 0 end`,
+      sql`case when ${statuses.category} in ('completed', 'canceled') then 1 else 0 end`,
       sql`case ${tasks.priority} when 'high' then 0 when 'medium' then 1 when 'low' then 2 else 3 end`,
       sql`coalesce(${tasks.dueDate}, '9999-12-31')`,
+      // After priority and due date, so the workflow order breaks ties (and keeps Done above
+      // Canceled at the bottom) without overriding how urgent a task is.
+      asc(statuses.position),
       asc(tasks.position),
       asc(tasks.createdAt),
     )
@@ -290,7 +337,10 @@ export const createTask = (
   if (input.recurrence !== 'none' && !input.dueDate) {
     throw createError({ status: 422, statusText: 'Recurring tasks need a due date' })
   }
-  if (input.recurrence !== 'none' && input.status === 'done') {
+  const status = input.statusId
+    ? assertStatus(db, workspaceId, input.statusId)
+    : defaultStatus(db, workspaceId)
+  if (input.recurrence !== 'none' && CLOSED_CATEGORIES.some(category => category === status.category)) {
     throw createError({ status: 422, statusText: 'Recurring tasks must start open' })
   }
   assertParent(db, userId, workspaceId, input.parentId)
@@ -318,12 +368,13 @@ export const createTask = (
       parentId: input.parentId,
       title: input.title,
       description: input.description,
-      status: input.status,
+      statusId: status.id,
+      startedAt: status.category === 'started' ? now : null,
       priority: input.priority,
       dueDate: input.dueDate,
       scheduledFor: input.scheduledFor,
       recurrence: input.recurrence,
-      completedAt: input.status === 'done' ? now : null,
+      completedAt: status.category === 'completed' ? now : null,
       estimate: input.estimate ?? null,
       number: allocateTaskNumber(tx, workspaceId),
       position: positionRow?.position ?? 0,
@@ -359,9 +410,10 @@ export const updateTask = (
   assertMilestone(db, workspaceId, milestoneId, projectId)
   assertParent(db, userId, workspaceId, parentId)
   assertAssignee(db, workspaceId, assigneeId)
+  const requested = input.statusId ? assertStatus(db, workspaceId, input.statusId) : null
 
   const valuesFor = (base: Task) => {
-    const status = input.status ?? base.status
+    const status = requested ?? base.status
     const recurrence = input.recurrence ?? base.recurrence
     const values = {
       projectId: input.projectId === undefined ? base.projectId : input.projectId,
@@ -370,7 +422,10 @@ export const updateTask = (
       assigneeId,
       title: input.title ?? base.title,
       description: input.description ?? base.description,
-      status,
+      statusId: status.id,
+      // Set once, on the first transition into a started category, and never cleared: cycle time
+      // has to survive a task being reopened.
+      startedAt: base.startedAt ?? (status.category === 'started' ? nowIso() : null),
       priority: input.priority ?? base.priority,
       dueDate: input.dueDate === undefined ? base.dueDate : input.dueDate,
       scheduledFor: input.scheduledFor === undefined ? base.scheduledFor : input.scheduledFor,
@@ -382,18 +437,18 @@ export const updateTask = (
       // Keep the original completion marker while a recurring occurrence is reopened. It records
       // that its successor was already created, so completing the same occurrence again cannot
       // duplicate future work. Pausing recurrence restores the normal open-task invariant.
-      completedAt: status === 'done'
+      completedAt: status.category === 'completed'
         ? base.completedAt ?? nowIso()
         : recurrence !== 'none' ? base.completedAt : null,
     }
     if (values.recurrence !== 'none' && !values.dueDate) {
       throw createError({ status: 422, statusText: 'Recurring tasks need a due date' })
     }
-    return values
+    return { ...values, category: status.category }
   }
 
   const update = (database: KobiDb, values: ReturnType<typeof valuesFor>, updatedAt: string) => {
-    const { selectedForToday, ...taskValues } = values
+    const { selectedForToday, category: _category, ...taskValues } = values
     database.update(tasks)
       .set({ ...taskValues, updatedAt })
       .where(and(
@@ -407,11 +462,11 @@ export const updateTask = (
   }
 
   const values = valuesFor(current)
-  if (current.status === 'done' && current.recurrence === 'none' && values.recurrence !== 'none') {
+  if (current.status.category === 'completed' && current.recurrence === 'none' && values.recurrence !== 'none') {
     throw createError({ status: 422, statusText: 'Completed tasks cannot start recurring' })
   }
-  const shouldSchedule = values.status === 'done'
-    && current.status !== 'done'
+  const shouldSchedule = values.category === 'completed'
+    && current.status.category !== 'completed'
     && current.completedAt === null
     && values.recurrence !== 'none'
     && values.dueDate !== null
@@ -425,7 +480,7 @@ export const updateTask = (
       assertParent(tx, userId, workspaceId, latestValues.parentId)
       const updatedAt = nowIso()
 
-      if (latest.status === 'done') {
+      if (latest.status.category === 'completed') {
         update(tx, latestValues, updatedAt)
         return
       }
@@ -444,6 +499,7 @@ export const updateTask = (
         .where(and(eq(tasks.workspaceId, workspaceId), projectCondition))
         .get()
       const successorId = crypto.randomUUID()
+      const successorStatus = defaultStatus(tx, workspaceId)
       tx.insert(tasks).values({
         id: successorId,
         userId,
@@ -454,7 +510,8 @@ export const updateTask = (
         parentId: null,
         title: latestValues.title,
         description: latestValues.description,
-        status: 'todo',
+        statusId: successorStatus.id,
+        startedAt: successorStatus.category === 'started' ? updatedAt : null,
         priority: latestValues.priority,
         dueDate: nextDueDate,
         scheduledFor: null,

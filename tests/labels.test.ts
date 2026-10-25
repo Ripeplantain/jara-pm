@@ -25,7 +25,6 @@ const userTwo = '22222222-2222-4222-8222-222222222222'
 const taskInput = (title: string, overrides: Record<string, unknown> = {}) => ({
   title,
   description: '',
-  status: 'todo' as const,
   priority: 'none' as const,
   dueDate: null,
   scheduledFor: null,

@@ -2,6 +2,7 @@ import { and, asc, eq } from 'drizzle-orm'
 import { createError } from 'h3'
 import type { KobiDatabase, KobiDb } from '~~/server/db'
 import { users, workspaceMembers, workspaces } from '~~/server/db/schema'
+import { seedWorkspaceStatuses } from '~~/server/services/statuses'
 import { nowIso } from '~~/server/utils/time'
 import type { CreateWorkspaceInput, UpdateWorkspaceInput } from '~~/shared/schemas/workspace'
 import type { WorkspaceListItem, WorkspaceMember, WorkspaceSummary } from '~~/shared/types/domain'
@@ -63,6 +64,8 @@ export const createWorkspace = (
       role: 'owner',
       joinedAt: now,
     }).run()
+    // A workspace is never observable without a workflow: tasks.status_id is NOT NULL.
+    seedWorkspaceStatuses(tx, id)
     tx.update(users)
       .set({ activeWorkspaceId: id, updatedAt: now })
       .where(eq(users.id, userId))

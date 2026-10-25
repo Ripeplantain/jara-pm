@@ -9,9 +9,9 @@ import type {
 import type { Milestone, Project } from '#shared/types/domain'
 import { calculateProgress } from '#shared/utils/progress'
 import type { KobiDb } from '~~/server/db'
-import { goals, milestones, projects, tasks } from '~~/server/db/schema'
+import { goals, milestones, projects, statuses, tasks } from '~~/server/db/schema'
 import type { MilestoneRow, ProjectRow } from '~~/server/types/database'
-import { taskPointColumns, workspaceWeighsEstimates } from '~~/server/utils/task-points'
+import { taskRollupColumns, workspaceWeighsEstimates } from '~~/server/utils/task-points'
 import { nowIso } from '~~/server/utils/time'
 
 const mapMilestone = (row: MilestoneRow): Milestone => ({
@@ -56,9 +56,7 @@ const milestoneSelection = (weighted: boolean) => ({
   target_date: milestones.targetDate,
   position: milestones.position,
   status: milestones.status,
-  task_count: sql<number>`count(distinct ${tasks.id})`,
-  completed_task_count: sql<number>`count(distinct case when ${tasks.status} = 'done' then ${tasks.id} end)`,
-  ...taskPointColumns(weighted),
+  ...taskRollupColumns(weighted),
 })
 
 const projectSelection = (weighted: boolean) => ({
@@ -72,15 +70,14 @@ const projectSelection = (weighted: boolean) => ({
   target_date: projects.targetDate,
   created_at: projects.createdAt,
   updated_at: projects.updatedAt,
-  task_count: sql<number>`count(distinct ${tasks.id})`,
-  completed_task_count: sql<number>`count(distinct case when ${tasks.status} = 'done' then ${tasks.id} end)`,
-  ...taskPointColumns(weighted),
+  ...taskRollupColumns(weighted),
 })
 
 const milestonesFor = (db: KobiDb, workspaceId: string, projectId: string, weighted: boolean) => {
   const rows = db.select(milestoneSelection(weighted))
     .from(milestones)
     .leftJoin(tasks, and(eq(tasks.milestoneId, milestones.id), eq(tasks.workspaceId, milestones.workspaceId)))
+    .leftJoin(statuses, eq(statuses.id, tasks.statusId))
     .where(and(eq(milestones.workspaceId, workspaceId), eq(milestones.projectId, projectId)))
     .groupBy(milestones.id)
     .orderBy(asc(milestones.position), asc(milestones.createdAt))
@@ -111,6 +108,7 @@ export const listProjects = (
     .from(projects)
     .leftJoin(goals, and(eq(goals.id, projects.goalId), eq(goals.workspaceId, projects.workspaceId)))
     .leftJoin(tasks, and(eq(tasks.projectId, projects.id), eq(tasks.workspaceId, projects.workspaceId)))
+    .leftJoin(statuses, eq(statuses.id, tasks.statusId))
     .where(and(...conditions))
     .groupBy(projects.id)
     .orderBy(
@@ -128,6 +126,7 @@ export const getProject = (db: KobiDb, userId: string, workspaceId: string, proj
     .from(projects)
     .leftJoin(goals, and(eq(goals.id, projects.goalId), eq(goals.workspaceId, projects.workspaceId)))
     .leftJoin(tasks, and(eq(tasks.projectId, projects.id), eq(tasks.workspaceId, projects.workspaceId)))
+    .leftJoin(statuses, eq(statuses.id, tasks.statusId))
     .where(and(eq(projects.id, projectId), eq(projects.workspaceId, workspaceId)))
     .groupBy(projects.id)
     .get() as ProjectRow | undefined

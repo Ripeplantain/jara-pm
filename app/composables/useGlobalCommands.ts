@@ -12,16 +12,10 @@ import {
   Target,
   UserRound,
 } from '@lucide/vue'
-import type { Goal, Label, LabelCollection, Project, Task, TaskPriority, TaskStatus, WorkspaceMember } from '#shared/types/domain'
+import type { Goal, Label, LabelCollection, Project, Task, TaskPriority, WorkspaceMember } from '#shared/types/domain'
 import { estimateLabel, estimateOptions } from '#shared/utils/estimates'
 import { parseTaskKey } from '#shared/utils/task-key'
 import type { CommandAction } from '~/composables/useCommandPalette'
-
-const STATUS_LABELS: Record<TaskStatus, string> = {
-  todo: 'To do',
-  in_progress: 'In progress',
-  done: 'Done',
-}
 
 const PRIORITY_LABELS: Record<TaskPriority, string> = {
   none: 'No priority',
@@ -58,6 +52,7 @@ export const useGlobalCommands = () => {
   const { toggle: toggleTheme } = useTheme()
   const { open: openAskKobi } = useAskKobi()
   const { activeWorkspace, data: workspaces, activateWorkspace } = useWorkspaces()
+  const { statuses } = useStatuses()
   const { refreshTaskViews } = useTaskViews()
   const { show } = useToasts()
   const { capture, captureException } = useProductAnalytics()
@@ -271,14 +266,16 @@ export const useGlobalCommands = () => {
       await patch(task, changes, { flow: 'palette_task_patch', message: `Kobi could not ${label}.` })
     }
 
-    const statusActions = (Object.keys(STATUS_LABELS) as TaskStatus[])
-      .filter(status => status !== task.status)
+    // Built from the workspace's own workflow, so a renamed or added status shows up here with
+    // no code change.
+    const statusActions = statuses.value
+      .filter(status => status.id !== task.status.id)
       .map(status => ({
-        id: `task-status-${status}`,
-        label: `Set status: ${STATUS_LABELS[status]}`,
+        id: `task-status-${status.id}`,
+        label: `Set status: ${status.name}`,
         group: 'Task',
         icon: Check,
-        keywords: ['status', task.key, STATUS_LABELS[status]],
+        keywords: ['status', task.key, status.name, status.category],
         when: hasTask,
         run: applyPatch('change that status', { status }),
       }))

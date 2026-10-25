@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { dateSchema, descriptionSchema, idSchema, titleSchema } from '#shared/schemas/common'
 import { MAX_ESTIMATE } from '#shared/utils/estimates'
 import { idListSchema, queryFlagSchema } from '#shared/schemas/query'
-import { TASK_PRIORITIES, TASK_RECURRENCES, TASK_STATUSES } from '#shared/types/domain'
+import { STATUS_CATEGORIES, TASK_PRIORITIES, TASK_RECURRENCES } from '#shared/types/domain'
 
 export const taskQuerySchema = z.object({
   scope: z.enum(['all', 'inbox', 'today', 'upcoming']).default('all'),
@@ -10,7 +10,8 @@ export const taskQuerySchema = z.object({
   // The task panel lists a task's subtasks. Scoping by parent is a read filter like any other,
   // and it stays subject to the same workspace and visibility predicates.
   parentId: idSchema.optional(),
-  status: z.enum(TASK_STATUSES).optional(),
+  statusId: idSchema.optional(),
+  category: z.enum(STATUS_CATEGORIES).optional(),
   assignee: z.enum(['me', 'everyone', 'unassigned']).optional(),
   // AND semantics across labels: a task must carry every id listed here. Grouped labels are
   // single-select, so listing two siblings of one group matches nothing.
@@ -23,7 +24,7 @@ export const taskQuerySchema = z.object({
 const taskFields = {
   title: titleSchema,
   description: descriptionSchema,
-  status: z.enum(TASK_STATUSES),
+  statusId: idSchema,
   priority: z.enum(TASK_PRIORITIES),
   dueDate: dateSchema,
   scheduledFor: dateSchema,
@@ -42,7 +43,8 @@ const taskFields = {
 export const createTaskSchema = z.object({
   title: taskFields.title,
   description: taskFields.description.default(''),
-  status: taskFields.status.default('todo'),
+  // Absent means the workspace's default status, resolved by the service.
+  statusId: taskFields.statusId.optional(),
   priority: taskFields.priority.default('none'),
   dueDate: taskFields.dueDate.optional().default(null),
   scheduledFor: taskFields.scheduledFor.optional().default(null),
@@ -58,15 +60,12 @@ export const createTaskSchema = z.object({
   if (value.recurrence !== 'none' && !value.dueDate) {
     ctx.addIssue({ code: 'custom', path: ['dueDate'], message: 'Recurring tasks need a due date' })
   }
-  if (value.recurrence !== 'none' && value.status === 'done') {
-    ctx.addIssue({ code: 'custom', path: ['status'], message: 'Recurring tasks must start open' })
-  }
 })
 
 export const updateTaskSchema = z.object({
   title: taskFields.title.optional(),
   description: taskFields.description.optional(),
-  status: taskFields.status.optional(),
+  statusId: taskFields.statusId.optional(),
   priority: taskFields.priority.optional(),
   dueDate: taskFields.dueDate.optional(),
   scheduledFor: taskFields.scheduledFor.optional(),

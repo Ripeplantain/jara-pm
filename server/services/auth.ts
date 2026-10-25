@@ -1,6 +1,7 @@
 import { eq } from 'drizzle-orm'
 import type { KobiDatabase } from '~~/server/db'
 import { users, workspaceMembers, workspaces } from '~~/server/db/schema'
+import { seedWorkspaceStatuses } from '~~/server/services/statuses'
 import { allocateWorkspaceKey } from '~~/server/services/workspace'
 import { nowIso } from '~~/server/utils/time'
 
@@ -35,6 +36,7 @@ export const createUserWithPersonalWorkspace = (
       role: 'owner',
       joinedAt: now,
     }).run()
+    seedWorkspaceStatuses(tx, workspaceId)
     tx.update(users)
       .set({ activeWorkspaceId: workspaceId })
       .where(eq(users.id, id))

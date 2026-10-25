@@ -6,16 +6,12 @@ import {
   rejectPatch,
   resolvePatch,
   settlePatch,
+  type TaskMutation,
   type TaskPatch,
+  taskMutationBody,
   withOverlay,
   withOverlayAll,
 } from '#shared/utils/task-overlay'
-
-/** The fields a row or panel is allowed to change inline. */
-export type TaskMutation = Pick<
-  Partial<Task>,
-  'status' | 'priority' | 'dueDate' | 'scheduledFor' | 'assigneeId' | 'estimate' | 'recurrence' | 'selectedForToday' | 'title'
->
 
 type PatchOptions = {
   /** Goes to PostHog as the flow name when the request fails. */
@@ -54,7 +50,7 @@ export const useOptimisticTask = () => {
     state.value = begun.state
 
     try {
-      const server = await $fetch<Task>(`/api/tasks/${taskId}`, { method: 'PATCH', body: changes })
+      const server = await $fetch<Task>(`/api/tasks/${taskId}`, { method: 'PATCH', body: taskMutationBody(changes) })
       state.value = resolvePatch(state.value, taskId, begun.ticket, server)
       // Refresh every surface showing this task, then drop the entry -- unless a newer mutation
       // has taken it over, which `settlePatch` checks.
@@ -98,4 +94,4 @@ export const useOptimisticTask = () => {
 }
 
 export type TaskPatchFn = ReturnType<typeof useOptimisticTask>['patch']
-export type { TaskPatch }
+export type { TaskMutation, TaskPatch }

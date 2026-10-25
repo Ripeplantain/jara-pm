@@ -1,4 +1,4 @@
-import type { LabelColor } from '#shared/types/domain'
+import type { LabelColor, StatusCategory } from '#shared/types/domain'
 
 export type UserRow = {
   id: string
@@ -24,7 +24,12 @@ export type TaskRow = {
   workspace_key: string
   title: string
   description: string
-  status: 'todo' | 'in_progress' | 'done'
+  status_id: string
+  status_name: string
+  status_category: StatusCategory
+  status_position: number
+  status_is_default: boolean | number
+  started_at: string | null
   priority: 'none' | 'low' | 'medium' | 'high'
   due_date: string | null
   scheduled_for: string | null
@@ -35,6 +40,14 @@ export type TaskRow = {
   position: number
   created_at: string
   updated_at: string
+}
+
+export type StatusRow = {
+  id: string
+  name: string
+  category: StatusCategory
+  position: number
+  is_default: boolean | number
 }
 
 export type GoalRow = {

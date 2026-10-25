@@ -1,6 +1,6 @@
 import { sql } from 'drizzle-orm'
 import { check, foreignKey, index, integer, sqliteTable, text, unique, uniqueIndex } from 'drizzle-orm/sqlite-core'
-import type { EstimateScale, LabelColor } from '#shared/types/domain'
+import type { EstimateScale, LabelColor, StatusCategory } from '#shared/types/domain'
 
 const workspaceIdColumn = (): any => workspaces.id
 const userIdColumn = (): any => users.id
@@ -110,7 +110,10 @@ export const tasks = sqliteTable('tasks', {
   parentId: text('parent_id'),
   title: text('title').notNull(),
   description: text('description').notNull().default(''),
-  status: text('status').notNull().$type<'todo' | 'in_progress' | 'done'>().default('todo'),
+  statusId: text('status_id').notNull().references(() => statuses.id),
+  // The first transition into a `started` category, set once and never cleared, so cycle time
+  // survives a task being reopened.
+  startedAt: text('started_at'),
   priority: text('priority').notNull().$type<'none' | 'low' | 'medium' | 'high'>().default('none'),
   dueDate: text('due_date'),
   scheduledFor: text('scheduled_for'),
@@ -122,14 +125,13 @@ export const tasks = sqliteTable('tasks', {
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
 }, table => [
-  check('tasks_status_check', sql`${table.status} in ('todo', 'in_progress', 'done')`),
   check('tasks_estimate_check', sql`${table.estimate} is null or (${table.estimate} between 1 and 1000)`),
   unique('tasks_workspace_number_unique').on(table.workspaceId, table.number),
   check('tasks_priority_check', sql`${table.priority} in ('none', 'low', 'medium', 'high')`),
   check('tasks_recurrence_check', sql`${table.recurrence} in ('none', 'daily', 'weekly')`),
-  index('idx_tasks_user_status').on(table.userId, table.status),
+  index('idx_tasks_user_status_id').on(table.userId, table.statusId),
   index('idx_tasks_user_due').on(table.userId, table.dueDate),
-  index('idx_tasks_workspace_status').on(table.workspaceId, table.status),
+  index('idx_tasks_workspace_status_id').on(table.workspaceId, table.statusId),
   index('idx_tasks_workspace_due').on(table.workspaceId, table.dueDate),
   index('idx_tasks_workspace_assignee').on(table.workspaceId, table.assigneeId),
   index('idx_tasks_project').on(table.projectId, table.position),
@@ -147,6 +149,39 @@ export const taskDaySelections = sqliteTable('task_day_selections', {
 }, table => [
   unique('task_day_selections_user_task_unique').on(table.userId, table.taskId),
   index('idx_task_day_selections_task').on(table.taskId),
+])
+
+/**
+ * A workspace's named workflow. The `category` is what automation reasons about -- progress,
+ * cycle rollover and the completion checks all read it -- while `name` is the team's own label
+ * and can be renamed freely without changing any behaviour.
+ */
+export const statuses = sqliteTable('statuses', {
+  id: text('id').primaryKey(),
+  workspaceId: text('workspace_id').notNull().references(() => workspaces.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  category: text('category').notNull().$type<StatusCategory>(),
+  position: integer('position').notNull().default(0),
+  isDefault: integer('is_default', { mode: 'boolean' }).notNull().default(false),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+}, table => [
+  check(
+    'statuses_category_check',
+    sql`${table.category} in ('backlog', 'unstarted', 'started', 'completed', 'canceled')`,
+  ),
+  // `is_default` is this schema's first boolean column. The redundant check is there so
+  // hand-written SQL and the migration backfill cannot store anything but 0 or 1.
+  check('statuses_is_default_check', sql`${table.isDefault} in (0, 1)`),
+  unique('statuses_workspace_name_unique').on(table.workspaceId, table.name),
+  index('idx_statuses_workspace_position').on(table.workspaceId, table.position),
+  index('idx_statuses_workspace_category').on(table.workspaceId, table.category),
+  // At most one default per workspace, enforced by the database rather than by a service rule.
+  // Same partial-index shape as `workspace_invites_pending_email_unique`. "At least one" cannot
+  // be expressed declaratively in SQLite and stays a service invariant.
+  uniqueIndex('statuses_workspace_default_unique')
+    .on(table.workspaceId)
+    .where(sql`${table.isDefault} = 1`),
 ])
 
 export const labelGroups = sqliteTable('label_groups', {
@@ -247,6 +282,7 @@ export const schema = {
   milestones,
   tasks,
   taskDaySelections,
+  statuses,
   labelGroups,
   labels,
   taskLabels,

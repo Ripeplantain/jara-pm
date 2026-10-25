@@ -12,7 +12,7 @@ import { createGoal } from '~~/server/services/goals'
 import { createMilestone, createProject } from '~~/server/services/projects'
 import { createTask } from '~~/server/services/tasks'
 import type { KobiDatabase, KobiDb } from '~~/server/db'
-import { aiMessages, aiProposals, goals, projects, tasks } from '~~/server/db/schema'
+import { aiMessages, aiProposals, goals, projects, statuses, tasks } from '~~/server/db/schema'
 import { nowIso, todayIso } from '~~/server/utils/time'
 import { workspaceIdForUser } from '~~/server/utils/workspace'
 
@@ -96,10 +96,10 @@ const checkRateLimit = (userId: string) => {
 const contextFor = (db: KobiDb, userId: string, workspaceId: string) => {
   const today = todayIso()
   const taskCounts = db.select({
-    open: sql<number>`count(case when ${tasks.status} != 'done' then 1 end)`,
-    overdue: sql<number>`count(case when ${tasks.status} != 'done' and ${tasks.dueDate} < ${today} then 1 end)`,
-    done: sql<number>`count(case when ${tasks.status} = 'done' then 1 end)`,
-  }).from(tasks).where(and(
+    open: sql<number>`count(case when ${statuses.category} not in ('completed', 'canceled') then 1 end)`,
+    overdue: sql<number>`count(case when ${statuses.category} not in ('completed', 'canceled') and ${tasks.dueDate} < ${today} then 1 end)`,
+    done: sql<number>`count(case when ${statuses.category} = 'completed' then 1 end)`,
+  }).from(tasks).innerJoin(statuses, eq(statuses.id, tasks.statusId)).where(and(
     eq(tasks.workspaceId, workspaceId),
     or(isNotNull(tasks.projectId), eq(tasks.userId, userId)),
   )).get() ?? { open: 0, overdue: 0, done: 0 }
@@ -596,7 +596,6 @@ export const acceptProposal = (
           createTask(tx, userId, workspaceId, {
             title: taskInput.title,
             description: '',
-            status: 'todo',
             priority: taskInput.priority,
             dueDate: taskInput.dueDate,
             scheduledFor: null,

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { X } from '@lucide/vue'
-import type { Task, TaskPriority, TaskStatus, WorkspaceMember } from '#shared/types/domain'
+import type { Task, TaskPriority, WorkspaceMember } from '#shared/types/domain'
 import { estimateOptions } from '#shared/utils/estimates'
 
 const { openKey, close } = useTaskPanel()
@@ -83,11 +83,7 @@ const estimateOffScale = computed(() => {
   return value !== null && value !== undefined && !estimateChoices.value.some(option => option.value === value)
 })
 
-const STATUSES: ReadonlyArray<{ value: TaskStatus, label: string }> = [
-  { value: 'todo', label: 'To do' },
-  { value: 'in_progress', label: 'In progress' },
-  { value: 'done', label: 'Done' },
-]
+const { statuses } = useStatuses()
 const PRIORITIES: ReadonlyArray<{ value: TaskPriority, label: string }> = [
   { value: 'none', label: 'No priority' },
   { value: 'low', label: 'Low' },
@@ -100,9 +96,14 @@ const apply = async (changes: Parameters<typeof patch>[1], flow: string) => {
   await patch(task.value, changes, { flow })
 }
 
-const onSelect = (field: 'status' | 'priority') => (event: Event) => {
-  const value = (event.target as HTMLSelectElement).value
-  void apply({ [field]: value } as Parameters<typeof patch>[1], `panel_task_${field}`)
+const onStatus = (event: Event) => {
+  const status = statuses.value.find(item => item.id === (event.target as HTMLSelectElement).value)
+  if (status) void apply({ status }, 'panel_task_status')
+}
+
+const onPriority = (event: Event) => {
+  const priority = (event.target as HTMLSelectElement).value as TaskPriority
+  void apply({ priority }, 'panel_task_priority')
 }
 
 const onAssign = (event: Event) => {
@@ -115,9 +116,12 @@ const onEstimate = (event: Event) => {
   void apply({ estimate: value === '' ? null : Number(value) }, 'panel_task_estimate')
 }
 
-const onDate = (field: 'dueDate' | 'scheduledFor') => (event: Event) => {
-  const value = (event.target as HTMLInputElement).value
-  void apply({ [field]: value || null } as Parameters<typeof patch>[1], `panel_task_${field}`)
+const onDueDate = (event: Event) => {
+  void apply({ dueDate: (event.target as HTMLInputElement).value || null }, 'panel_task_dueDate')
+}
+
+const onScheduledFor = (event: Event) => {
+  void apply({ scheduledFor: (event.target as HTMLInputElement).value || null }, 'panel_task_scheduledFor')
 }
 
 const openParent = async () => {
@@ -224,7 +228,7 @@ onMounted(() => {
     />
 
     <div v-else-if="task" class="task-panel-body">
-      <h2 class="task-panel-title" :class="{ done: task.status === 'done' }">{{ task.title }}</h2>
+      <h2 class="task-panel-title" :class="{ done: task.status.category === 'completed' }">{{ task.title }}</h2>
       <p v-if="task.description" class="task-panel-description"><TaskText :text="task.description" /></p>
 
       <div v-if="parent" class="task-panel-relation">
@@ -238,8 +242,8 @@ onMounted(() => {
         <div class="task-panel-field">
           <dt><label :for="`panel-status-${task.id}`">Status</label></dt>
           <dd>
-            <select :id="`panel-status-${task.id}`" class="task-assignee" :value="task.status" @change="onSelect('status')">
-              <option v-for="option in STATUSES" :key="option.value" :value="option.value">{{ option.label }}</option>
+            <select :id="`panel-status-${task.id}`" class="task-assignee" :value="task.status.id" @change="onStatus">
+              <option v-for="option in statuses" :key="option.id" :value="option.id">{{ option.name }}</option>
             </select>
           </dd>
         </div>
@@ -247,7 +251,7 @@ onMounted(() => {
         <div class="task-panel-field">
           <dt><label :for="`panel-priority-${task.id}`">Priority</label></dt>
           <dd>
-            <select :id="`panel-priority-${task.id}`" class="task-assignee" :value="task.priority" @change="onSelect('priority')">
+            <select :id="`panel-priority-${task.id}`" class="task-assignee" :value="task.priority" @change="onPriority">
               <option v-for="option in PRIORITIES" :key="option.value" :value="option.value">{{ option.label }}</option>
             </select>
           </dd>
@@ -265,12 +269,12 @@ onMounted(() => {
 
         <div class="task-panel-field">
           <dt><label :for="`panel-due-${task.id}`">Due</label></dt>
-          <dd><input :id="`panel-due-${task.id}`" type="date" class="date-input" :value="task.dueDate ?? ''" @change="onDate('dueDate')"></dd>
+          <dd><input :id="`panel-due-${task.id}`" type="date" class="date-input" :value="task.dueDate ?? ''" @change="onDueDate"></dd>
         </div>
 
         <div class="task-panel-field">
           <dt><label :for="`panel-scheduled-${task.id}`">Scheduled</label></dt>
-          <dd><input :id="`panel-scheduled-${task.id}`" type="date" class="date-input" :value="task.scheduledFor ?? ''" @change="onDate('scheduledFor')"></dd>
+          <dd><input :id="`panel-scheduled-${task.id}`" type="date" class="date-input" :value="task.scheduledFor ?? ''" @change="onScheduledFor"></dd>
         </div>
 
         <div v-if="estimateScale !== 'none'" class="task-panel-field">
@@ -299,7 +303,7 @@ onMounted(() => {
       </div>
 
       <section v-if="subtasks.length" class="task-panel-section">
-        <h3>Subtasks <span class="form-hint">{{ subtasks.filter(item => item.status === 'done').length }} of {{ subtasks.length }} done</span></h3>
+        <h3>Subtasks <span class="form-hint">{{ subtasks.filter(item => item.status.category === 'completed').length }} of {{ subtasks.length }} done</span></h3>
         <TaskList :tasks="subtasks" />
       </section>
     </div>

@@ -9,8 +9,8 @@ export const getToday = (db: KobiDb, userId: string, workspaceId: string): Today
   // One pass over every task serves both the overdue list and what was finished today, which
   // `completedAt` records exactly rather than by inference.
   const allTasks = listTasks(db, userId, workspaceId, { scope: 'all' })
-  const allOpen = allTasks.filter(task => task.status !== 'done')
-  const completedToday = allTasks.filter(task => task.status === 'done' && task.completedAt?.slice(0, 10) === today)
+  const allOpen = allTasks.filter(task => task.status.category !== 'completed' && task.status.category !== 'canceled')
+  const completedToday = allTasks.filter(task => task.status.category === 'completed' && task.completedAt?.slice(0, 10) === today)
   const overdue = allOpen
     .filter(task => task.dueDate !== null && task.dueDate < today)
     .sort((left, right) => {

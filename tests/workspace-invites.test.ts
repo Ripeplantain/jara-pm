@@ -5,7 +5,7 @@ import type { KobiDatabase } from '../server/db'
 import { tasks, users, workspaceMembers } from '../server/db/schema'
 import { acceptInvite, createOrRefreshInvite, inspectInvite, listPendingInvites, removeWorkspaceMember, resendInvite } from '../server/services/workspace-invites'
 import { initializeDatabase } from '../server/utils/database'
-import { createWorkspaceForUser } from './workspace-fixtures'
+import { createWorkspaceForUser, statusIdFor } from './workspace-fixtures'
 
 describe('workspace invites', () => {
   const databases: Database.Database[] = []
@@ -94,6 +94,7 @@ describe('workspace invites', () => {
       number: 1,
       userId: 'remove-owner',
       workspaceId,
+      statusId: statusIdFor(db, workspaceId, 'unstarted'),
       assigneeId: 'remove-member',
       title: 'Assigned work',
       createdAt: now,
@@ -104,6 +105,7 @@ describe('workspace invites', () => {
       number: 1,
       userId: 'remove-member',
       workspaceId: personalWorkspaceId,
+      statusId: statusIdFor(db, personalWorkspaceId, 'unstarted'),
       assigneeId: 'remove-member',
       title: 'Personal assigned work',
       createdAt: now,

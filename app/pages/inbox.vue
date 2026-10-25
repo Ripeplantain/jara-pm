@@ -13,7 +13,7 @@ const { data: tasks, status, error, refresh } = await useFetch<Task[]>('/api/tas
   query: computed(() => (showCompleted.value ? { scope: 'inbox', includeCompleted: 'true' } : { scope: 'inbox' })),
   default: () => [],
 })
-const completedCount = computed(() => tasks.value.filter(task => task.status === 'done').length)
+const completedCount = computed(() => tasks.value.filter(task => task.status.category === 'completed').length)
 const menuItems = computed(() => [{
   label: 'Show Completed',
   checked: showCompleted.value,

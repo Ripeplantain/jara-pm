@@ -17,7 +17,6 @@ import { createWorkspaceForUser } from './workspace-fixtures'
 const taskInput = (title: string) => ({
   title,
   description: '',
-  status: 'todo' as const,
   priority: 'none' as const,
   dueDate: null,
   scheduledFor: null,

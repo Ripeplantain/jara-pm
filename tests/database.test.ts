@@ -148,7 +148,7 @@ describe('database migrations', () => {
       }
     }
     const before = readdirSync(new URL('../drizzle', import.meta.url))
-      .filter(file => file.endsWith('.sql') && !file.startsWith('0006'))
+      .filter(file => file.endsWith('.sql') && file < '0006')
       .sort()
     for (const file of before) apply(file)
 
@@ -203,6 +203,109 @@ describe('database migrations', () => {
 
     expect(sqlite.prepare('SELECT DISTINCT estimate_scale FROM workspaces').all()).toEqual([{ estimate_scale: 'none' }])
     expect(sqlite.prepare('SELECT count(*) AS n FROM tasks WHERE estimate IS NOT NULL').get()).toEqual({ n: 0 })
+    expect(sqlite.pragma('foreign_key_check')).toEqual([])
+  })
+
+  it('seeds workflows and maps legacy task statuses in 0007 and 0008 without losing linked rows', () => {
+    const sqlite = new Database(':memory:')
+    databases.push(sqlite)
+    sqlite.pragma('foreign_keys = OFF')
+
+    const apply = (file: string) => {
+      const sql = readFileSync(new URL(`../drizzle/${file}`, import.meta.url), 'utf8')
+      for (const statement of sql.split('--> statement-breakpoint')) {
+        const trimmed = statement.trim()
+        if (trimmed) sqlite.exec(trimmed)
+      }
+    }
+    const before = readdirSync(new URL('../drizzle', import.meta.url))
+      .filter(file => file.endsWith('.sql') && file < '0007')
+      .sort()
+    for (const file of before) apply(file)
+
+    const at = (day: string) => `2026-01-0${day}T00:00:00.000Z`
+    sqlite.exec(`
+      INSERT INTO users (id, email, name, password_hash, created_at, updated_at)
+      VALUES ('user-a', 'a@example.test', 'A', 'h', '${at('1')}', '${at('1')}'),
+             ('user-b', 'b@example.test', 'B', 'h', '${at('1')}', '${at('1')}');
+      INSERT INTO workspaces (id, name, key, owner_id, task_counter, created_at, updated_at)
+      VALUES ('ws-1', 'Acme', 'ACME', 'user-a', 3, '${at('1')}', '${at('1')}'),
+             ('ws-2', 'Anvil', 'ANV', 'user-b', 1, '${at('2')}', '${at('2')}');
+      INSERT INTO workspace_members (workspace_id, user_id, role, joined_at)
+      VALUES ('ws-1', 'user-a', 'owner', '${at('1')}'), ('ws-2', 'user-b', 'owner', '${at('2')}');
+      INSERT INTO tasks (id, user_id, workspace_id, title, status, number, completed_at, created_at, updated_at)
+      VALUES ('t-todo', 'user-a', 'ws-1', 'Todo', 'todo', 1, NULL, '${at('1')}', '${at('4')}'),
+             ('t-doing', 'user-a', 'ws-1', 'Doing', 'in_progress', 2, NULL, '${at('1')}', '${at('5')}'),
+             ('t-done', 'user-a', 'ws-1', 'Done', 'done', 3, '${at('6')}', '${at('1')}', '${at('6')}'),
+             ('t-other', 'user-b', 'ws-2', 'Other', 'todo', 1, NULL, '${at('1')}', '${at('1')}');
+      INSERT INTO task_day_selections (user_id, task_id, created_at)
+      VALUES ('user-a', 't-todo', '${at('1')}');
+      INSERT INTO labels (id, workspace_id, name, created_at, updated_at)
+      VALUES ('label-1', 'ws-1', 'bug', '${at('1')}', '${at('1')}');
+      INSERT INTO task_labels (task_id, label_id, created_at)
+      VALUES ('t-todo', 'label-1', '${at('1')}');
+    `)
+
+    // Production applies migrations inside one transaction with enforcement already off.
+    sqlite.pragma('foreign_keys = OFF')
+    sqlite.exec('BEGIN')
+    apply('0007_statuses_add.sql')
+    apply('0008_statuses_drop_legacy.sql')
+    sqlite.exec('COMMIT')
+
+    const count = (table: string) =>
+      (sqlite.prepare(`SELECT count(*) AS n FROM ${table}`).get() as { n: number }).n
+    // Nothing may be cascade-deleted by the DROP TABLE in the tasks rebuild.
+    expect(count('tasks')).toBe(4)
+    expect(count('workspaces')).toBe(2)
+    expect(count('workspace_members')).toBe(2)
+    expect(count('task_day_selections')).toBe(1)
+    expect(count('task_labels')).toBe(1)
+    expect(count('users')).toBe(2)
+
+    // Each workspace gets the documented five-status workflow with exactly one default.
+    for (const workspaceId of ['ws-1', 'ws-2']) {
+      expect(sqlite.prepare('SELECT name, category, position, is_default FROM statuses WHERE workspace_id = ? ORDER BY position').all(workspaceId))
+        .toEqual([
+          { name: 'Backlog', category: 'backlog', position: 0, is_default: 0 },
+          { name: 'Todo', category: 'unstarted', position: 1, is_default: 1 },
+          { name: 'In Progress', category: 'started', position: 2, is_default: 0 },
+          { name: 'Done', category: 'completed', position: 3, is_default: 0 },
+          { name: 'Canceled', category: 'canceled', position: 4, is_default: 0 },
+        ])
+    }
+
+    // Seeded ids must be selectable through the API, whose id schema is a uuid.
+    const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/
+    const ids = sqlite.prepare('SELECT id FROM statuses').all() as Array<{ id: string }>
+    expect(ids).toHaveLength(10)
+    for (const { id } of ids) expect(id).toMatch(uuid)
+
+    // Every task resolves to a status in its OWN workspace, with the category the legacy value maps to.
+    expect(sqlite.prepare('SELECT count(*) AS n FROM tasks WHERE status_id IS NULL').get()).toEqual({ n: 0 })
+    expect(sqlite.prepare(`
+      SELECT t.id AS id, s.category AS category, (s.workspace_id = t.workspace_id) AS same_workspace
+      FROM tasks t JOIN statuses s ON s.id = t.status_id ORDER BY t.id
+    `).all()).toEqual([
+      { id: 't-doing', category: 'started', same_workspace: 1 },
+      { id: 't-done', category: 'completed', same_workspace: 1 },
+      { id: 't-other', category: 'unstarted', same_workspace: 1 },
+      { id: 't-todo', category: 'unstarted', same_workspace: 1 },
+    ])
+
+    // The legacy column and its check are gone.
+    const columns = (sqlite.pragma('table_info(tasks)') as Array<{ name: string }>).map(column => column.name)
+    expect(columns).not.toContain('status')
+    expect(columns).toContain('status_id')
+    expect(sqlite.prepare("SELECT count(*) AS n FROM sqlite_master WHERE sql LIKE '%tasks_status_check%'").get()).toEqual({ n: 0 })
+
+    // started_at: the in-progress task keeps its own updated_at; completed and todo rows stay null.
+    expect(sqlite.prepare('SELECT id, started_at FROM tasks ORDER BY id').all()).toEqual([
+      { id: 't-doing', started_at: at('5') },
+      { id: 't-done', started_at: null },
+      { id: 't-other', started_at: null },
+      { id: 't-todo', started_at: null },
+    ])
     expect(sqlite.pragma('foreign_key_check')).toEqual([])
   })
 

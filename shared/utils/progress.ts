@@ -8,6 +8,8 @@ export const calculateProgress = (completed: number, total: number): number | nu
 export type WeighedTask = {
   estimate: number | null
   completed: boolean
+  /** A canceled task is neither progress made nor work remaining, so it is skipped entirely. */
+  canceled?: boolean
 }
 
 /**
@@ -26,6 +28,7 @@ export const calculateWeightedProgress = (tasks: WeighedTask[]): number | null =
   let total = 0
   let completed = 0
   for (const task of tasks) {
+    if (task.canceled) continue
     const weight = taskPoints(task.estimate)
     total += weight
     if (task.completed) completed += weight

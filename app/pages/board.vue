@@ -20,7 +20,7 @@ const { data: tasks, status, error, refresh } = await useFetch<Task[]>('/api/tas
       <div>
         <div class="eyebrow">Every task, one workflow</div>
         <h1>Board</h1>
-        <p>Move work from to do through completion, or use each task’s status menu.</p>
+        <p>Move work through your workflow, or use each task’s status menu.</p>
       </div>
     </header>
     <LoadingState v-if="status === 'pending'" />

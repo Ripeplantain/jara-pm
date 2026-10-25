@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Check, Trash2 } from '@lucide/vue'
-import type { Task, TaskPriority, TaskStatus, WorkspaceMember } from '#shared/types/domain'
+import type { Status, Task, TaskPriority, WorkspaceMember } from '#shared/types/domain'
 import { estimateLabel, estimateOptions } from '#shared/utils/estimates'
 
 const props = withDefaults(defineProps<{ task: Task, showReschedule?: boolean, members?: WorkspaceMember[] }>(), { showReschedule: false, members: () => [] })
@@ -12,6 +12,7 @@ const { activeWorkspace } = useWorkspaces()
 const { patch, decorate, adopt } = useOptimisticTask()
 const { focus: focusTask, isFocused } = useFocusedTask()
 const { openTask } = useTaskPanel()
+const { statuses, defaultStatus, completedStatus } = useStatuses()
 
 // Everything the row renders comes from the decorated task, so a pending change shows here the
 // moment it is made and rolls back on its own if the request fails. There are no local mirrors
@@ -32,7 +33,9 @@ const estimateOffScale = computed(() => (
   current.value.estimate !== null && !estimateChoices.value.some(option => option.value === current.value.estimate)
 ))
 
-const isDone = computed(() => current.value.status === 'done')
+// Completion is a property of the status category, never of its name: a renamed "Done" still
+// completes, and "Canceled" does not.
+const isDone = computed(() => current.value.status.category === 'completed')
 
 const assigneeSelect = ref<HTMLSelectElement | null>(null)
 const estimateSelect = ref<HTMLSelectElement | null>(null)
@@ -40,19 +43,22 @@ const dueInput = ref<HTMLInputElement | null>(null)
 const labelPicker = ref<{ open: () => void } | null>(null)
 
 const toggle = async () => {
-  const status: TaskStatus = isDone.value ? 'todo' : 'done'
+  // Completing targets the lowest-position completed status; reopening returns the task to the
+  // workspace default rather than remembering where it was.
+  const status = isDone.value ? defaultStatus.value : completedStatus.value
+  if (!status) return
   const task = await patch(current.value, { status }, {
     flow: 'task_status_update',
     message: 'Kobi could not save that change.',
   })
   if (!task) return
-  capture(status === 'done' ? 'task_action_completed' : 'task_action_reopened', {
+  capture(status.category === 'completed' ? 'task_action_completed' : 'task_action_reopened', {
     has_due_date: Boolean(task.dueDate),
   })
   emit('updated', task)
 }
 
-const setStatus = async (status: TaskStatus) => {
+const setStatus = async (status: Status) => {
   const task = await patch(current.value, { status }, { flow: 'task_status_update' })
   if (task) emit('updated', task)
 }
@@ -124,11 +130,26 @@ const onLabelUpdated = (task: Task) => {
   emit('updated', task)
 }
 
-const STATUS_ORDER: readonly TaskStatus[] = ['todo', 'in_progress', 'done']
 const PRIORITY_ORDER: readonly TaskPriority[] = ['none', 'low', 'medium', 'high']
 
 const advance = <T,>(order: readonly T[], value: T): T => order[(order.indexOf(value) + 1) % order.length] as T
 
+// The `s` key walks the workspace's own workflow in position order, skipping `canceled`:
+// cancelling is a decision, not somewhere to land by pressing a key one time too many. A task
+// already sitting in a canceled status can still advance out of it.
+const nextStatus = (): Status | null => {
+  const order = statuses.value.filter(
+    status => status.category !== 'canceled' || status.id === current.value.status.id,
+  )
+  if (order.length === 0) return null
+  const index = order.findIndex(status => status.id === current.value.status.id)
+  return order[(index + 1) % order.length] ?? null
+}
+
+const changeStatus = async (event: Event) => {
+  const status = statuses.value.find(item => item.id === (event.target as HTMLSelectElement).value)
+  if (status) await setStatus(status)
+}
 /**
  * Single-key shortcuts on the focused row, which is why the row itself is focusable. They are
  * bound to the row rather than the document so only the row the person is on responds, and so
@@ -145,7 +166,12 @@ const onKeydown = (event: KeyboardEvent) => {
   // -- no assignee select on an Inbox task, no estimate without a scale -- falls through to the
   // browser instead of being silently swallowed.
   const shortcuts: Record<string, () => boolean> = {
-    s: () => { void setStatus(advance(STATUS_ORDER, current.value.status)); return true },
+    s: () => {
+      const next = nextStatus()
+      if (!next) return false
+      void setStatus(next)
+      return true
+    },
     p: () => { void setPriority(advance(PRIORITY_ORDER, current.value.priority)); return true },
     x: () => { void toggle(); return true },
     a: () => Boolean(assigneeSelect.value?.focus() ?? assigneeSelect.value),
@@ -198,6 +224,15 @@ const onKeydown = (event: KeyboardEvent) => {
       </span>
     </div>
     <div class="task-actions">
+      <select
+        v-if="statuses.length"
+        :value="current.status.id"
+        class="task-assignee"
+        :aria-label="`Status for ${current.title}`"
+        @change="changeStatus"
+      >
+        <option v-for="option in statuses" :key="option.id" :value="option.id">{{ option.name }}</option>
+      </select>
       <select v-if="members.length && current.projectId" ref="assigneeSelect" :value="current.assigneeId ?? ''" class="task-assignee" :aria-label="`Assign ${current.title}`" @change="assign">
         <option value="">Unassigned</option>
         <option v-for="member in members" :key="member.userId" :value="member.userId">{{ member.name }}</option>

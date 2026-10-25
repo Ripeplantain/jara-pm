@@ -42,12 +42,14 @@ describe('task input', () => {
   it('allows a title-only inbox task', () => {
     const task = createTaskSchema.parse({ title: 'Book the appointment' })
     expect(task.projectId).toBeNull()
-    expect(task.status).toBe('todo')
+    // Absent means the workspace default, which only the service can resolve.
+    expect(task.statusId).toBeUndefined()
     expect(task.recurrence).toBe('none')
   })
 
   it('does not apply create defaults to a partial update', () => {
-    expect(updateTaskSchema.parse({ status: 'done' })).toEqual({ status: 'done' })
+    const statusId = '55555555-5555-4555-8555-555555555555'
+    expect(updateTaskSchema.parse({ statusId })).toEqual({ statusId })
   })
 
   it('requires a due date for recurring tasks', () => {
@@ -61,10 +63,13 @@ describe('task input', () => {
     expect(() => updateTaskSchema.parse({ recurrence: 'monthly' })).toThrow()
   })
 
-  it('requires recurring tasks to start open', () => {
-    expect(() => createTaskSchema.parse({
-      title: 'Exercise', dueDate: '2099-01-01', recurrence: 'daily', status: 'done',
-    })).toThrow()
+  // Whether a status is open needs its category, which the schema cannot see: the "recurring
+  // tasks must start open" rule lives in the service (tests/tasks.test.ts).
+  it('requires a status id to be a uuid, and no longer accepts the legacy status field', () => {
+    expect(() => createTaskSchema.parse({ title: 'Exercise', statusId: 'done' })).toThrow()
+    expect(() => updateTaskSchema.parse({ statusId: 'in_progress' })).toThrow()
+    expect(createTaskSchema.parse({ title: 'Exercise', status: 'done' })).not.toHaveProperty('status')
+    expect(updateTaskSchema.parse({ status: 'done' })).toEqual({})
   })
 
   it('rejects invalid calendar dates', () => {

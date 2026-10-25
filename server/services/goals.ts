@@ -3,10 +3,10 @@ import { createError } from 'h3'
 import type { CreateGoalInput, UpdateGoalInput } from '#shared/schemas/goal'
 import type { Goal } from '#shared/types/domain'
 import { calculateProgress } from '#shared/utils/progress'
-import { goals, projects, tasks } from '~~/server/db/schema'
+import { goals, projects, statuses, tasks } from '~~/server/db/schema'
 import type { KobiDb } from '~~/server/db'
 import type { GoalRow } from '~~/server/types/database'
-import { taskPointColumns, workspaceWeighsEstimates } from '~~/server/utils/task-points'
+import { taskRollupColumns, workspaceWeighsEstimates } from '~~/server/utils/task-points'
 import { nowIso } from '~~/server/utils/time'
 
 const mapGoal = (row: GoalRow): Goal => ({
@@ -35,9 +35,7 @@ const goalSelection = (weighted: boolean) => ({
   created_at: goals.createdAt,
   updated_at: goals.updatedAt,
   project_count: sql<number>`count(distinct ${projects.id})`,
-  task_count: sql<number>`count(distinct ${tasks.id})`,
-  completed_task_count: sql<number>`count(distinct case when ${tasks.status} = 'done' then ${tasks.id} end)`,
-  ...taskPointColumns(weighted),
+  ...taskRollupColumns(weighted),
 })
 
 export const listGoals = (db: KobiDb, userId: string, workspaceId: string, includeArchived = false) => {
@@ -51,6 +49,7 @@ export const listGoals = (db: KobiDb, userId: string, workspaceId: string, inclu
       ne(projects.status, 'archived'),
     ))
     .leftJoin(tasks, and(eq(tasks.projectId, projects.id), eq(tasks.workspaceId, projects.workspaceId)))
+    .leftJoin(statuses, eq(statuses.id, tasks.statusId))
     .where(and(...conditions))
     .groupBy(goals.id)
     .orderBy(
@@ -71,6 +70,7 @@ export const getGoal = (db: KobiDb, userId: string, workspaceId: string, goalId:
       ne(projects.status, 'archived'),
     ))
     .leftJoin(tasks, and(eq(tasks.projectId, projects.id), eq(tasks.workspaceId, projects.workspaceId)))
+    .leftJoin(statuses, eq(statuses.id, tasks.statusId))
     .where(and(eq(goals.id, goalId), eq(goals.workspaceId, workspaceId)))
     .groupBy(goals.id)
     .get() as GoalRow | undefined

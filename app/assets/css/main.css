@@ -861,8 +861,10 @@
     @apply px-3 pb-2 text-xs text-danger;
   }
 
+  /* One column per workspace status, so the count is not fixed: columns share the width until
+     they would drop below 220px, then the board scrolls sideways instead of crushing the cards. */
   .board {
-    @apply grid grid-cols-3 items-start gap-4;
+    @apply grid grid-flow-col auto-cols-[minmax(220px,1fr)] items-start gap-4 overflow-x-auto pb-2;
   }
 
   .board-column {
@@ -1502,7 +1504,7 @@
 
 @media (max-width: 760px) {
   .board {
-    @apply grid-cols-1;
+    @apply grid-flow-row auto-cols-auto grid-cols-1 overflow-x-visible;
   }
 
   .board-column {

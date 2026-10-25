@@ -24,8 +24,8 @@ const assignedTasks = computed(() => {
   return data.value.tasks.filter(task => !task.assigneeId)
 })
 const filteredTasks = computed(() =>
-  showCompleted.value ? assignedTasks.value : assignedTasks.value.filter(task => task.status !== 'done'))
-const completedCount = computed(() => assignedTasks.value.filter(task => task.status === 'done').length)
+  showCompleted.value ? assignedTasks.value : assignedTasks.value.filter(task => task.status.category !== 'completed' && task.status.category !== 'canceled'))
+const completedCount = computed(() => assignedTasks.value.filter(task => task.status.category === 'completed').length)
 const menuItems = computed(() => [{
   label: 'Show Completed',
   checked: showCompleted.value,

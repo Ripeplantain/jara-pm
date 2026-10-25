@@ -48,7 +48,7 @@ describe('workspace-scoped resource access', () => {
       title: 'Private project', description: '', goalId: goal.id, targetDate: null,
     })
     const task = createTask(db, userOne, workspaceOne, {
-      title: 'Private task', description: '', status: 'todo', priority: 'none',
+      title: 'Private task', description: '', priority: 'none',
       dueDate: null, scheduledFor: null, recurrence: 'none', selectedForToday: false,
       projectId: project.id, milestoneId: null, parentId: null,
     })
@@ -83,7 +83,7 @@ describe('workspace-scoped resource access', () => {
     db.update(users).set({ activeWorkspaceId: workspaceId }).where(eq(users.id, userTwo)).run()
 
     const inboxTask = createTask(db, userOne, workspaceId, {
-      title: 'Private inbox', description: '', status: 'todo', priority: 'none',
+      title: 'Private inbox', description: '', priority: 'none',
       dueDate: null, scheduledFor: null, recurrence: 'none', selectedForToday: false,
       projectId: null, milestoneId: null, parentId: null,
     })
@@ -108,7 +108,7 @@ describe('workspace-scoped resource access', () => {
       title: 'Shared project', description: '', goalId: null, targetDate: null,
     })
     const task = createTask(db, userOne, workspaceId, {
-      title: 'Shared assigned task', description: '', status: 'todo', priority: 'none',
+      title: 'Shared assigned task', description: '', priority: 'none',
       dueDate: null, scheduledFor: null, recurrence: 'none', selectedForToday: true,
       assigneeId: userTwo, projectId: project.id, milestoneId: null, parentId: null,
     })
@@ -133,17 +133,17 @@ describe('workspace-scoped resource access', () => {
       title: 'Assignments', description: '', goalId: null, targetDate: null,
     })
     const assignedToOne = createTask(db, userOne, workspaceId, {
-      title: 'One task', description: '', status: 'todo', priority: 'none',
+      title: 'One task', description: '', priority: 'none',
       dueDate: null, scheduledFor: null, recurrence: 'none', selectedForToday: false,
       assigneeId: userOne, projectId: project.id, milestoneId: null, parentId: null,
     })
     const assignedToTwo = createTask(db, userOne, workspaceId, {
-      title: 'Two task', description: '', status: 'todo', priority: 'none',
+      title: 'Two task', description: '', priority: 'none',
       dueDate: null, scheduledFor: null, recurrence: 'none', selectedForToday: false,
       assigneeId: userTwo, projectId: project.id, milestoneId: null, parentId: null,
     })
     const unassigned = createTask(db, userOne, workspaceId, {
-      title: 'Unassigned task', description: '', status: 'todo', priority: 'none',
+      title: 'Unassigned task', description: '', priority: 'none',
       dueDate: null, scheduledFor: null, recurrence: 'none', selectedForToday: false,
       assigneeId: null, projectId: project.id, milestoneId: null, parentId: null,
     })
@@ -170,12 +170,12 @@ describe('workspace-scoped resource access', () => {
       title: 'Today assignments', description: '', goalId: null, targetDate: null,
     })
     const assignedToOne = createTask(db, userOne, workspaceId, {
-      title: 'Owner work', description: '', status: 'todo', priority: 'none',
+      title: 'Owner work', description: '', priority: 'none',
       dueDate: todayIso(), scheduledFor: null, recurrence: 'none', selectedForToday: false,
       assigneeId: userOne, projectId: project.id, milestoneId: null, parentId: null,
     })
     const assignedToTwo = createTask(db, userOne, workspaceId, {
-      title: 'Member work', description: '', status: 'todo', priority: 'none',
+      title: 'Member work', description: '', priority: 'none',
       dueDate: todayIso(), scheduledFor: null, recurrence: 'none', selectedForToday: false,
       assigneeId: userTwo, projectId: project.id, milestoneId: null, parentId: null,
     })
@@ -200,7 +200,7 @@ describe('workspace-scoped resource access', () => {
       title: 'Shared project', description: '', goalId: null, targetDate: null,
     })
     const task = createTask(db, userOne, workspaceId, {
-      title: 'Select independently', description: '', status: 'todo', priority: 'none',
+      title: 'Select independently', description: '', priority: 'none',
       dueDate: null, scheduledFor: null, recurrence: 'none', selectedForToday: false,
       assigneeId: userTwo, projectId: project.id, milestoneId: null, parentId: null,
     })

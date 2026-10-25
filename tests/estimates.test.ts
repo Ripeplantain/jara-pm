@@ -3,21 +3,20 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import type { KobiDatabase } from '../server/db'
 import { users } from '../server/db/schema'
 import { createGoal, getGoal } from '../server/services/goals'
-import { createProject, getProject } from '../server/services/projects'
+import { createMilestone, createProject, getProject } from '../server/services/projects'
 import { createTask, updateTask } from '../server/services/tasks'
 import { updateWorkspace } from '../server/services/workspace'
 import { createTaskSchema } from '../shared/schemas/task'
 import { ESTIMATE_SCALE_OPTIONS, estimateLabel, estimateOptions, MAX_ESTIMATE, taskPoints } from '../shared/utils/estimates'
 import { calculateWeightedProgress } from '../shared/utils/progress'
 import { initializeDatabase } from '../server/utils/database'
-import { createWorkspaceForUser } from './workspace-fixtures'
+import { createWorkspaceForUser, statusIdFor } from './workspace-fixtures'
 
 const userOne = '11111111-1111-4111-8111-111111111111'
 
 const taskInput = (title: string, overrides: Record<string, unknown> = {}) => ({
   title,
   description: '',
-  status: 'todo' as const,
   priority: 'none' as const,
   dueDate: null,
   scheduledFor: null,
@@ -146,7 +145,7 @@ describe('weighted progress through the services', () => {
     })
     const big = createTask(db, userOne, workspaceId, taskInput('Big', { projectId: project.id, estimate: 8 }))
     createTask(db, userOne, workspaceId, taskInput('Small', { projectId: project.id, estimate: 2 }))
-    updateTask(db, userOne, workspaceId, big.id, { status: 'done' })
+    updateTask(db, userOne, workspaceId, big.id, { statusId: statusIdFor(db, workspaceId, 'completed') })
 
     const loaded = getProject(db, userOne, workspaceId, project.id)
     expect(loaded.points).toBe(10)
@@ -169,7 +168,7 @@ describe('weighted progress through the services', () => {
     const first = createTask(db, userOne, workspaceId, taskInput('One', { projectId: project.id }))
     createTask(db, userOne, workspaceId, taskInput('Two', { projectId: project.id }))
     createTask(db, userOne, workspaceId, taskInput('Three', { projectId: project.id }))
-    updateTask(db, userOne, workspaceId, first.id, { status: 'done' })
+    updateTask(db, userOne, workspaceId, first.id, { statusId: statusIdFor(db, workspaceId, 'completed') })
 
     const loaded = getProject(db, userOne, workspaceId, project.id)
     expect(loaded.points).toBe(loaded.taskCount)
@@ -182,7 +181,7 @@ describe('weighted progress through the services', () => {
     })
     const done = createTask(db, userOne, workspaceId, taskInput('Done', { projectId: project.id }))
     createTask(db, userOne, workspaceId, taskInput('Open', { projectId: project.id, estimate: 8 }))
-    updateTask(db, userOne, workspaceId, done.id, { status: 'done' })
+    updateTask(db, userOne, workspaceId, done.id, { statusId: statusIdFor(db, workspaceId, 'completed') })
 
     const loaded = getProject(db, userOne, workspaceId, project.id)
     expect(loaded.points).toBe(9)
@@ -197,7 +196,7 @@ describe('weighted progress through the services', () => {
     })
     const big = createTask(db, userOne, workspaceId, taskInput('Big', { projectId: project.id, estimate: 13 }))
     createTask(db, userOne, workspaceId, taskInput('Tiny', { projectId: project.id, estimate: 1 }))
-    updateTask(db, userOne, workspaceId, big.id, { status: 'done' })
+    updateTask(db, userOne, workspaceId, big.id, { statusId: statusIdFor(db, workspaceId, 'completed') })
 
     const loaded = getGoal(db, userOne, workspaceId, goal.id)
     expect(loaded.points).toBe(14)
@@ -211,7 +210,7 @@ describe('weighted progress through the services', () => {
     })
     createTask(db, userOne, workspaceId, taskInput('Big', { projectId: project.id, estimate: 13 }))
     const small = createTask(db, userOne, workspaceId, taskInput('Small', { projectId: project.id, estimate: 1 }))
-    updateTask(db, userOne, workspaceId, small.id, { status: 'done' })
+    updateTask(db, userOne, workspaceId, small.id, { statusId: statusIdFor(db, workspaceId, 'completed') })
 
     // Weighted: 1 of 14 points done.
     expect(getProject(db, userOne, workspaceId, project.id).progress).toBe(7)
@@ -246,5 +245,122 @@ describe('weighted progress through the services', () => {
     const task = createTask(db, userOne, workspaceId, taskInput('Sized', { estimate: 5 }))
     expect(task.estimate).toBe(5)
     expect(updateTask(db, userOne, workspaceId, task.id, { estimate: null }).estimate).toBeNull()
+  })
+})
+
+// Canceled work is neither progress made nor work remaining, so it leaves both sides of the ratio.
+describe('progress with canceled tasks', () => {
+  let sqlite: Database.Database
+  let db: KobiDatabase
+  let workspaceId: string
+
+  beforeEach(() => {
+    sqlite = new Database(':memory:')
+    db = initializeDatabase(sqlite)
+    const now = '2026-01-01T00:00:00.000Z'
+    db.insert(users).values([
+      { id: userOne, email: 'one@example.test', name: 'One', passwordHash: 'h', createdAt: now, updatedAt: now },
+    ]).run()
+    workspaceId = createWorkspaceForUser(db, userOne)
+  })
+
+  afterEach(() => sqlite.close())
+
+  const inCategory = (projectId: string, title: string, category: 'unstarted' | 'completed' | 'canceled', estimate: number | null = null) =>
+    createTask(db, userOne, workspaceId, taskInput(title, {
+      projectId, estimate, statusId: statusIdFor(db, workspaceId, category),
+    }))
+
+  const newProject = (goalId: string | null = null) =>
+    createProject(db, userOne, workspaceId, { title: 'P', description: '', targetDate: null, goalId })
+
+  it('takes a canceled task out of the denominator', () => {
+    const project = newProject()
+    inCategory(project.id, 'Open one', 'unstarted')
+    inCategory(project.id, 'Open two', 'unstarted')
+    inCategory(project.id, 'Dropped', 'canceled')
+
+    const loaded = getProject(db, userOne, workspaceId, project.id)
+    expect(loaded.taskCount).toBe(2)
+    expect(loaded.points).toBe(2)
+    expect(loaded.progress).toBe(0)
+  })
+
+  it('takes a canceled task out of the numerator and denominator alike', () => {
+    const project = newProject()
+    inCategory(project.id, 'Shipped', 'completed')
+    inCategory(project.id, 'Dropped', 'canceled')
+
+    const loaded = getProject(db, userOne, workspaceId, project.id)
+    expect(loaded.progress).toBe(100)
+    expect(loaded.taskCount).toBe(1)
+    expect(loaded.completedTaskCount).toBe(1)
+  })
+
+  it('reports a collection made only of canceled tasks as unmeasured', () => {
+    const goal = createGoal(db, userOne, workspaceId, { title: 'G', description: '', targetDate: null })
+    const project = newProject(goal.id)
+    inCategory(project.id, 'Dropped one', 'canceled')
+    inCategory(project.id, 'Dropped two', 'canceled', 5)
+
+    const loaded = getProject(db, userOne, workspaceId, project.id)
+    expect(loaded.progress).toBeNull()
+    expect(loaded.taskCount).toBe(0)
+    expect(loaded.points).toBe(0)
+    expect(getGoal(db, userOne, workspaceId, goal.id).progress).toBeNull()
+  })
+
+  it('still reports empty goals and projects as unmeasured', () => {
+    const goal = createGoal(db, userOne, workspaceId, { title: 'Empty', description: '', targetDate: null })
+    const project = newProject(goal.id)
+
+    expect(getProject(db, userOne, workspaceId, project.id).progress).toBeNull()
+    expect(getGoal(db, userOne, workspaceId, goal.id).progress).toBeNull()
+  })
+
+  it('skips canceled tasks in the weighted rollup and agrees with the pure helper', () => {
+    updateWorkspace(db, userOne, workspaceId, { estimateScale: 'fibonacci' })
+    const project = newProject()
+    inCategory(project.id, 'Big done', 'completed', 8)
+    inCategory(project.id, 'Small open', 'unstarted', 2)
+    inCategory(project.id, 'Unestimated open', 'unstarted')
+    inCategory(project.id, 'Huge dropped', 'canceled', 13)
+
+    const loaded = getProject(db, userOne, workspaceId, project.id)
+    expect(loaded.points).toBe(11)
+    expect(loaded.completedPoints).toBe(8)
+    expect(loaded.progress).toBe(calculateWeightedProgress([
+      { estimate: 8, completed: true },
+      { estimate: 2, completed: false },
+      { estimate: null, completed: false },
+      { estimate: 13, completed: false, canceled: true },
+    ]))
+  })
+
+  it('rolls milestones up without counting canceled work', () => {
+    const project = newProject()
+    const withMilestone = createMilestone(db, userOne, workspaceId, project.id, {
+      title: 'M1', description: '', targetDate: null,
+    })
+    const milestoneId = withMilestone.milestones[0]!.id
+    createTask(db, userOne, workspaceId, taskInput('Done', {
+      projectId: project.id, milestoneId, statusId: statusIdFor(db, workspaceId, 'completed'),
+    }))
+    createTask(db, userOne, workspaceId, taskInput('Dropped', {
+      projectId: project.id, milestoneId, statusId: statusIdFor(db, workspaceId, 'canceled'),
+    }))
+
+    const milestone = getProject(db, userOne, workspaceId, project.id).milestones[0]!
+    expect(milestone.taskCount).toBe(1)
+    expect(milestone.progress).toBe(100)
+  })
+
+  it('treats a canceled task as weightless in the pure helper', () => {
+    expect(calculateWeightedProgress([{ estimate: 5, completed: false, canceled: true }])).toBeNull()
+    expect(calculateWeightedProgress([])).toBeNull()
+    expect(calculateWeightedProgress([
+      { estimate: null, completed: true },
+      { estimate: null, completed: false, canceled: true },
+    ])).toBe(100)
   })
 })

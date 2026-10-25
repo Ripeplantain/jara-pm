@@ -938,20 +938,45 @@ given.
 
 #### C1 — Status categories and custom workflow
 
-- [ ] Design the full status backfill and obtain the irreversible-migration
-      checkpoint approval.
-- [ ] Confirm a database-volume backup exists before running the migration on
-      anything other than a throwaway database.
-- [ ] Add statuses, category validation, task status references, and
+- [x] Design the full status backfill and obtain the irreversible-migration
+      checkpoint approval. Decisions recorded in `docs/plans/slice-c-plan.md`
+      §8.0.
+- [x] Confirm a database-volume backup exists before running the migration on
+      anything other than a throwaway database. Verified backup at
+      `data/kobi.db.pre-0006.bak` (`integrity_check ok`, matching row counts).
+      **Note:** the operator's live database is the host `./data/kobi.db`, not
+      the Docker `kobi-data` volume, which held a near-empty leftover. Neither
+      has taken 0006 yet, so the next boot applies 0006, 0007 and 0008 together.
+- [x] Add statuses, category validation, task status references, and
       `startedAt` behavior.
-- [ ] Seed existing workspaces and backfill every task without null status IDs.
-- [ ] Remove the legacy status column/check constraint in the approved
-      migration.
-- [ ] Update completion logic, progress exclusion, status editing, and ordering.
-- [ ] Add migration, transition, progress, rename, and isolation tests.
-- [ ] Run the tester and reviewer roles.
-- [ ] Run `./scripts/verify.sh`; record the exact result.
-- [ ] Stop at the commit checkpoint.
+- [x] Seed existing workspaces and backfill every task without null status IDs.
+      All three workspace-creation paths seed, not just `createWorkspace`:
+      `status_id` is NOT NULL, so signup and the invite-removal fallback
+      workspace needed it too.
+- [x] Remove the legacy status column/check constraint in the approved
+      migration. Split across two files rather than one: `drizzle-kit` cannot
+      tell whether `status` -> `status_id` is a rename and demands an
+      interactive answer, so 0007 is additive (table, seed, backfill) and 0008
+      is destructive (drop + NOT NULL). Each reflects a real intermediate schema
+      state, so the snapshots stay consistent.
+- [x] Update completion logic, progress exclusion, status editing, and ordering.
+      `server/utils/task-points.ts` is now the single definition of both the
+      weighting and the completed/canceled rule.
+- [x] Add migration, transition, progress, rename, and isolation tests,
+      including the same-workspace second-member case.
+- [x] Run the tester and reviewer roles. Review returned no blocking defect.
+      Fixed from it: `deleteStatus` reassigning recurring work into a closed
+      status killed the recurrence chain permanently (now 422); the
+      `taskMutationBody` drift guard did not actually guard anything (a spread
+      loses excess-property checking -- now an exhaustive mapped type, verified
+      by adding a display-only field and seeing it fail to compile); reorder and
+      set-default were not invalidating task caches; and `s` could cycle a task
+      into Canceled.
+- [x] Run `./scripts/verify.sh`; record the exact result. **VERIFY: PASS** --
+      image build, Biome lint, Nuxt typecheck, 341 tests and the production
+      build, all inside Docker. First full gate run of the programme; Slices A
+      and B were verified locally only, Docker being unavailable at the time.
+- [x] Stop at the commit checkpoint. Approved and committed.
 
 #### C2 — Cycles
 

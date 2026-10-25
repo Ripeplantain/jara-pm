@@ -5,6 +5,7 @@ import type { KobiDatabase, KobiDb } from '~~/server/db'
 import { tasks, users, workspaceInvites, workspaceMembers, workspaces } from '~~/server/db/schema'
 import { nowIso } from '~~/server/utils/time'
 import { sendInviteEmail } from '~~/server/services/mailer'
+import { seedWorkspaceStatuses } from '~~/server/services/statuses'
 import { allocateWorkspaceKey } from '~~/server/services/workspace'
 
 const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000
@@ -278,6 +279,7 @@ export const removeWorkspaceMember = (db: KobiDatabase, workspaceId: string, use
         updatedAt: now,
       }).run()
       tx.insert(workspaceMembers).values({ workspaceId: fallbackId, userId, role: 'owner', joinedAt: now }).run()
+      seedWorkspaceStatuses(tx, fallbackId)
     }
     tx.update(users).set({ activeWorkspaceId: fallbackId, updatedAt: nowIso() }).where(eq(users.id, userId)).run()
   })

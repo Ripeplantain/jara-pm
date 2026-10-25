@@ -312,6 +312,8 @@ const toggleArchivedLabels = async () => {
       <p v-if="workspaceError" class="form-error" role="alert">{{ workspaceError }}</p>
     </section>
 
+    <StatusEditor v-if="activeWorkspace && isOwner" />
+
     <section v-if="activeWorkspace" class="card card-pad section">
       <div class="section-heading"><div><h2>Labels</h2><p class="form-hint">Labels in a group are single-select; ungrouped labels are multi-select.</p></div><span>{{ allLabels.length }} active</span></div>
 
