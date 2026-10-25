@@ -41,19 +41,19 @@ const menuItems = computed(() => [{
       </div>
       <section class="section" aria-labelledby="priorities-heading">
         <div class="section-heading"><h2 id="priorities-heading">Today’s priorities</h2><span>{{ data.priorities.length }}</span></div>
-        <TaskList :tasks="data.priorities" empty-title="A clear day" empty-message="Add a task above or choose something from your inbox." @changed="refresh" />
+        <TaskList :tasks="data.priorities" empty-title="A clear day" empty-message="Add a task above or choose something from your inbox." />
       </section>
       <section v-if="data.overdue.length" class="section" aria-labelledby="overdue-heading">
         <div class="section-heading"><h2 id="overdue-heading">Overdue</h2><span>{{ data.overdue.length }}</span></div>
-        <TaskList :tasks="data.overdue" show-reschedule @changed="refresh" />
+        <TaskList :tasks="data.overdue" show-reschedule />
       </section>
       <section v-if="showCompleted && data.completedToday.length" class="section" aria-labelledby="completed-heading">
         <div class="section-heading"><h2 id="completed-heading">Completed today</h2><span>{{ data.completedToday.length }}</span></div>
-        <TaskList :tasks="data.completedToday" @changed="refresh" />
+        <TaskList :tasks="data.completedToday" />
       </section>
       <section class="section" aria-labelledby="up-next-heading">
         <div class="section-heading"><h2 id="up-next-heading">Up next</h2><NuxtLink to="/upcoming">See all</NuxtLink></div>
-        <TaskList :tasks="data.upcoming" empty-title="Nothing due soon" empty-message="Your upcoming schedule is open." @changed="refresh" />
+        <TaskList :tasks="data.upcoming" empty-title="Nothing due soon" empty-message="Your upcoming schedule is open." />
       </section>
     </template>
   </main>

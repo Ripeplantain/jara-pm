@@ -858,40 +858,81 @@ given.
 
 #### B1 — Command palette
 
-- [ ] Add the action registry and command-palette composable/component.
-- [ ] Register global and page-specific actions, including task-focused
-      actions.
-- [ ] Implement keyboard navigation, fuzzy matching, focus trapping, and
-      focus restoration.
-- [ ] Verify authenticated-page access, project/task navigation, task creation,
-      and double-Enter protection.
-- [ ] Run focused checks and the reviewer role.
-- [ ] Run `./scripts/verify.sh`; record the exact result.
-- [ ] Stop at the commit checkpoint.
+- [x] Add the action registry and command-palette composable/component.
+      `useCommandPalette` owns the registry and the Cmd/Ctrl+K binding;
+      `useGlobalCommands` builds the action set.
+- [x] Register global and page-specific actions, including task-focused
+      actions. Task actions key off `useFocusedTask`, set by a row on hover or
+      keyboard focus and by the panel when it opens. No page registers its own
+      actions yet -- the hook (`registerActions(owner, actions)`) exists and the
+      global set is registered through it.
+- [x] Implement keyboard navigation, fuzzy matching, focus trapping, and
+      focus restoration. Ranking is pure and unit-tested in
+      `tests/command-score.test.ts`.
+- [x] Verify authenticated-page access, project/task navigation, task creation,
+      and double-Enter protection. Access is structural: the binding lives in
+      the `default` layout, which the auth pages do not use. Double-Enter is
+      guarded by `isRunning`. **Not exercised in a browser** -- there is no e2e
+      harness and Docker is unavailable, so the keyboard and focus behaviour was
+      reviewed and type-checked, not clicked.
+- [x] Run focused checks and the reviewer role.
+- [ ] Run `./scripts/verify.sh`; record the exact result. **Not run** -- Docker
+      unavailable. Lint, typecheck, 279 Vitest tests and `npm run build` all
+      pass locally.
+- [ ] Stop at the commit checkpoint. **Stopped here, awaiting approval.**
 
 #### B2 — Optimistic updates
 
-- [ ] Extract the board mutation pattern into `useOptimisticTask()`.
-- [ ] Adopt it across task list, board, Today, Inbox, and Upcoming surfaces.
-- [ ] Reconcile with server-returned rows for recurrence and daily-selection
-      side effects.
-- [ ] Verify rollback, one-toast failure handling, and rapid consecutive
-      mutations.
-- [ ] Run focused checks and the reviewer role.
-- [ ] Run `./scripts/verify.sh`; record the exact result.
-- [ ] Stop at the commit checkpoint.
+- [x] Extract the board mutation pattern into `useOptimisticTask()`. The change
+      is recorded once in a shared overlay rather than spliced into one page's
+      array, so a task rendered on several surfaces updates on all of them.
+- [x] Adopt it across task list, board, Today, Inbox, and Upcoming surfaces.
+      The three list pages no longer refetch on every edit; `projects/[id].vue`
+      keeps its handler because its own cache key is not one `refreshTaskViews`
+      refreshes.
+- [x] Reconcile with server-returned rows for recurrence and daily-selection
+      side effects. The response row is adopted wholesale, never the local guess.
+- [x] Verify rollback, one-toast failure handling, and rapid consecutive
+      mutations. Review found two blocking defects here, both fixed:
+      the settle check compared the server row against itself so it always
+      passed, clearing the overlay even for surfaces `refreshTaskViews` does not
+      refresh (the panel visibly reverted an accepted edit); and the failure path
+      could leave a rejected value pinned on screen for the life of the document.
+      The lifecycle is now an explicit state machine in
+      `shared/utils/task-overlay.ts` -- every path either clears the task's entry
+      or hands it to a newer mutation -- with 21 cases in
+      `tests/task-overlay.test.ts` covering concurrent failures, stale responses
+      and success-then-failure. Surfaces with their own cache key register a
+      refresh through `useTaskViews.registerTaskView`.
+- [x] Run focused checks and the reviewer role.
+- [ ] Run `./scripts/verify.sh`; record the exact result. **Not run** -- Docker
+      unavailable.
+- [ ] Stop at the commit checkpoint. **Stopped here, awaiting approval.**
 
 #### B3 — Side-panel task detail
 
-- [ ] Add route-driven task-panel state using `?task=KEY-number`.
-- [ ] Keep list state interactive without remounting or refetching it.
-- [ ] Implement desktop side panel, mobile sheet behavior, Esc close, and
-      browser-back behavior.
-- [ ] Verify deep links and panel content for all currently available task
-      fields.
-- [ ] Run focused checks and the reviewer role.
-- [ ] Run `./scripts/verify.sh`; record the exact result.
-- [ ] Stop at the commit checkpoint.
+- [x] Add route-driven task-panel state using `?task=KEY-number`. A malformed
+      key is treated as no panel rather than a lookup that will 404.
+- [x] Keep list state interactive without remounting or refetching it. The panel
+      is rendered by the layout, so only the query string changes: page
+      components stay mounted and their `useFetch` keys are static. The panel is
+      deliberately not a modal -- no `aria-modal`, no overlay, no focus trap.
+- [x] Implement desktop side panel, mobile sheet behavior, Esc close, and
+      browser-back behavior. Below 620px the sheet covers the screen, so there
+      it becomes a real dialog -- `role="dialog"`, `aria-modal`, a Tab trap and
+      `inert` on everything behind it -- while staying a non-blocking side panel
+      above that width. The breakpoint is shared with the CSS rule that makes it
+      full width, since the two have to agree. Opening pushes a history entry so Back closes the
+      panel; a panel arriving in a pasted URL is closed by replacing instead,
+      which would otherwise leave the app.
+- [x] Verify deep links and panel content for all currently available task
+      fields. Subtasks needed a `parentId` read filter on `listTasks`, added with
+      tests including a cross-member isolation case. **Browser behaviour not
+      exercised** -- no e2e harness.
+- [x] Run focused checks and the reviewer role.
+- [ ] Run `./scripts/verify.sh`; record the exact result. **Not run** -- Docker
+      unavailable.
+- [ ] Stop at the commit checkpoint. **Stopped here, awaiting approval.**
 
 ### Slice C — Rhythm
 

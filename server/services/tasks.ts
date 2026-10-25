@@ -204,6 +204,9 @@ export const listTasks = (
   if (query.projectId) {
     conditions.push(eq(tasks.projectId, query.projectId))
   }
+  if (query.parentId) {
+    conditions.push(eq(tasks.parentId, query.parentId))
+  }
   if (query.status) {
     conditions.push(eq(tasks.status, query.status))
   }

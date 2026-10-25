@@ -22,9 +22,13 @@ export const useWorkspaces = () => {
   const actionError = useState<string>('workspace-action-error', () => '')
   const activeWorkspace = computed(() => request.data.value.find(workspace => workspace.isActive) ?? null)
   const { reset: resetAskKobi } = useAskKobi()
+  const { resetOverlay } = useOptimisticTask()
 
   const reloadWorkspaceContext = async () => {
     resetAskKobi()
+    // Pending optimistic changes belong to the workspace being left. `clearNuxtData` does not
+    // touch `useState`, so without this they would be merged onto the new workspace's lists.
+    resetOverlay()
     await clearNuxtData()
     await navigateTo('/', { replace: true })
     await refreshNuxtData()

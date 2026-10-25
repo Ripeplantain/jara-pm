@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Check, Trash2 } from '@lucide/vue'
-import type { Task, TaskStatus, WorkspaceMember } from '#shared/types/domain'
+import type { Task, TaskPriority, TaskStatus, WorkspaceMember } from '#shared/types/domain'
 import { estimateLabel, estimateOptions } from '#shared/utils/estimates'
 
 const props = withDefaults(defineProps<{ task: Task, showReschedule?: boolean, members?: WorkspaceMember[] }>(), { showReschedule: false, members: () => [] })
@@ -9,93 +9,100 @@ const { capture, captureException } = useProductAnalytics()
 const { showUndo, hideTask, revealTask } = useToasts()
 const { refreshTaskViews } = useTaskViews()
 const { activeWorkspace } = useWorkspaces()
+const { patch, decorate, adopt } = useOptimisticTask()
+const { focus: focusTask, isFocused } = useFocusedTask()
+const { openTask } = useTaskPanel()
+
+// Everything the row renders comes from the decorated task, so a pending change shows here the
+// moment it is made and rolls back on its own if the request fails. There are no local mirrors
+// of server fields left to drift.
+const current = computed(() => decorate(props.task))
+
 // `scale === 'none'` hides estimates entirely, so the row shows nothing rather than a number
 // with no scale to read it against.
 const estimateScale = computed(() => activeWorkspace.value?.estimateScale ?? 'none')
 const estimateText = computed(() => (
-  estimateScale.value === 'none' ? null : estimateLabel(estimateScale.value, props.task.estimate)
+  estimateScale.value === 'none' ? null : estimateLabel(estimateScale.value, current.value.estimate)
 ))
 const estimateChoices = computed(() => estimateOptions(estimateScale.value))
-const localEstimate = ref(props.task.estimate === null ? '' : String(props.task.estimate))
-watch(() => props.task.estimate, value => { localEstimate.value = value === null ? '' : String(value) })
 
 // A stored estimate the current scale does not offer still has to be selectable, or saving any
 // other field through this control would silently rewrite it.
 const estimateOffScale = computed(() => (
-  props.task.estimate !== null && !estimateChoices.value.some(option => option.value === props.task.estimate)
+  current.value.estimate !== null && !estimateChoices.value.some(option => option.value === current.value.estimate)
 ))
 
-const setEstimate = async () => {
-  const previous = props.task.estimate
-  isSaving.value = true
-  try {
-    const task = await $fetch<Task>(`/api/tasks/${props.task.id}`, {
-      method: 'PATCH',
-      body: { estimate: localEstimate.value === '' ? null : Number(localEstimate.value) },
-    })
-    emit('updated', task)
-  } catch (error: unknown) {
-    captureException(error, { flow: 'task_estimate' })
-    errorMessage.value = 'Kobi could not save that estimate.'
-    localEstimate.value = previous === null ? '' : String(previous)
-  } finally {
-    isSaving.value = false
-  }
-}
-const errorMessage = ref('')
-const localStatus = ref<TaskStatus>(props.task.status)
-const localDueDate = ref(props.task.dueDate ?? '')
-const isSaving = ref(false)
-const localAssigneeId = ref(props.task.assigneeId ?? '')
+const isDone = computed(() => current.value.status === 'done')
 
-watch(() => props.task.status, value => { localStatus.value = value })
-watch(() => props.task.dueDate, value => { localDueDate.value = value ?? '' })
-watch(() => props.task.assigneeId, value => { localAssigneeId.value = value ?? '' })
+const assigneeSelect = ref<HTMLSelectElement | null>(null)
+const estimateSelect = ref<HTMLSelectElement | null>(null)
+const dueInput = ref<HTMLInputElement | null>(null)
+const labelPicker = ref<{ open: () => void } | null>(null)
 
 const toggle = async () => {
-  const previous = localStatus.value
-  localStatus.value = previous === 'done' ? 'todo' : 'done'
-  isSaving.value = true
-  try {
-    const task = await $fetch<Task>(`/api/tasks/${props.task.id}`, {
-      method: 'PATCH', body: { status: localStatus.value },
-    })
-    void refreshTaskViews()
-    capture(localStatus.value === 'done' ? 'task_action_completed' : 'task_action_reopened', {
-      has_due_date: Boolean(task.dueDate),
-    })
-    emit('updated', task)
-  } catch (error: unknown) {
-    captureException(error, { flow: 'task_status_update' })
-    errorMessage.value = 'Kobi could not save that change.'
-    localStatus.value = previous
-  } finally {
-    isSaving.value = false
-  }
+  const status: TaskStatus = isDone.value ? 'todo' : 'done'
+  const task = await patch(current.value, { status }, {
+    flow: 'task_status_update',
+    message: 'Kobi could not save that change.',
+  })
+  if (!task) return
+  capture(status === 'done' ? 'task_action_completed' : 'task_action_reopened', {
+    has_due_date: Boolean(task.dueDate),
+  })
+  emit('updated', task)
 }
 
-const reschedule = async () => {
-  try {
-    const task = await $fetch<Task>(`/api/tasks/${props.task.id}`, {
-      method: 'PATCH', body: { dueDate: localDueDate.value || null },
-    })
-    capture('task_action_rescheduled', { has_due_date: Boolean(task.dueDate) })
-    emit('updated', task)
-  } catch (error: unknown) {
-    captureException(error, { flow: 'task_reschedule' })
-    errorMessage.value = 'Kobi could not reschedule this task.'
-    localDueDate.value = props.task.dueDate ?? ''
-  }
+const setStatus = async (status: TaskStatus) => {
+  const task = await patch(current.value, { status }, { flow: 'task_status_update' })
+  if (task) emit('updated', task)
+}
+
+const setPriority = async (priority: TaskPriority) => {
+  const task = await patch(current.value, { priority }, { flow: 'task_priority' })
+  if (task) emit('updated', task)
+}
+
+const setEstimate = async (event: Event) => {
+  const value = (event.target as HTMLSelectElement).value
+  const task = await patch(current.value, { estimate: value === '' ? null : Number(value) }, {
+    flow: 'task_estimate',
+    message: 'Kobi could not save that estimate.',
+  })
+  if (task) emit('updated', task)
+}
+
+const assign = async (event: Event) => {
+  const value = (event.target as HTMLSelectElement).value
+  const task = await patch(current.value, { assigneeId: value || null }, { flow: 'task_assignment' })
+  if (task) emit('updated', task)
+}
+
+const reschedule = async (event: Event) => {
+  const value = (event.target as HTMLInputElement).value
+  const task = await patch(current.value, { dueDate: value || null }, {
+    flow: 'task_reschedule',
+    message: 'Kobi could not reschedule this task.',
+  })
+  if (!task) return
+  capture('task_action_rescheduled', { has_due_date: Boolean(task.dueDate) })
+  emit('updated', task)
+}
+
+const pauseRecurrence = async () => {
+  if (current.value.recurrence === 'none') return
+  const task = await patch(current.value, { recurrence: 'none' }, { flow: 'task_recurrence_pause' })
+  if (!task) return
+  capture('task_recurrence_paused')
+  emit('updated', task)
 }
 
 // A reversible action in place of a confirmation prompt: the row leaves immediately and the
 // DELETE only runs once the undo window closes, so taking it back costs no request at all.
 const remove = () => {
-  errorMessage.value = ''
   hideTask(props.task.id)
   capture('task_action_deleted')
   showUndo({
-    message: `Deleted “${props.task.title}”`,
+    message: `Deleted “${current.value.title}”`,
     flushOnNavigate: true,
     onCommit: async () => {
       await $fetch(`/api/tasks/${props.task.id}`, { method: 'DELETE' })
@@ -105,96 +112,116 @@ const remove = () => {
     onCommitError: (error: unknown) => {
       captureException(error, { flow: 'task_delete' })
       revealTask(props.task.id)
-      errorMessage.value = 'Kobi could not delete this task.'
     },
     onUndo: () => revealTask(props.task.id),
   })
 }
 
-const pauseRecurrence = async () => {
-  if (isSaving.value || props.task.recurrence === 'none') return
-  isSaving.value = true
-  try {
-    const task = await $fetch<Task>(`/api/tasks/${props.task.id}`, {
-      method: 'PATCH', body: { recurrence: 'none' },
-    })
-    capture('task_recurrence_paused')
-    emit('updated', task)
-  } catch (error: unknown) {
-    captureException(error, { flow: 'task_recurrence_pause' })
-  } finally {
-    isSaving.value = false
-  }
+const onLabelUpdated = (task: Task) => {
+  // The label endpoints return the whole task, so the result is shared with every other list
+  // rather than only the row that was clicked.
+  void adopt(task)
+  emit('updated', task)
 }
 
-const assign = async () => {
-  const previous = props.task.assigneeId
-  isSaving.value = true
-  try {
-    const task = await $fetch<Task>(`/api/tasks/${props.task.id}`, {
-      method: 'PATCH', body: { assigneeId: localAssigneeId.value || null },
-    })
-    emit('updated', task)
-  } catch (error: unknown) {
-    captureException(error, { flow: 'task_assignment' })
-    localAssigneeId.value = previous ?? ''
-  } finally {
-    isSaving.value = false
+const STATUS_ORDER: readonly TaskStatus[] = ['todo', 'in_progress', 'done']
+const PRIORITY_ORDER: readonly TaskPriority[] = ['none', 'low', 'medium', 'high']
+
+const advance = <T,>(order: readonly T[], value: T): T => order[(order.indexOf(value) + 1) % order.length] as T
+
+/**
+ * Single-key shortcuts on the focused row, which is why the row itself is focusable. They are
+ * bound to the row rather than the document so only the row the person is on responds, and so
+ * the list stays navigable with Tab alone.
+ */
+const onKeydown = (event: KeyboardEvent) => {
+  if (event.metaKey || event.ctrlKey || event.altKey) return
+  // Only when the row itself holds focus. Anything inside it -- the date input, the selects, the
+  // delete button -- owns its own keys, and `Enter` on a button must activate that button rather
+  // than also opening the panel.
+  if (event.target !== event.currentTarget) return
+
+  // Each returns whether it did anything, so a key bound to a control this row does not render
+  // -- no assignee select on an Inbox task, no estimate without a scale -- falls through to the
+  // browser instead of being silently swallowed.
+  const shortcuts: Record<string, () => boolean> = {
+    s: () => { void setStatus(advance(STATUS_ORDER, current.value.status)); return true },
+    p: () => { void setPriority(advance(PRIORITY_ORDER, current.value.priority)); return true },
+    x: () => { void toggle(); return true },
+    a: () => Boolean(assigneeSelect.value?.focus() ?? assigneeSelect.value),
+    e: () => Boolean(estimateSelect.value?.focus() ?? estimateSelect.value),
+    d: () => Boolean(dueInput.value?.focus() ?? dueInput.value),
+    l: () => Boolean(labelPicker.value?.open() ?? labelPicker.value),
+    Enter: () => { void openTask(current.value.key); return true },
   }
+
+  const run = shortcuts[event.key]
+  if (!run) return
+  if (run()) event.preventDefault()
 }
 </script>
 
 <template>
-  <div class="task-row" :class="{ 'is-done': localStatus === 'done' }">
-    <button type="button" class="task-check" :class="{ done: localStatus === 'done' }" :disabled="isSaving" :aria-label="localStatus === 'done' ? `Reopen ${task.title}` : `Complete ${task.title}`" @click="toggle">
-      <Check v-if="localStatus === 'done'" aria-hidden="true" />
+  <div
+    class="task-row"
+    :class="{ 'is-done': isDone, 'is-focused': isFocused(task.id) }"
+    role="group"
+    tabindex="0"
+    :aria-label="current.title"
+    @keydown="onKeydown"
+    @focusin="focusTask(current)"
+    @mouseenter="focusTask(current)"
+  >
+    <button type="button" class="task-check" :class="{ done: isDone }" :aria-label="isDone ? `Reopen ${current.title}` : `Complete ${current.title}`" @click="toggle">
+      <Check v-if="isDone" aria-hidden="true" />
     </button>
     <div class="task-copy">
-      <span class="task-title" :class="{ done: localStatus === 'done' }">
-        <span class="task-key">{{ task.key }}</span>
-        {{ task.title }}
-      </span>
-      <span v-if="task.labels.length" class="task-labels">
-        <LabelChip v-for="label in task.labels" :key="label.id" :label="label" />
+      <button type="button" class="task-title-button" :aria-label="`Open ${current.key}`" @click="openTask(current.key)">
+        <span class="task-title" :class="{ done: isDone }">
+          <span class="task-key">{{ current.key }}</span>
+          {{ current.title }}
+        </span>
+      </button>
+      <span v-if="current.labels.length" class="task-labels">
+        <LabelChip v-for="label in current.labels" :key="label.id" :label="label" />
       </span>
       <span class="task-meta">
-        <span v-if="task.projectTitle">{{ task.projectTitle }}</span>
-        <span v-if="task.milestoneTitle">· {{ task.milestoneTitle }}</span>
-        <span v-if="task.dueDate">· Due {{ task.dueDate }}</span>
-        <span v-if="task.recurrence !== 'none'">· Repeats {{ task.recurrence }}</span>
-        <span v-if="task.priority !== 'none'" class="task-priority">
-          <span class="priority-dot" :class="task.priority" /> {{ task.priority }}
+        <span v-if="current.projectTitle">{{ current.projectTitle }}</span>
+        <span v-if="current.milestoneTitle">· {{ current.milestoneTitle }}</span>
+        <span v-if="current.dueDate">· Due {{ current.dueDate }}</span>
+        <span v-if="current.recurrence !== 'none'">· Repeats {{ current.recurrence }}</span>
+        <span v-if="current.priority !== 'none'" class="task-priority">
+          <span class="priority-dot" :class="current.priority" /> {{ current.priority }}
         </span>
-        <span v-if="task.assigneeName">· {{ task.assigneeName }}</span>
+        <span v-if="current.assigneeName">· {{ current.assigneeName }}</span>
         <span v-if="estimateText" class="task-estimate">· {{ estimateText }}</span>
       </span>
     </div>
     <div class="task-actions">
-      <select v-if="members.length && task.projectId" v-model="localAssigneeId" class="task-assignee" :aria-label="`Assign ${task.title}`" :disabled="isSaving" @change="assign">
+      <select v-if="members.length && current.projectId" ref="assigneeSelect" :value="current.assigneeId ?? ''" class="task-assignee" :aria-label="`Assign ${current.title}`" @change="assign">
         <option value="">Unassigned</option>
         <option v-for="member in members" :key="member.userId" :value="member.userId">{{ member.name }}</option>
       </select>
       <select
         v-if="estimateScale !== 'none'"
-        v-model="localEstimate"
+        ref="estimateSelect"
+        :value="current.estimate === null ? '' : String(current.estimate)"
         class="task-assignee"
-        :aria-label="`Estimate for ${task.title}`"
-        :disabled="isSaving"
+        :aria-label="`Estimate for ${current.title}`"
         @change="setEstimate"
       >
         <option value="">No estimate</option>
         <option v-for="option in estimateChoices" :key="option.value" :value="String(option.value)">{{ option.label }}</option>
-        <option v-if="estimateOffScale" :value="String(task.estimate)">{{ task.estimate }}</option>
+        <option v-if="estimateOffScale" :value="String(current.estimate)">{{ current.estimate }}</option>
       </select>
-      <LabelPicker :task="task" @updated="emit('updated', $event)" />
-      <input v-if="showReschedule" v-model="localDueDate" type="date" class="date-input" :aria-label="`Reschedule ${task.title}`" @change="reschedule">
-      <button v-if="task.recurrence !== 'none' && localStatus !== 'done'" type="button" class="button ghost small" :aria-label="`Pause repeating ${task.title}`" @click="pauseRecurrence">
+      <LabelPicker ref="labelPicker" :task="current" @updated="onLabelUpdated" />
+      <input v-if="showReschedule" ref="dueInput" :value="current.dueDate ?? ''" type="date" class="date-input" :aria-label="`Reschedule ${current.title}`" @change="reschedule">
+      <button v-if="current.recurrence !== 'none' && !isDone" type="button" class="button ghost small" :aria-label="`Pause repeating ${current.title}`" @click="pauseRecurrence">
         Pause
       </button>
-      <button type="button" class="button ghost small" :aria-label="`Delete ${task.title}`" @click="remove">
+      <button type="button" class="button ghost small" :aria-label="`Delete ${current.title}`" @click="remove">
         <Trash2 :size="15" aria-hidden="true" />
       </button>
     </div>
-    <p v-if="errorMessage" class="task-error" role="alert">{{ errorMessage }}</p>
   </div>
 </template>

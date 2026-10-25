@@ -1285,6 +1285,145 @@
   .welcome-actions {
     @apply flex justify-center gap-2;
   }
+
+  /* Command palette ------------------------------------------------------------------------ */
+
+  .command-overlay {
+    @apply fixed inset-0 z-[120] flex items-start justify-center bg-overlay p-4 pt-[12vh] backdrop-blur-[2px];
+  }
+
+  .command-palette {
+    @apply flex max-h-[min(560px,70vh)] w-[min(620px,100%)] flex-col overflow-hidden rounded-xl border border-border bg-background shadow-lg;
+  }
+
+  .command-input-row {
+    @apply flex items-center gap-2 border-b border-border px-4 py-3 text-text-muted;
+  }
+
+  .command-input {
+    @apply w-full border-0 bg-transparent text-base text-text-primary outline-none placeholder:text-text-muted;
+  }
+
+  .command-results {
+    @apply min-h-0 flex-1 overflow-y-auto p-2;
+  }
+
+  .command-section + .command-section {
+    @apply mt-2 border-t border-border pt-2;
+  }
+
+  .command-section-name {
+    @apply px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-text-muted;
+  }
+
+  .command-option {
+    @apply flex cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-text-primary;
+  }
+
+  /* Highlight follows the keyboard, so there is no separate hover state to disagree with it. */
+  .command-option.highlighted {
+    @apply bg-surface-active;
+  }
+
+  .command-option-label {
+    @apply min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap;
+  }
+
+  .command-option-group {
+    @apply shrink-0 text-xs text-text-muted;
+  }
+
+  .command-empty {
+    @apply px-4 py-8 text-center text-sm text-text-muted;
+  }
+
+  .command-footer {
+    @apply flex items-center gap-4 border-t border-border px-4 py-2 text-[11px] text-text-muted;
+  }
+
+  .command-footer kbd {
+    @apply mr-0.5 rounded border border-border bg-surface px-1 py-px font-sans text-[10px];
+  }
+
+  /* Task side panel ------------------------------------------------------------------------ */
+
+  .task-panel {
+    @apply fixed inset-y-0 right-0 z-[70] flex w-[min(420px,100%)] flex-col overflow-y-auto border-l border-border bg-background shadow-lg;
+  }
+
+  /* The main column makes room rather than being covered: the list stays usable beside it. */
+  .app-frame.has-task-panel .app-main {
+    @apply pr-[min(420px,100%)];
+  }
+
+  .task-panel-header {
+    @apply sticky top-0 flex items-center justify-between border-b border-border bg-background px-4 py-3;
+  }
+
+  .task-panel-body {
+    @apply flex flex-col gap-4 p-4;
+  }
+
+  .task-panel-title {
+    @apply m-0 text-lg font-semibold leading-snug;
+  }
+
+  .task-panel-title.done {
+    @apply text-text-muted line-through;
+  }
+
+  .task-panel-description {
+    @apply m-0 whitespace-pre-line text-sm text-text-secondary;
+  }
+
+  .task-panel-fields {
+    @apply m-0 flex flex-col gap-2;
+  }
+
+  .task-panel-field {
+    @apply flex items-center justify-between gap-3;
+  }
+
+  .task-panel-field dt,
+  .task-panel-field .field-label {
+    @apply m-0 text-xs text-text-muted;
+  }
+
+  .task-panel-field dd {
+    @apply m-0;
+  }
+
+  .task-panel-relation {
+    @apply flex flex-col gap-1 rounded-lg border border-border p-2.5;
+  }
+
+  .task-panel-labels {
+    @apply flex flex-wrap items-center gap-1;
+  }
+
+  .task-panel-section h3 {
+    @apply mb-2 flex items-center gap-2 text-sm font-semibold;
+  }
+
+  /* A task title opens the panel, so it has to read as a control without looking like a button. */
+  .task-title-button {
+    @apply cursor-pointer border-0 bg-transparent p-0 text-left text-inherit;
+  }
+
+  .task-title-button:hover .task-title,
+  .task-title-button:hover {
+    @apply underline;
+  }
+
+  /* The row the single-key shortcuts will act on. */
+  .task-row:focus-visible,
+  .task-row.is-focused {
+    @apply outline-none ring-1 ring-border;
+  }
+
+  .task-row:focus-visible {
+    @apply ring-2 ring-primary;
+  }
 }
 
 @keyframes shimmer {
@@ -1433,6 +1572,22 @@
 
   .ask-panel {
     @apply border-l-0;
+  }
+
+  .task-panel {
+    @apply w-full border-l-0;
+  }
+
+  .app-frame.has-task-panel .app-main {
+    @apply pr-0;
+  }
+
+  .command-overlay {
+    @apply pt-[6vh];
+  }
+
+  .task-panel-field {
+    @apply flex-col items-start gap-1;
   }
 
   .ask-panel.is-maximized {

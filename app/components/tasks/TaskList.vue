@@ -10,7 +10,8 @@ const props = withDefaults(defineProps<{ tasks: Task[], showReschedule?: boolean
 const emit = defineEmits<{ changed: [] }>()
 const { pendingTaskIds } = useToasts()
 // A task whose delete is still undoable is already gone from the person's point of view, so it
-// is filtered here rather than in each page.
+// is filtered here rather than in each page. Pending edits are not merged here: every `TaskRow`
+// decorates its own task, so doing it again would be the same work twice per row.
 const visibleTasks = computed(() => props.tasks.filter(task => !pendingTaskIds.value.includes(task.id)))
 const { data: members } = await useFetch<WorkspaceMember[]>('/api/workspace/members', {
   key: 'workspace-members-task-list',

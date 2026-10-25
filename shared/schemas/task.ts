@@ -7,6 +7,9 @@ import { TASK_PRIORITIES, TASK_RECURRENCES, TASK_STATUSES } from '#shared/types/
 export const taskQuerySchema = z.object({
   scope: z.enum(['all', 'inbox', 'today', 'upcoming']).default('all'),
   projectId: idSchema.optional(),
+  // The task panel lists a task's subtasks. Scoping by parent is a read filter like any other,
+  // and it stays subject to the same workspace and visibility predicates.
+  parentId: idSchema.optional(),
   status: z.enum(TASK_STATUSES).optional(),
   assignee: z.enum(['me', 'everyone', 'unassigned']).optional(),
   // AND semantics across labels: a task must carry every id listed here. Grouped labels are

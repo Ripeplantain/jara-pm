@@ -10,9 +10,8 @@ const { data: tasks, status, error, refresh } = await useFetch<Task[]>('/api/tas
   default: () => [],
 })
 
-const replaceTask = (updated: Task) => {
-  tasks.value = tasks.value.map(task => task.id === updated.id ? updated : task)
-}
+// `replaceTask` used to live here, splicing the returned row into this one page's array. That
+// job now belongs to `useOptimisticTask`, which records the change once for every surface.
 </script>
 
 <template>
@@ -26,6 +25,6 @@ const replaceTask = (updated: Task) => {
     </header>
     <LoadingState v-if="status === 'pending'" />
     <ErrorState v-else-if="error" @retry="refresh" />
-    <Board v-else :tasks="tasks" @changed="replaceTask" />
+    <Board v-else :tasks="tasks" />
   </main>
 </template>

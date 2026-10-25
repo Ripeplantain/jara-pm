@@ -230,6 +230,41 @@ describe('task service', () => {
     expect(listTasks(db, '11111111-1111-4111-8111-111111111111', { scope: 'all' })).toHaveLength(1)
   })
 
+  // The task panel lists a task's subtasks through this filter.
+  describe('parent filter', () => {
+    const owner = '11111111-1111-4111-8111-111111111111'
+    const other = '22222222-2222-4222-8222-222222222222'
+    const base = {
+      description: '', priority: 'none' as const, scheduledFor: null, dueDate: null,
+      recurrence: 'none' as const, selectedForToday: false, status: 'todo' as const,
+      projectId: null, milestoneId: null, parentId: null,
+    }
+
+    it('returns only the children of the requested task', () => {
+      const parent = createTask(db, owner, { ...base, title: 'Parent' })
+      createTask(db, owner, { ...base, title: 'Child one', parentId: parent.id })
+      createTask(db, owner, { ...base, title: 'Child two', parentId: parent.id })
+      createTask(db, owner, { ...base, title: 'Unrelated' })
+
+      const children = listTasks(db, owner, { scope: 'all', parentId: parent.id })
+
+      expect(children.map(task => task.title).sort()).toEqual(['Child one', 'Child two'])
+    })
+
+    it('returns nothing for a task with no children', () => {
+      const lonely = createTask(db, owner, { ...base, title: 'Lonely' })
+      expect(listTasks(db, owner, { scope: 'all', parentId: lonely.id })).toEqual([])
+    })
+
+    // The filter must not become a way around the workspace and visibility predicates.
+    it('does not leak another member’s subtasks', () => {
+      const parent = createTask(db, owner, { ...base, title: 'Parent' })
+      createTask(db, owner, { ...base, title: 'Child', parentId: parent.id })
+
+      expect(listTasks(db, other, { scope: 'all', parentId: parent.id })).toEqual([])
+    })
+  })
+
   // The scoped views hide completed work, so a list had no way to show what it was hiding.
   describe('completed-task visibility', () => {
     const owner = '11111111-1111-4111-8111-111111111111'

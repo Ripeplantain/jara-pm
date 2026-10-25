@@ -33,6 +33,6 @@ const menuItems = computed(() => [{
     <QuickCapture placeholder="Add something to your inbox…" @created="refresh" @ask="open" />
     <LoadingState v-if="status === 'pending'" />
     <ErrorState v-else-if="error" @retry="refresh" />
-    <TaskList v-else :tasks="tasks" empty-title="Inbox zero" empty-message="New unorganized tasks will appear here." @changed="refresh" />
+    <TaskList v-else :tasks="tasks" empty-title="Inbox zero" empty-message="New unorganized tasks will appear here." />
   </main>
 </template>

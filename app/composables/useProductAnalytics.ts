@@ -18,6 +18,11 @@ export type ProductEventName =
   | 'workspace_created'
   | 'workspace_switched'
   | 'workspace_identifiers_saved'
+  | 'command_palette_opened'
+  | 'task_created_from_palette'
+  | 'project_created_from_palette'
+  | 'goal_created_from_palette'
+  | 'task_panel_opened'
 
 type ProductEventProperties = Record<string, string | number | boolean | null | undefined>
 

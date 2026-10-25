@@ -3,8 +3,12 @@ import type { Task, TaskStatus } from '#shared/types/domain'
 
 const props = defineProps<{ tasks: Task[] }>()
 const emit = defineEmits<{ changed: [task: Task] }>()
-const { captureException } = useProductAnalytics()
-const { refreshTaskViews } = useTaskViews()
+const { patch, decorateAll } = useOptimisticTask()
+const { openTask } = useTaskPanel()
+
+// The board reads through the shared overlay, so a card that was moved on another surface -- or
+// by the command palette -- is already in its new column here.
+const boardTasks = computed(() => decorateAll(props.tasks))
 
 const columns: ReadonlyArray<{ status: TaskStatus, label: string, emptyMessage: string }> = [
   { status: 'todo', label: 'To do', emptyMessage: 'No tasks waiting to start.' },
@@ -12,33 +16,21 @@ const columns: ReadonlyArray<{ status: TaskStatus, label: string, emptyMessage: 
   { status: 'done', label: 'Done', emptyMessage: 'No completed tasks yet.' },
 ]
 const draggedTaskId = ref<string | null>(null)
-const updatingTaskIds = ref<string[]>([])
-const errorMessage = ref('')
 
-const tasksFor = (status: TaskStatus) => props.tasks.filter(task => task.status === status)
-const isUpdating = (taskId: string) => updatingTaskIds.value.includes(taskId)
+const tasksFor = (status: TaskStatus) => boardTasks.value.filter(task => task.status === status)
 
+// The card moves column on the drop, before the request is sent. A failure puts it back and
+// raises one toast, so there is no per-card spinner and nothing is disabled mid-drag.
 const moveTask = async (task: Task, status: TaskStatus) => {
-  if (task.status === status || isUpdating(task.id)) return
-  errorMessage.value = ''
-  updatingTaskIds.value = [...updatingTaskIds.value, task.id]
-  try {
-    const updated = await $fetch<Task>(`/api/tasks/${task.id}`, {
-      method: 'PATCH',
-      body: { status },
-    })
-    emit('changed', updated)
-    void refreshTaskViews()
-  } catch (error: unknown) {
-    captureException(error, { flow: 'board_status_update' })
-    errorMessage.value = `Kobi could not move “${task.title}”. Try again.`
-  } finally {
-    updatingTaskIds.value = updatingTaskIds.value.filter(id => id !== task.id)
-  }
+  if (task.status === status) return
+  const updated = await patch(task, { status }, {
+    flow: 'board_status_update',
+    message: `Kobi could not move “${task.title}”.`,
+  })
+  if (updated) emit('changed', updated)
 }
 
 const startDrag = (event: DragEvent, task: Task) => {
-  if (isUpdating(task.id)) return
   draggedTaskId.value = task.id
   if (event.dataTransfer) {
     event.dataTransfer.effectAllowed = 'move'
@@ -49,7 +41,7 @@ const startDrag = (event: DragEvent, task: Task) => {
 const dropTask = (event: DragEvent, status: TaskStatus) => {
   const taskId = draggedTaskId.value ?? event.dataTransfer?.getData('text/plain')
   draggedTaskId.value = null
-  const task = props.tasks.find(item => item.id === taskId)
+  const task = boardTasks.value.find(item => item.id === taskId)
   if (task) void moveTask(task, status)
 }
 
@@ -62,7 +54,6 @@ const changeStatus = (event: Event, task: Task) => {
 
 <template>
   <div>
-    <p v-if="errorMessage" class="board-error" role="alert">{{ errorMessage }}</p>
     <div class="board" aria-label="Task status board">
       <section
         v-for="column in columns"
@@ -81,13 +72,16 @@ const changeStatus = (event: Event, task: Task) => {
             v-for="task in tasksFor(column.status)"
             :key="task.id"
             class="board-card"
-            :class="{ 'is-updating': isUpdating(task.id) }"
-            :draggable="!isUpdating(task.id)"
+            draggable="true"
             @dragstart="startDrag($event, task)"
             @dragend="draggedTaskId = null"
           >
             <div class="board-card-copy">
-              <h3><span class="task-key">{{ task.key }}</span> {{ task.title }}</h3>
+              <h3>
+                <button type="button" class="task-title-button" :aria-label="`Open ${task.key}`" @click="openTask(task.key)">
+                  <span class="task-key">{{ task.key }}</span> {{ task.title }}
+                </button>
+              </h3>
               <p v-if="task.description"><TaskText :text="task.description" /></p>
               <div v-if="task.labels.length" class="task-labels">
                 <LabelChip v-for="label in task.labels" :key="label.id" :label="label" />
@@ -102,7 +96,6 @@ const changeStatus = (event: Event, task: Task) => {
             <select
               class="board-status-select"
               :value="task.status"
-              :disabled="isUpdating(task.id)"
               :aria-label="`Status for ${task.title}`"
               @change="changeStatus($event, task)"
               @dragstart.stop

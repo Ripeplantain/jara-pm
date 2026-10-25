@@ -34,9 +34,9 @@ const later = computed(() => tasks.value.filter(task => task.dueDate && task.due
     <LoadingState v-if="status === 'pending'" />
     <ErrorState v-else-if="error" @retry="refresh" />
     <template v-else>
-      <section class="section"><div class="section-heading"><h2>Tomorrow</h2><span>{{ tomorrow.length }}</span></div><TaskList :tasks="tomorrow" show-reschedule @changed="refresh" /></section>
-      <section class="section"><div class="section-heading"><h2>This week</h2><span>{{ thisWeek.length }}</span></div><TaskList :tasks="thisWeek" show-reschedule @changed="refresh" /></section>
-      <section class="section"><div class="section-heading"><h2>Later</h2><span>{{ later.length }}</span></div><TaskList :tasks="later" show-reschedule @changed="refresh" /></section>
+      <section class="section"><div class="section-heading"><h2>Tomorrow</h2><span>{{ tomorrow.length }}</span></div><TaskList :tasks="tomorrow" show-reschedule /></section>
+      <section class="section"><div class="section-heading"><h2>This week</h2><span>{{ thisWeek.length }}</span></div><TaskList :tasks="thisWeek" show-reschedule /></section>
+      <section class="section"><div class="section-heading"><h2>Later</h2><span>{{ later.length }}</span></div><TaskList :tasks="later" show-reschedule /></section>
     </template>
   </main>
 </template>

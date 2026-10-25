@@ -66,6 +66,8 @@ const toggleLabel = async (label: Label) => {
 }
 
 const hasAnyLabel = computed(() => labels.value.length > 0)
+
+defineExpose({ open, close })
 </script>
 
 <template>
@@ -95,8 +97,9 @@ const hasAnyLabel = computed(() => labels.value.length > 0)
         No labels yet. Create them in Settings.
       </p>
 
-      <div v-for="group in groups" :key="group.id" class="label-group">
-        <!-- Labels inside a group are mutually exclusive, so the control reads as a radio set. -->
+      <!-- Labels inside a group are mutually exclusive, so the control reads as a radio set.
+           A group with no labels in it yet would be a radiogroup with nothing to choose. -->
+      <div v-for="group in groups.filter(item => inGroup(item.id).length > 0)" :key="group.id" class="label-group" role="radiogroup" :aria-label="group.name">
         <p class="label-group-name">{{ group.name }} <span class="form-hint">· pick one</span></p>
         <button
           v-for="label in inGroup(group.id)"
