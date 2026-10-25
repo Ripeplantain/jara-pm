@@ -1,11 +1,14 @@
 import { and, asc, eq, gt, isNotNull, isNull, ne, or, sql } from 'drizzle-orm'
 import { createError } from 'h3'
 import type { CreateTaskInput, TaskQuery, UpdateTaskInput } from '#shared/schemas/task'
-import type { Task } from '#shared/types/domain'
+import type { Label, Task } from '#shared/types/domain'
 import type { KobiDatabase, KobiDb } from '~~/server/db'
-import { milestones, projects, taskDaySelections, tasks, users, workspaceMembers } from '~~/server/db/schema'
+import { withTransaction } from '~~/server/db'
+import { milestones, projects, taskDaySelections, taskLabels, tasks, users, workspaceMembers, workspaces } from '~~/server/db/schema'
+import { labelsForTasks, setTaskLabels } from '~~/server/services/labels'
 import type { TaskRow } from '~~/server/types/database'
 import { nextRecurringDate } from '#shared/utils/recurrence'
+import { formatTaskKey, parseTaskKey } from '#shared/utils/task-key'
 import { nowIso, todayIso } from '~~/server/utils/time'
 import { workspaceIdForUser } from '~~/server/utils/workspace'
 
@@ -20,6 +23,8 @@ const taskSelection = {
   milestone_id: tasks.milestoneId,
   milestone_title: milestones.title,
   parent_id: tasks.parentId,
+  number: tasks.number,
+  workspace_key: workspaces.key,
   title: tasks.title,
   description: tasks.description,
   status: tasks.status,
@@ -27,6 +32,7 @@ const taskSelection = {
   due_date: tasks.dueDate,
   scheduled_for: tasks.scheduledFor,
   recurrence: tasks.recurrence,
+  estimate: tasks.estimate,
   selected_for_today: sql<boolean>`${taskDaySelections.taskId} is not null`,
   completed_at: tasks.completedAt,
   position: tasks.position,
@@ -34,7 +40,7 @@ const taskSelection = {
   updated_at: tasks.updatedAt,
 }
 
-const mapTask = (row: TaskRow): Task => ({
+const mapTask = (row: TaskRow, labels: Label[] = []): Task => ({
   id: row.id,
   title: row.title,
   description: row.description,
@@ -52,10 +58,25 @@ const mapTask = (row: TaskRow): Task => ({
   milestoneId: row.milestone_id,
   milestoneTitle: row.milestone_title,
   parentId: row.parent_id,
+  number: row.number,
+  key: formatTaskKey(row.workspace_key, row.number),
+  estimate: row.estimate,
+  labels,
   completedAt: row.completed_at,
   createdAt: row.created_at,
   updatedAt: row.updated_at,
 })
+
+// Every task read needs the same joins: assignee, project and milestone titles, this user's
+// day selection, and the workspace key the display identifier is built from. The day-selection
+// join is user-scoped, so the caller's id is part of the shape rather than a filter.
+const selectTasks = (db: KobiDb, userId: string) => db.select(taskSelection)
+  .from(tasks)
+  .leftJoin(users, eq(users.id, tasks.assigneeId))
+  .leftJoin(projects, and(eq(projects.id, tasks.projectId), eq(projects.workspaceId, tasks.workspaceId)))
+  .leftJoin(milestones, and(eq(milestones.id, tasks.milestoneId), eq(milestones.workspaceId, tasks.workspaceId)))
+  .leftJoin(taskDaySelections, and(eq(taskDaySelections.taskId, tasks.id), eq(taskDaySelections.userId, userId)))
+  .innerJoin(workspaces, eq(workspaces.id, tasks.workspaceId))
 
 const notFound = () => {
   throw createError({ status: 404, statusText: 'Task not found' })
@@ -126,12 +147,7 @@ export const getTask = (
 ) => {
   const workspaceId = workspaceIdForUser(db, userId, maybeTaskId ? workspaceIdOrTaskId : undefined)
   const taskId = maybeTaskId ?? workspaceIdOrTaskId
-  const row = db.select(taskSelection)
-    .from(tasks)
-    .leftJoin(users, eq(users.id, tasks.assigneeId))
-    .leftJoin(projects, and(eq(projects.id, tasks.projectId), eq(projects.workspaceId, tasks.workspaceId)))
-    .leftJoin(milestones, and(eq(milestones.id, tasks.milestoneId), eq(milestones.workspaceId, tasks.workspaceId)))
-    .leftJoin(taskDaySelections, and(eq(taskDaySelections.taskId, tasks.id), eq(taskDaySelections.userId, userId)))
+  const row = selectTasks(db, userId)
     .where(and(
       eq(tasks.id, taskId),
       eq(tasks.workspaceId, workspaceId),
@@ -139,7 +155,35 @@ export const getTask = (
     ))
     .get() as TaskRow | undefined
   if (!row) return notFound()
-  return mapTask(row)
+  return mapTask(row, labelsForTasks(db, workspaceId, [row.id]).get(row.id) ?? [])
+}
+
+/**
+ * Resolves a display identifier such as `ACME-7` within the caller's active workspace.
+ *
+ * The key prefix must match that workspace's key: a task from another workspace is reported as
+ * missing rather than redirected, so the endpoint never discloses that another workspace holds
+ * that number. A malformed key is a 404 as well -- `/not-a-key` must not reach the database.
+ */
+export const getTaskByKey = (
+  db: KobiDb,
+  userId: string,
+  workspaceIdOrKey: string,
+  maybeKey?: string,
+) => {
+  const workspaceId = workspaceIdForUser(db, userId, maybeKey ? workspaceIdOrKey : undefined)
+  const parsed = parseTaskKey(maybeKey ?? workspaceIdOrKey)
+  if (!parsed) return notFound()
+  const row = selectTasks(db, userId)
+    .where(and(
+      eq(tasks.workspaceId, workspaceId),
+      eq(tasks.number, parsed.taskNumber),
+      eq(workspaces.key, parsed.workspaceKey),
+      or(isNotNull(tasks.projectId), eq(tasks.userId, userId)),
+    ))
+    .get() as TaskRow | undefined
+  if (!row) return notFound()
+  return mapTask(row, labelsForTasks(db, workspaceId, [row.id]).get(row.id) ?? [])
 }
 
 export const listTasks = (
@@ -162,6 +206,14 @@ export const listTasks = (
   }
   if (query.status) {
     conditions.push(eq(tasks.status, query.status))
+  }
+  // AND semantics: one EXISTS per label, so a task must carry every requested label. This is
+  // deliberately not `inArray`, which would widen the filter to OR across labels.
+  for (const labelId of query.labelIds ?? []) {
+    conditions.push(sql`exists (
+      select 1 from ${taskLabels}
+      where ${taskLabels.taskId} = ${tasks.id} and ${taskLabels.labelId} = ${labelId}
+    )`)
   }
   if (query.assignee === 'me') conditions.push(eq(tasks.assigneeId, userId))
   if (query.assignee === 'unassigned') conditions.push(isNull(tasks.assigneeId))
@@ -191,12 +243,7 @@ export const listTasks = (
     conditions.push(or(eq(tasks.assigneeId, userId), and(isNull(tasks.projectId), eq(tasks.userId, userId)))!)
   }
 
-  const rows = db.select(taskSelection)
-    .from(tasks)
-    .leftJoin(users, eq(users.id, tasks.assigneeId))
-    .leftJoin(projects, and(eq(projects.id, tasks.projectId), eq(projects.workspaceId, tasks.workspaceId)))
-    .leftJoin(milestones, and(eq(milestones.id, tasks.milestoneId), eq(milestones.workspaceId, tasks.workspaceId)))
-    .leftJoin(taskDaySelections, and(eq(taskDaySelections.taskId, tasks.id), eq(taskDaySelections.userId, userId)))
+  const rows = selectTasks(db, userId)
     .where(and(...conditions))
     .orderBy(
       sql`case when ${tasks.status} = 'done' then 1 else 0 end`,
@@ -206,7 +253,20 @@ export const listTasks = (
       asc(tasks.createdAt),
     )
     .all() as TaskRow[]
-  return rows.map(mapTask)
+  const labelsByTask = labelsForTasks(db, workspaceId, rows.map(row => row.id))
+  return rows.map(row => mapTask(row, labelsByTask.get(row.id) ?? []))
+}
+
+// One atomic statement, so the read-modify-write cannot interleave between concurrent creates.
+// Callers run it inside the same transaction as the insert, so a failed insert leaves no gap.
+const allocateTaskNumber = (db: KobiDb, workspaceId: string): number => {
+  const allocated = db.update(workspaces)
+    .set({ taskCounter: sql`${workspaces.taskCounter} + 1` })
+    .where(eq(workspaces.id, workspaceId))
+    .returning({ number: workspaces.taskCounter })
+    .get()
+  if (!allocated) throw createError({ status: 404, statusText: 'Workspace not found' })
+  return allocated.number
 }
 
 export const createTask = (
@@ -237,32 +297,39 @@ export const createTask = (
   const projectCondition = input.projectId === null
     ? and(isNull(tasks.projectId), eq(tasks.userId, userId))!
     : eq(tasks.projectId, input.projectId)
-  const positionRow = db.select({ position: sql<number>`coalesce(max(${tasks.position}), -1) + 1` })
-    .from(tasks)
-    .where(and(eq(tasks.workspaceId, workspaceId), projectCondition))
-    .get()
 
-  db.insert(tasks).values({
-    id,
-    userId,
-    workspaceId,
-    assigneeId,
-    projectId: input.projectId,
-    milestoneId: input.milestoneId,
-    parentId: input.parentId,
-    title: input.title,
-    description: input.description,
-    status: input.status,
-    priority: input.priority,
-    dueDate: input.dueDate,
-    scheduledFor: input.scheduledFor,
-    recurrence: input.recurrence,
-    completedAt: input.status === 'done' ? now : null,
-    position: positionRow?.position ?? 0,
-    createdAt: now,
-    updatedAt: now,
-  }).run()
-  setDaySelection(db, userId, id, input.selectedForToday)
+  // The counter bump and the insert share one transaction so a failed insert leaves no gap in
+  // the workspace's task numbers. `tasks_workspace_number_unique` is the backstop.
+  withTransaction(db, (tx) => {
+    const positionRow = tx.select({ position: sql<number>`coalesce(max(${tasks.position}), -1) + 1` })
+      .from(tasks)
+      .where(and(eq(tasks.workspaceId, workspaceId), projectCondition))
+      .get()
+    tx.insert(tasks).values({
+      id,
+      userId,
+      workspaceId,
+      assigneeId,
+      projectId: input.projectId,
+      milestoneId: input.milestoneId,
+      parentId: input.parentId,
+      title: input.title,
+      description: input.description,
+      status: input.status,
+      priority: input.priority,
+      dueDate: input.dueDate,
+      scheduledFor: input.scheduledFor,
+      recurrence: input.recurrence,
+      completedAt: input.status === 'done' ? now : null,
+      estimate: input.estimate ?? null,
+      number: allocateTaskNumber(tx, workspaceId),
+      position: positionRow?.position ?? 0,
+      createdAt: now,
+      updatedAt: now,
+    }).run()
+    setDaySelection(tx, userId, id, input.selectedForToday)
+    if (input.labelIds?.length) setTaskLabels(tx, workspaceId, id, input.labelIds)
+  })
   return getTask(db, userId, workspaceId, id)
 }
 
@@ -308,6 +375,7 @@ export const updateTask = (
       selectedForToday: input.selectedForToday === undefined
         ? base.selectedForToday
         : input.selectedForToday,
+      estimate: input.estimate === undefined ? base.estimate : input.estimate,
       // Keep the original completion marker while a recurring occurrence is reopened. It records
       // that its successor was already created, so completing the same occurrence again cannot
       // duplicate future work. Pausing recurrence restores the normal open-task invariant.
@@ -332,6 +400,7 @@ export const updateTask = (
       ))
       .run()
     setDaySelection(database, userId, taskId, selectedForToday)
+    if (input.labelIds !== undefined) setTaskLabels(database, workspaceId, taskId, input.labelIds)
   }
 
   const values = valuesFor(current)
@@ -371,8 +440,9 @@ export const updateTask = (
         .from(tasks)
         .where(and(eq(tasks.workspaceId, workspaceId), projectCondition))
         .get()
+      const successorId = crypto.randomUUID()
       tx.insert(tasks).values({
-        id: crypto.randomUUID(),
+        id: successorId,
         userId,
         workspaceId,
         assigneeId: latestValues.assigneeId,
@@ -387,10 +457,14 @@ export const updateTask = (
         scheduledFor: null,
         recurrence: latestValues.recurrence,
         completedAt: null,
+        estimate: latestValues.estimate,
+        number: allocateTaskNumber(tx, workspaceId),
         position: positionRow?.position ?? 0,
         createdAt: updatedAt,
         updatedAt,
       }).run()
+      const inherited = latest.labels.map(label => label.id)
+      if (inherited.length > 0) setTaskLabels(tx, workspaceId, successorId, inherited)
     })
   } else {
     update(db, values, nowIso())

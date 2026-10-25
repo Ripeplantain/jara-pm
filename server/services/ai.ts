@@ -602,6 +602,10 @@ export const acceptProposal = (
             scheduledFor: null,
             recurrence: 'none',
             selectedForToday: false,
+            // An accepted plan proposes no estimates or labels of its own; Slice E1 is where
+            // the model starts proposing them.
+            estimate: null,
+            labelIds: [],
             assigneeId: userId,
             projectId: project.id,
             milestoneId: milestone.id,

@@ -82,6 +82,7 @@ describe('AI proposal persistence', () => {
     db.insert(workspaces).values({
       id: otherWorkspace,
       name: 'Other workspace',
+      key: 'OTHER',
       ownerId: userId,
       createdAt: '2026-01-01T00:00:00.000Z',
       updatedAt: '2026-01-01T00:00:00.000Z',
@@ -236,7 +237,7 @@ describe('Edited plan acceptance', () => {
   it('still returns not found for an edited plan on another workspace\'s proposal', () => {
     const otherWorkspace = `workspace-other-${userId}`
     const now = '2026-01-01T00:00:00.000Z'
-    db.insert(workspaces).values({ id: otherWorkspace, name: 'Other', ownerId: userId, createdAt: now, updatedAt: now }).run()
+    db.insert(workspaces).values({ id: otherWorkspace, name: 'Other', key: 'OTHER', ownerId: userId, createdAt: now, updatedAt: now }).run()
     db.insert(workspaceMembers).values({ workspaceId: otherWorkspace, userId, role: 'owner', joinedAt: now }).run()
     db.insert(aiProposals).values({
       id: 'proposal-other-edit',

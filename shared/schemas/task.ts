@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { dateSchema, descriptionSchema, idSchema, titleSchema } from '#shared/schemas/common'
-import { queryFlagSchema } from '#shared/schemas/query'
+import { MAX_ESTIMATE } from '#shared/utils/estimates'
+import { idListSchema, queryFlagSchema } from '#shared/schemas/query'
 import { TASK_PRIORITIES, TASK_RECURRENCES, TASK_STATUSES } from '#shared/types/domain'
 
 export const taskQuerySchema = z.object({
@@ -8,6 +9,9 @@ export const taskQuerySchema = z.object({
   projectId: idSchema.optional(),
   status: z.enum(TASK_STATUSES).optional(),
   assignee: z.enum(['me', 'everyone', 'unassigned']).optional(),
+  // AND semantics across labels: a task must carry every id listed here. Grouped labels are
+  // single-select, so listing two siblings of one group matches nothing.
+  labelIds: idListSchema,
   // The scoped views hide completed work by default. This opts a single request back in,
   // so a list can reveal what it is hiding without needing a separate scope.
   includeCompleted: queryFlagSchema,
@@ -22,6 +26,10 @@ const taskFields = {
   scheduledFor: dateSchema,
   recurrence: z.enum(TASK_RECURRENCES),
   selectedForToday: z.boolean(),
+  // Bounds mirror the `tasks_estimate_check` constraint. Values are not checked against the
+  // workspace's estimate scale: changing the scale must not invalidate stored estimates.
+  estimate: z.number().int().min(1).max(MAX_ESTIMATE).nullable(),
+  labelIds: z.array(idSchema).max(50),
   assigneeId: idSchema.nullable(),
   projectId: idSchema.nullable(),
   milestoneId: idSchema.nullable(),
@@ -37,6 +45,8 @@ export const createTaskSchema = z.object({
   scheduledFor: taskFields.scheduledFor.optional().default(null),
   recurrence: taskFields.recurrence.default('none'),
   selectedForToday: taskFields.selectedForToday.default(false),
+  estimate: taskFields.estimate.optional().default(null),
+  labelIds: taskFields.labelIds.optional().default([]),
   assigneeId: taskFields.assigneeId.optional(),
   projectId: taskFields.projectId.optional().default(null),
   milestoneId: taskFields.milestoneId.optional().default(null),
@@ -59,6 +69,8 @@ export const updateTaskSchema = z.object({
   scheduledFor: taskFields.scheduledFor.optional(),
   recurrence: taskFields.recurrence.optional(),
   selectedForToday: taskFields.selectedForToday.optional(),
+  estimate: taskFields.estimate.optional(),
+  labelIds: taskFields.labelIds.optional(),
   assigneeId: taskFields.assigneeId.optional(),
   projectId: taskFields.projectId.optional(),
   milestoneId: taskFields.milestoneId.optional(),

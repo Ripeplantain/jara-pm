@@ -3,17 +3,34 @@ export const TASK_PRIORITIES = ['none', 'low', 'medium', 'high'] as const
 export const TASK_RECURRENCES = ['none', 'daily', 'weekly'] as const
 export const GOAL_STATUSES = ['active', 'completed', 'archived'] as const
 export const PROJECT_STATUSES = ['active', 'paused', 'completed', 'archived'] as const
+export const ESTIMATE_SCALES = ['none', 'exponential', 'fibonacci', 'linear', 'tshirt'] as const
+export const LABEL_COLORS = [
+  'slate',
+  'red',
+  'orange',
+  'amber',
+  'green',
+  'teal',
+  'blue',
+  'indigo',
+  'purple',
+  'pink',
+] as const
 
 export type TaskStatus = (typeof TASK_STATUSES)[number]
 export type TaskPriority = (typeof TASK_PRIORITIES)[number]
 export type TaskRecurrence = (typeof TASK_RECURRENCES)[number]
 export type GoalStatus = (typeof GOAL_STATUSES)[number]
 export type ProjectStatus = (typeof PROJECT_STATUSES)[number]
+export type EstimateScale = (typeof ESTIMATE_SCALES)[number]
+export type LabelColor = (typeof LABEL_COLORS)[number]
 export type WorkspaceRole = 'owner' | 'member'
 
 export type WorkspaceSummary = {
   id: string
   name: string
+  key: string
+  estimateScale: EstimateScale
   role: WorkspaceRole
 }
 
@@ -36,8 +53,33 @@ export type User = {
   workspace?: WorkspaceSummary
 }
 
+export type LabelGroup = {
+  id: string
+  name: string
+  position: number
+}
+
+export type Label = {
+  id: string
+  groupId: string | null
+  groupName: string | null
+  name: string
+  color: LabelColor
+  description: string
+  archivedAt: string | null
+}
+
+// Groups travel with the labels so a picker can render single-select groups without a
+// second request. Archived labels are omitted unless the caller opts in.
+export type LabelCollection = {
+  groups: LabelGroup[]
+  labels: Label[]
+}
+
 export type Task = {
   id: string
+  number: number
+  key: string
   title: string
   description: string
   status: TaskStatus
@@ -54,6 +96,8 @@ export type Task = {
   milestoneId: string | null
   milestoneTitle: string | null
   parentId: string | null
+  estimate: number | null
+  labels: Label[]
   completedAt: string | null
   createdAt: string
   updatedAt: string
@@ -69,6 +113,8 @@ export type Milestone = {
   status: 'active' | 'completed'
   taskCount: number
   completedTaskCount: number
+  points: number
+  completedPoints: number
   progress: number | null
 }
 
@@ -82,6 +128,8 @@ export type Project = {
   targetDate: string | null
   taskCount: number
   completedTaskCount: number
+  points: number
+  completedPoints: number
   progress: number | null
   milestones: Milestone[]
   createdAt: string
@@ -97,6 +145,8 @@ export type Goal = {
   projectCount: number
   taskCount: number
   completedTaskCount: number
+  points: number
+  completedPoints: number
   progress: number | null
   createdAt: string
   updatedAt: string

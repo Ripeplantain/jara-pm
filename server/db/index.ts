@@ -10,3 +10,8 @@ export type KobiTransaction = Parameters<KobiDatabase['transaction']>[0] extends
   ? T
   : never
 export type KobiDb = KobiDatabase | KobiTransaction
+
+// `KobiDb` is a union, so `.transaction` needs a cast to call. better-sqlite3 implements nested
+// transactions as SAVEPOINTs, so this is safe when `db` is already a transaction.
+export const withTransaction = <T>(db: KobiDb, run: (tx: KobiDb) => T): T =>
+  (db as KobiDatabase).transaction(tx => run(tx)) as T

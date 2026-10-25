@@ -1,6 +1,7 @@
 import { eq } from 'drizzle-orm'
 import type { KobiDatabase } from '~~/server/db'
 import { users, workspaceMembers, workspaces } from '~~/server/db/schema'
+import { allocateWorkspaceKey } from '~~/server/services/workspace'
 import { nowIso } from '~~/server/utils/time'
 
 export const createUserWithPersonalWorkspace = (
@@ -23,6 +24,7 @@ export const createUserWithPersonalWorkspace = (
     tx.insert(workspaces).values({
       id: workspaceId,
       name: `${input.name}'s workspace`,
+      key: allocateWorkspaceKey(tx, input.name),
       ownerId: id,
       createdAt: now,
       updatedAt: now,

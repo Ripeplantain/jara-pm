@@ -1,8 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import { askKobiSchema, goalPlanProposalSchema } from '../shared/schemas/ai'
-import { createTaskSchema, updateTaskSchema } from '../shared/schemas/task'
+import { createLabelSchema, labelQuerySchema, updateLabelSchema } from '../shared/schemas/label'
+import { idListSchema } from '../shared/schemas/query'
+import { createTaskSchema, taskQuerySchema, updateTaskSchema } from '../shared/schemas/task'
 import {
   createWorkspaceSchema,
+  updateWorkspaceSchema,
+  workspaceKeySchema,
   workspaceInviteParamsSchema,
   workspaceInviteSchema,
   workspaceMemberParamsSchema,
@@ -103,5 +107,111 @@ describe('Ask Kobi message validation', () => {
 
   it('rejects a 16001-character message', () => {
     expect(() => askKobiSchema.parse({ message: 'x'.repeat(16_001) })).toThrow()
+  })
+})
+
+
+describe('workspace key input', () => {
+  it('upper-cases a hand-typed key', () => {
+    expect(workspaceKeySchema.parse(' acme ')).toBe('ACME')
+    expect(updateWorkspaceSchema.parse({ key: 'k' })).toEqual({ key: 'K' })
+  })
+
+  it('accepts digits after the first character', () => {
+    expect(workspaceKeySchema.parse('A2')).toBe('A2')
+    expect(workspaceKeySchema.parse('TEAM1')).toBe('TEAM1')
+  })
+
+  it('rejects keys the database CHECK would reject', () => {
+    for (const value of ['', '1A', 'TOOLONG', 'A-B', 'A B', 'Ä']) {
+      expect(() => workspaceKeySchema.parse(value), value).toThrow()
+    }
+  })
+
+  it('leaves out every field the caller did not send', () => {
+    expect(updateWorkspaceSchema.parse({})).toEqual({})
+  })
+})
+
+describe('label input', () => {
+  const groupId = '8a5c64c8-9fb8-43d8-bf43-7583392d3479'
+
+  it('defaults a new label to an ungrouped slate label', () => {
+    expect(createLabelSchema.parse({ name: ' bug ' }))
+      .toEqual({ name: 'bug', color: 'slate', description: '', groupId: null })
+  })
+
+  it('accepts a group and a colour from the fixed palette', () => {
+    expect(createLabelSchema.parse({ name: 'bug', color: 'red', groupId }))
+      .toEqual({ name: 'bug', color: 'red', description: '', groupId })
+  })
+
+  it('rejects an empty name, an oversized name, and a colour outside the palette', () => {
+    expect(() => createLabelSchema.parse({ name: '   ' })).toThrow()
+    expect(() => createLabelSchema.parse({ name: 'x'.repeat(61) })).toThrow()
+    expect(() => createLabelSchema.parse({ name: 'bug', color: 'chartreuse' })).toThrow()
+  })
+
+  it('treats archiving as an explicit boolean, not an absence', () => {
+    expect(updateLabelSchema.parse({})).toEqual({})
+    expect(updateLabelSchema.parse({ archived: false })).toEqual({ archived: false })
+    expect(updateLabelSchema.parse({ archived: true })).toEqual({ archived: true })
+  })
+
+  it('reads the archived query flag the way useFetch serialises it', () => {
+    expect(labelQuerySchema.parse({})).toEqual({ includeArchived: undefined })
+    expect(labelQuerySchema.parse({ includeArchived: 'false' })).toEqual({ includeArchived: false })
+    expect(labelQuerySchema.parse({ includeArchived: 'true' })).toEqual({ includeArchived: true })
+  })
+})
+
+describe('id list query input', () => {
+  const first = '8a5c64c8-9fb8-43d8-bf43-7583392d3479'
+  const second = '68e9ef85-4804-47b9-8656-a296a05f3ff9'
+
+  it('accepts a single id, a repeated parameter, and a comma-separated list alike', () => {
+    expect(idListSchema.parse(first)).toEqual([first])
+    expect(idListSchema.parse([first, second])).toEqual([first, second])
+    expect(idListSchema.parse(`${first},${second}`)).toEqual([first, second])
+    expect(idListSchema.parse(`${first}, ${second}`)).toEqual([first, second])
+  })
+
+  it('dedupes so a filter cannot be doubled by the URL', () => {
+    expect(idListSchema.parse(`${first},${first}`)).toEqual([first])
+  })
+
+  it('is absent rather than empty when the parameter is omitted', () => {
+    expect(taskQuerySchema.parse({ scope: 'all' }).labelIds).toBeUndefined()
+  })
+
+  it('rejects a list containing anything that is not an id', () => {
+    expect(() => idListSchema.parse(`${first},not-an-id`)).toThrow()
+  })
+
+  it('reads an empty parameter as no filter rather than a bad request', () => {
+    // `?labelIds=` is what a URL serialiser emits when the filter is cleared, and an empty
+    // list applies no label condition at all.
+    expect(idListSchema.parse('')).toEqual([])
+    expect(idListSchema.parse(',')).toEqual([])
+  })
+})
+
+describe('task estimate and label input', () => {
+  const labelId = '8a5c64c8-9fb8-43d8-bf43-7583392d3479'
+
+  it('defaults a new task to no estimate and no labels', () => {
+    const parsed = createTaskSchema.parse({ title: 'Plain' })
+    expect(parsed.estimate).toBeNull()
+    expect(parsed.labelIds).toEqual([])
+  })
+
+  it('distinguishes clearing an estimate from leaving it alone', () => {
+    expect(updateTaskSchema.parse({ estimate: null })).toEqual({ estimate: null })
+    expect(updateTaskSchema.parse({})).toEqual({})
+  })
+
+  it('caps how many labels one write may set', () => {
+    expect(() => createTaskSchema.parse({ title: 'Many', labelIds: Array.from({ length: 51 }, () => labelId) }))
+      .toThrow()
   })
 })

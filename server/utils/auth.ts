@@ -80,6 +80,8 @@ export const getWorkspaceDetails = (event: H3Event, workspaceId: string, userId:
   return useDatabase(event).select({
     id: workspaces.id,
     name: workspaces.name,
+    key: workspaces.key,
+    estimateScale: workspaces.estimateScale,
     role: workspaceMembers.role,
   })
     .from(workspaces)

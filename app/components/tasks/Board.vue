@@ -87,8 +87,11 @@ const changeStatus = (event: Event, task: Task) => {
             @dragend="draggedTaskId = null"
           >
             <div class="board-card-copy">
-              <h3>{{ task.title }}</h3>
-              <p v-if="task.description">{{ task.description }}</p>
+              <h3><span class="task-key">{{ task.key }}</span> {{ task.title }}</h3>
+              <p v-if="task.description"><TaskText :text="task.description" /></p>
+              <div v-if="task.labels.length" class="task-labels">
+                <LabelChip v-for="label in task.labels" :key="label.id" :label="label" />
+              </div>
             </div>
             <div v-if="task.projectTitle || task.dueDate || task.scheduledFor || task.assigneeName" class="board-card-meta">
               <span v-if="task.projectTitle">{{ task.projectTitle }}</span>

@@ -1,3 +1,5 @@
+import type { LabelColor } from '#shared/types/domain'
+
 export type UserRow = {
   id: string
   email: string
@@ -18,6 +20,8 @@ export type TaskRow = {
   milestone_id: string | null
   milestone_title: string | null
   parent_id: string | null
+  number: number
+  workspace_key: string
   title: string
   description: string
   status: 'todo' | 'in_progress' | 'done'
@@ -26,6 +30,7 @@ export type TaskRow = {
   scheduled_for: string | null
   recurrence: 'none' | 'daily' | 'weekly'
   selected_for_today: boolean
+  estimate: number | null
   completed_at: string | null
   position: number
   created_at: string
@@ -44,6 +49,8 @@ export type GoalRow = {
   project_count: number
   task_count: number
   completed_task_count: number
+  points: number
+  completed_points: number
 }
 
 export type ProjectRow = {
@@ -59,6 +66,8 @@ export type ProjectRow = {
   updated_at: string
   task_count: number
   completed_task_count: number
+  points: number
+  completed_points: number
 }
 
 export type MilestoneRow = {
@@ -72,4 +81,22 @@ export type MilestoneRow = {
   status: 'active' | 'completed'
   task_count: number
   completed_task_count: number
+  points: number
+  completed_points: number
+}
+
+export type LabelGroupRow = {
+  id: string
+  name: string
+  position: number
+}
+
+export type LabelRow = {
+  id: string
+  group_id: string | null
+  group_name: string | null
+  name: string
+  color: LabelColor
+  description: string
+  archived_at: string | null
 }

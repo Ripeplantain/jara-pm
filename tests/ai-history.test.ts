@@ -87,6 +87,7 @@ describe('historyFor', () => {
     db.insert(workspaces).values({
       id: secondWorkspace,
       name: 'Secondary workspace',
+      key: 'SEC',
       ownerId: userId,
       createdAt: '2026-01-01T00:00:00.000Z',
       updatedAt: '2026-01-01T00:00:00.000Z',

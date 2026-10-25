@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs'
+import { readdirSync, readFileSync } from 'node:fs'
 import Database from 'better-sqlite3'
 import { afterEach, describe, expect, it } from 'vitest'
 import { eq } from 'drizzle-orm'
@@ -31,6 +31,20 @@ describe('database migrations', () => {
     const restarted = initializeDatabase(sqlite)
     expect(restarted.select({ id: users.id }).from(users).where(eq(users.email, 'one@example.test')).get())
       .toEqual({ id: '11111111-1111-4111-8111-111111111111' })
+  })
+
+  // Migrations run with foreign_keys OFF so the table-rebuild pattern does not cascade child
+  // rows away. The application must never be left running in that state.
+  it('leaves foreign key enforcement on after migrating', () => {
+    const sqlite = new Database(':memory:')
+    databases.push(sqlite)
+
+    initializeDatabase(sqlite)
+
+    expect(sqlite.pragma('foreign_keys')).toEqual([{ foreign_keys: 1 }])
+    // And again on a database that has nothing left to migrate.
+    initializeDatabase(sqlite)
+    expect(sqlite.pragma('foreign_keys')).toEqual([{ foreign_keys: 1 }])
   })
 
   it('preserves data in an existing SQLite schema during the baseline migration', () => {
@@ -117,6 +131,79 @@ describe('database migrations', () => {
 
     expect(sqlite.prepare('SELECT recurrence FROM tasks WHERE id = ?').get('44444444-4444-4444-8444-444444444444'))
       .toEqual({ recurrence: 'none' })
+  })
+
+  it('backfills task numbers and workspace keys in 0006 without losing linked rows', () => {
+    const sqlite = new Database(':memory:')
+    databases.push(sqlite)
+    // Mirror production: Drizzle wraps migrations in one transaction, where PRAGMA foreign_keys
+    // is a no-op, so enforcement must be off for the rebuild steps not to cascade.
+    sqlite.pragma('foreign_keys = OFF')
+
+    const apply = (file: string) => {
+      const sql = readFileSync(new URL(`../drizzle/${file}`, import.meta.url), 'utf8')
+      for (const statement of sql.split('--> statement-breakpoint')) {
+        const trimmed = statement.trim()
+        if (trimmed) sqlite.exec(trimmed)
+      }
+    }
+    const before = readdirSync(new URL('../drizzle', import.meta.url))
+      .filter(file => file.endsWith('.sql') && !file.startsWith('0006'))
+      .sort()
+    for (const file of before) apply(file)
+
+    const at = (day: string) => `2026-01-0${day}T00:00:00.000Z`
+    sqlite.exec(`
+      INSERT INTO users (id, email, name, password_hash, created_at, updated_at)
+      VALUES ('user-a', 'a@example.test', 'A', 'h', '${at('1')}', '${at('1')}'),
+             ('user-b', 'b@example.test', 'B', 'h', '${at('1')}', '${at('1')}');
+      INSERT INTO workspaces (id, name, owner_id, created_at, updated_at)
+      VALUES ('ws-1', 'Acme', 'user-a', '${at('1')}', '${at('1')}'),
+             ('ws-2', 'Anvil', 'user-b', '${at('2')}', '${at('2')}'),
+             ('ws-3', '9 Lives', 'user-b', '${at('3')}', '${at('3')}');
+      INSERT INTO workspace_members (workspace_id, user_id, role, joined_at)
+      VALUES ('ws-1', 'user-a', 'owner', '${at('1')}'), ('ws-2', 'user-b', 'owner', '${at('2')}');
+      INSERT INTO tasks (id, user_id, workspace_id, title, created_at, updated_at)
+      VALUES ('t-a2', 'user-a', 'ws-1', 'Second', '${at('2')}', '${at('2')}'),
+             ('t-a1', 'user-a', 'ws-1', 'First', '${at('1')}', '${at('1')}'),
+             ('t-a3', 'user-a', 'ws-1', 'Third', '${at('3')}', '${at('3')}'),
+             ('t-b1', 'user-b', 'ws-2', 'Other', '${at('1')}', '${at('1')}');
+      INSERT INTO task_day_selections (user_id, task_id, created_at)
+      VALUES ('user-a', 't-a1', '${at('1')}');
+    `)
+
+    // Production applies migrations inside one transaction with enforcement disabled first; the
+    // baseline files above were replayed outside one, so their PRAGMA statements took effect.
+    sqlite.pragma('foreign_keys = OFF')
+    sqlite.exec('BEGIN')
+    apply('0006_past_rick_jones.sql')
+    sqlite.exec('COMMIT')
+
+    // Nothing may be cascade-deleted by the DROP TABLE steps in the rebuilds.
+    const count = (table: string) =>
+      (sqlite.prepare(`SELECT count(*) AS n FROM ${table}`).get() as { n: number }).n
+    expect(count('tasks')).toBe(4)
+    expect(count('workspaces')).toBe(3)
+    expect(count('workspace_members')).toBe(2)
+    expect(count('task_day_selections')).toBe(1)
+    expect(count('users')).toBe(2)
+
+    // Numbers are consecutive per workspace, ordered by created_at, starting at 1.
+    expect(sqlite.prepare('SELECT id, number FROM tasks WHERE workspace_id = ? ORDER BY number').all('ws-1'))
+      .toEqual([{ id: 't-a1', number: 1 }, { id: 't-a2', number: 2 }, { id: 't-a3', number: 3 }])
+    expect(sqlite.prepare('SELECT number FROM tasks WHERE id = ?').get('t-b1')).toEqual({ number: 1 })
+
+    // Keys are unique, satisfy the CHECK charset, and collisions take an ordinal suffix.
+    expect(sqlite.prepare('SELECT id, key FROM workspaces ORDER BY created_at').all())
+      .toEqual([{ id: 'ws-1', key: 'A' }, { id: 'ws-2', key: 'A2' }, { id: 'ws-3', key: 'W' }])
+
+    // Counters are seeded from the highest number so the next create cannot collide.
+    expect(sqlite.prepare('SELECT id, task_counter FROM workspaces ORDER BY created_at').all())
+      .toEqual([{ id: 'ws-1', task_counter: 3 }, { id: 'ws-2', task_counter: 1 }, { id: 'ws-3', task_counter: 0 }])
+
+    expect(sqlite.prepare('SELECT DISTINCT estimate_scale FROM workspaces').all()).toEqual([{ estimate_scale: 'none' }])
+    expect(sqlite.prepare('SELECT count(*) AS n FROM tasks WHERE estimate IS NOT NULL').get()).toEqual({ n: 0 })
+    expect(sqlite.pragma('foreign_key_check')).toEqual([])
   })
 
   it('backfills one workspace per existing user without losing linked data', () => {

@@ -5,6 +5,7 @@ import type { KobiDatabase, KobiDb } from '~~/server/db'
 import { tasks, users, workspaceInvites, workspaceMembers, workspaces } from '~~/server/db/schema'
 import { nowIso } from '~~/server/utils/time'
 import { sendInviteEmail } from '~~/server/services/mailer'
+import { allocateWorkspaceKey } from '~~/server/services/workspace'
 
 const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000
 const OWNER_INVITE_LIMIT = 10
@@ -271,6 +272,7 @@ export const removeWorkspaceMember = (db: KobiDatabase, workspaceId: string, use
       tx.insert(workspaces).values({
         id: fallbackId,
         name: 'Personal workspace',
+        key: allocateWorkspaceKey(tx, 'Personal workspace'),
         ownerId: userId,
         createdAt: now,
         updatedAt: now,

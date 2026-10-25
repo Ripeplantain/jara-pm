@@ -43,6 +43,13 @@
       "when": 1792454277301,
       "tag": "0005_happy_demogoblin",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1792798899099,
+      "tag": "0006_past_rick_jones",
+      "breakpoints": true
     }
   ]
 }

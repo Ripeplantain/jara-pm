@@ -35,6 +35,8 @@ describe('workspace service', () => {
       {
         id: 'workspace-workspace-owner',
         name: 'Test workspace',
+        key: 'TESTW',
+        estimateScale: 'none',
         role: 'owner',
         isActive: false,
       },
@@ -54,6 +56,8 @@ describe('workspace service', () => {
     expect(activateWorkspace(db, 'workspace-outsider', created.id)).toEqual({
       id: created.id,
       name: 'Shared workspace',
+      key: created.key,
+      estimateScale: 'none',
       role: 'member',
       isActive: true,
     })

@@ -91,6 +91,7 @@ describe('workspace invites', () => {
     db.update(users).set({ activeWorkspaceId: workspaceId }).where(eq(users.id, 'remove-member')).run()
     db.insert(tasks).values({
       id: 'assigned-task',
+      number: 1,
       userId: 'remove-owner',
       workspaceId,
       assigneeId: 'remove-member',
@@ -100,6 +101,7 @@ describe('workspace invites', () => {
     }).run()
     db.insert(tasks).values({
       id: 'personal-assigned-task',
+      number: 1,
       userId: 'remove-member',
       workspaceId: personalWorkspaceId,
       assigneeId: 'remove-member',

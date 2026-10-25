@@ -597,6 +597,90 @@
     @apply mt-3;
   }
 
+  .task-key {
+    @apply mr-1.5 font-mono text-xs text-text-muted tabular-nums;
+  }
+
+  .task-key-link {
+    @apply font-mono text-xs text-primary underline decoration-dotted underline-offset-2;
+  }
+
+  .task-estimate {
+    @apply tabular-nums;
+  }
+
+  .task-labels {
+    @apply mt-1 flex flex-wrap items-center gap-1;
+  }
+
+  .label-chip {
+    @apply inline-flex max-w-[160px] items-center gap-1 rounded-full border border-border bg-background px-2 py-px text-xs text-text-secondary;
+  }
+
+  .label-chip-text {
+    @apply overflow-hidden text-ellipsis whitespace-nowrap;
+  }
+
+  .label-chip.muted {
+    @apply text-text-muted;
+  }
+
+  .label-chip.archived .label-chip-text {
+    @apply line-through;
+  }
+
+  .label-dot {
+    @apply size-1.5 shrink-0 rounded-full bg-text-muted;
+  }
+
+  /* Label colours are a fixed palette, mirrored by LABEL_COLORS in shared/types/domain.ts. */
+  .label-chip.color-slate .label-dot { @apply bg-text-muted; }
+  .label-chip.color-red .label-dot { @apply bg-danger; }
+  .label-chip.color-orange .label-dot { @apply bg-warning; }
+  .label-chip.color-amber .label-dot { @apply bg-amber-500; }
+  .label-chip.color-green .label-dot { @apply bg-success; }
+  .label-chip.color-teal .label-dot { @apply bg-teal-500; }
+  .label-chip.color-blue .label-dot { @apply bg-primary; }
+  .label-chip.color-indigo .label-dot { @apply bg-indigo-500; }
+  .label-chip.color-purple .label-dot { @apply bg-purple-500; }
+  .label-chip.color-pink .label-dot { @apply bg-pink-500; }
+
+  .label-picker {
+    @apply relative;
+  }
+
+  .label-panel {
+    @apply absolute right-0 top-full z-20 mt-1 grid w-56 gap-2 rounded-lg border border-border bg-surface p-2 shadow-lg;
+  }
+
+  .label-group {
+    @apply grid gap-1;
+  }
+
+  .label-group-name {
+    @apply text-xs font-medium text-text-secondary;
+  }
+
+  .label-option {
+    @apply flex cursor-pointer items-center rounded-md border border-transparent bg-transparent px-1 py-1 text-left;
+  }
+
+  .label-option:hover:not(:disabled) {
+    @apply bg-surface-hover;
+  }
+
+  .label-option.selected {
+    @apply border-border bg-surface-active;
+  }
+
+  .label-option:disabled {
+    @apply cursor-not-allowed opacity-60;
+  }
+
+  .label-admin-row {
+    @apply flex flex-wrap items-center justify-between gap-2 rounded-md border border-border bg-background p-2;
+  }
+
   .priority-dot {
     @apply size-1.5 rounded-full bg-text-muted;
   }

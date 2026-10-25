@@ -1,5 +1,6 @@
 import { sql } from 'drizzle-orm'
 import { check, foreignKey, index, integer, sqliteTable, text, unique, uniqueIndex } from 'drizzle-orm/sqlite-core'
+import type { EstimateScale, LabelColor } from '#shared/types/domain'
 
 const workspaceIdColumn = (): any => workspaces.id
 const userIdColumn = (): any => users.id
@@ -17,10 +18,25 @@ export const users = sqliteTable('users', {
 export const workspaces = sqliteTable('workspaces', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
+  key: text('key').notNull().unique(),
+  taskCounter: integer('task_counter').notNull().default(0),
+  estimateScale: text('estimate_scale').notNull().$type<EstimateScale>().default('none'),
   ownerId: text('owner_id').notNull().references(userIdColumn, { onDelete: 'cascade' }),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
-})
+}, table => [
+  check(
+    'workspaces_key_check',
+    sql`length(${table.key}) between 1 and 5
+      and ${table.key} glob '[A-Z]*'
+      and ${table.key} not glob '*[^A-Z0-9]*'`,
+  ),
+  check(
+    'workspaces_estimate_scale_check',
+    sql`${table.estimateScale} in ('none', 'exponential', 'fibonacci', 'linear', 'tshirt')`,
+  ),
+  check('workspaces_task_counter_check', sql`${table.taskCounter} >= 0`),
+])
 
 export const workspaceMembers = sqliteTable('workspace_members', {
   workspaceId: text('workspace_id').notNull().references(() => workspaces.id, { onDelete: 'cascade' }),
@@ -100,11 +116,15 @@ export const tasks = sqliteTable('tasks', {
   scheduledFor: text('scheduled_for'),
   recurrence: text('recurrence').notNull().$type<'none' | 'daily' | 'weekly'>().default('none'),
   completedAt: text('completed_at'),
+  estimate: integer('estimate'),
+  number: integer('number').notNull(),
   position: integer('position').notNull().default(0),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
 }, table => [
   check('tasks_status_check', sql`${table.status} in ('todo', 'in_progress', 'done')`),
+  check('tasks_estimate_check', sql`${table.estimate} is null or (${table.estimate} between 1 and 1000)`),
+  unique('tasks_workspace_number_unique').on(table.workspaceId, table.number),
   check('tasks_priority_check', sql`${table.priority} in ('none', 'low', 'medium', 'high')`),
   check('tasks_recurrence_check', sql`${table.recurrence} in ('none', 'daily', 'weekly')`),
   index('idx_tasks_user_status').on(table.userId, table.status),
@@ -127,6 +147,47 @@ export const taskDaySelections = sqliteTable('task_day_selections', {
 }, table => [
   unique('task_day_selections_user_task_unique').on(table.userId, table.taskId),
   index('idx_task_day_selections_task').on(table.taskId),
+])
+
+export const labelGroups = sqliteTable('label_groups', {
+  id: text('id').primaryKey(),
+  workspaceId: text('workspace_id').notNull().references(() => workspaces.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  position: integer('position').notNull().default(0),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+}, table => [
+  unique('label_groups_workspace_name_unique').on(table.workspaceId, table.name),
+  index('idx_label_groups_workspace_position').on(table.workspaceId, table.position),
+])
+
+export const labels = sqliteTable('labels', {
+  id: text('id').primaryKey(),
+  workspaceId: text('workspace_id').notNull().references(() => workspaces.id, { onDelete: 'cascade' }),
+  groupId: text('group_id').references(() => labelGroups.id, { onDelete: 'set null' }),
+  name: text('name').notNull(),
+  color: text('color').notNull().$type<LabelColor>().default('slate'),
+  description: text('description').notNull().default(''),
+  archivedAt: text('archived_at'),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+}, table => [
+  check(
+    'labels_color_check',
+    sql`${table.color} in ('slate', 'red', 'orange', 'amber', 'green', 'teal', 'blue', 'indigo', 'purple', 'pink')`,
+  ),
+  unique('labels_workspace_name_unique').on(table.workspaceId, table.name),
+  index('idx_labels_workspace_group').on(table.workspaceId, table.groupId),
+  index('idx_labels_workspace_archived').on(table.workspaceId, table.archivedAt),
+])
+
+export const taskLabels = sqliteTable('task_labels', {
+  taskId: text('task_id').notNull().references(() => tasks.id, { onDelete: 'cascade' }),
+  labelId: text('label_id').notNull().references(() => labels.id, { onDelete: 'cascade' }),
+  createdAt: text('created_at').notNull(),
+}, table => [
+  unique('task_labels_task_label_unique').on(table.taskId, table.labelId),
+  index('idx_task_labels_label').on(table.labelId),
 ])
 
 export const workspaceInvites = sqliteTable('workspace_invites', {
@@ -186,6 +247,9 @@ export const schema = {
   milestones,
   tasks,
   taskDaySelections,
+  labelGroups,
+  labels,
+  taskLabels,
   workspaceInvites,
   aiProposals,
   aiMessages,
