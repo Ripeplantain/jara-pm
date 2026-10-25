@@ -15,3 +15,13 @@ CLAUDE.md
 agents.md
 claude.md
 .vscode
+
+# Stray tsc/vue-tsc emit. The generated .nuxt tsconfigs all set `noEmit`, but when that
+# directory is missing or stale -- as it was in the container's .nuxt volume -- vue-tsc falls
+# back to a config without it and writes CommonJS beside every source. Vitest resolves `.js`
+# before `.ts`, so one stale emit silently shadows the real module and the suite tests old code.
+*.vue.js
+/app/**/*.js
+/server/**/*.js
+/shared/**/*.js
+/tests/**/*.js
