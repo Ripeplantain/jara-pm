@@ -87,7 +87,8 @@ const changeStatus = (event: Event, task: Task) => {
                 <LabelChip v-for="label in task.labels" :key="label.id" :label="label" />
               </div>
             </div>
-            <div v-if="task.projectTitle || task.dueDate || task.scheduledFor || task.assigneeName" class="board-card-meta">
+            <div v-if="task.priority !== 'none' || task.projectTitle || task.dueDate || task.scheduledFor || task.assigneeName" class="board-card-meta">
+              <PriorityMark v-if="task.priority !== 'none'" :priority="task.priority" />
               <span v-if="task.projectTitle">{{ task.projectTitle }}</span>
               <span v-if="task.dueDate">Due {{ task.dueDate }}</span>
               <span v-if="task.scheduledFor">Scheduled {{ task.scheduledFor }}</span>

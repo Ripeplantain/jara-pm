@@ -216,9 +216,7 @@ const onKeydown = (event: KeyboardEvent) => {
         <span v-if="current.milestoneTitle">· {{ current.milestoneTitle }}</span>
         <span v-if="current.dueDate">· Due {{ current.dueDate }}</span>
         <span v-if="current.recurrence !== 'none'">· Repeats {{ current.recurrence }}</span>
-        <span v-if="current.priority !== 'none'" class="task-priority">
-          <span class="priority-dot" :class="current.priority" /> {{ current.priority }}
-        </span>
+        <PriorityMark v-if="current.priority !== 'none'" :priority="current.priority" />
         <span v-if="current.assigneeName">· {{ current.assigneeName }}</span>
         <span v-if="estimateText" class="task-estimate">· {{ estimateText }}</span>
       </span>

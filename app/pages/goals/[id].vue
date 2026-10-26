@@ -58,12 +58,12 @@ const setStatus = async (statusValue: Goal['status']) => {
           <button v-else type="button" class="button ghost" @click="setStatus('archived')"><Archive :size="16" /> Archive</button>
         </div>
       </header>
-      <section class="card card-pad">
+      <section class="card card-pad goal-summary">
+        <ProgressRing :value="data.goal.progress" :size="120" label="Goal progress" caption />
         <div class="form-row">
           <div><span class="field-label">Status</span><p class="detail-value">{{ data.goal.status }}</p></div>
           <div><span class="field-label">Target date</span><p class="detail-value">{{ data.goal.targetDate || 'No target date' }}</p></div>
         </div>
-        <ProgressBar :value="data.goal.progress" label="Goal progress" />
       </section>
       <section class="section">
         <div class="section-heading"><h2>Related projects</h2><NuxtLink to="/projects" class="button secondary small">Manage projects</NuxtLink></div>

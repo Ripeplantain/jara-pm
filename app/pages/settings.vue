@@ -116,9 +116,10 @@ const logout = async () => {
   await navigateTo('/welcome')
 }
 
-const toggleTheme = () => {
+const chooseTheme = (value: 'light' | 'dark') => {
+  if (theme.value === value) return
   toggle()
-  capture('theme_changed', { theme: theme.value === 'dark' ? 'light' : 'dark' })
+  capture('theme_changed', { theme: value })
 }
 
 // --- workspace identifier and estimate scale ---------------------------------------------
@@ -381,7 +382,10 @@ const toggleArchivedLabels = async () => {
 
     <section class="card card-pad section">
       <div class="section-heading"><h2>Appearance</h2></div>
-      <button type="button" class="button secondary" @click="toggleTheme"><Sun v-if="theme === 'dark'" :size="16" /><Moon v-else :size="16" /> Use {{ theme === 'dark' ? 'light' : 'dark' }} mode</button>
+      <div class="stack-actions" role="group" aria-label="Theme">
+        <button type="button" class="button secondary" :aria-pressed="theme === 'light'" @click="chooseTheme('light')"><Sun :size="16" aria-hidden="true" /> Light</button>
+        <button type="button" class="button secondary" :aria-pressed="theme === 'dark'" @click="chooseTheme('dark')"><Moon :size="16" aria-hidden="true" /> Dark</button>
+      </div>
     </section>
     <section class="card card-pad section">
       <div class="section-heading"><h2>Account</h2></div>

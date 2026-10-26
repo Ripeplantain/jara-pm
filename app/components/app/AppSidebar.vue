@@ -20,25 +20,25 @@ const initials = computed(() => user.value?.name.split(/\s+/).map(part => part[0
   <aside class="app-sidebar" aria-label="Primary navigation">
     <AppLogo />
     <WorkspaceSwitcher />
-    <nav class="sidebar-nav">
-      <NuxtLink v-for="item in navigation" :key="item.to" :to="item.to" class="nav-link">
+    <nav class="sidebar-nav" aria-label="Sections">
+      <NuxtLink v-for="item in navigation" :key="item.to" :to="item.to" class="nav-link" :aria-label="item.label">
         <component :is="item.icon" aria-hidden="true" />
-        <span>{{ item.label }}</span>
+        <span class="rail-tip" aria-hidden="true">{{ item.label }}</span>
       </NuxtLink>
     </nav>
     <div class="sidebar-spacer" />
-    <button type="button" class="ask-button" @click="open()">
-      <Sparkles :size="17" aria-hidden="true" />
-      Ask Kobi
+    <button type="button" class="ask-button" aria-label="Ask Kobi" @click="open()">
+      <Sparkles :size="20" aria-hidden="true" />
+      <span class="rail-tip" aria-hidden="true">Ask Kobi</span>
     </button>
     <div class="sidebar-footer">
-      <NuxtLink to="/settings" class="nav-link">
+      <NuxtLink to="/settings" class="nav-link" aria-label="Settings">
         <Settings aria-hidden="true" />
-        <span>Settings</span>
+        <span class="rail-tip" aria-hidden="true">Settings</span>
       </NuxtLink>
       <div class="user-chip">
-        <span class="avatar">{{ initials }}</span>
-        <span class="user-meta">
+        <span class="avatar" aria-hidden="true">{{ initials }}</span>
+        <span class="user-meta rail-tip">
           <strong>{{ user?.name }}</strong>
           <span>{{ user?.email }}</span>
         </span>

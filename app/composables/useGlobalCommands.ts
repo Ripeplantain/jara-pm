@@ -82,6 +82,7 @@ export const useGlobalCommands = () => {
     { id: 'nav-projects', label: 'Projects', group: 'Navigation', icon: CirclePlus, run: go('/projects') },
     { id: 'nav-board', label: 'Board', group: 'Navigation', icon: LayoutGrid, keywords: ['kanban', 'status'], run: go('/board') },
     { id: 'nav-upcoming', label: 'Upcoming', group: 'Navigation', icon: CalendarDays, keywords: ['schedule', 'later'], run: go('/upcoming') },
+    { id: 'nav-ask', label: 'Ask Kobi: full view', group: 'Navigation', icon: Sparkles, keywords: ['ai', 'assistant', 'plan', 'chat'], run: go('/ask') },
     { id: 'nav-settings', label: 'Settings', group: 'Navigation', icon: Settings, keywords: ['preferences', 'labels', 'team'], run: go('/settings') },
   ])
 

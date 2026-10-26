@@ -3,6 +3,9 @@ const { isOpen, close } = useAskKobi()
 const { isOpen: isPaletteOpen } = useCommandPalette()
 const { isOpen: isTaskPanelOpen } = useTaskPanel()
 const { isCompact } = useCompactViewport()
+// The full-screen /ask page is the conversation, so the dock and side panel step aside there.
+const route = useRoute()
+const isAskPage = computed(() => route.path === '/ask')
 
 // Cmd/Ctrl+K for the whole app. Bound here rather than in the palette so the shortcut works
 // before the palette has ever been opened, and only on authenticated pages -- the sign-in
@@ -37,7 +40,9 @@ const isPanelBlocking = computed<true | undefined>(
     </div>
     <TaskPanel v-if="isTaskPanelOpen" />
     <MobileNav :inert="isPanelBlocking" />
-    <AskKobiPanel v-if="isOpen" @close="close" />
+    <!-- Hidden while any overlay is open so it never sits over the panels, palette or tab bar. -->
+    <AskKobiDock v-if="!isAskPage && !isOpen && !isPaletteOpen && !isTaskPanelOpen" />
+    <AskKobiPanel v-if="isOpen && !isAskPage" @close="close" />
     <CommandPalette v-if="isPaletteOpen" />
     <ToastHost />
   </div>

@@ -22,6 +22,7 @@ const { data: tasks, status, error, refresh } = await useFetch<Task[]>('/api/tas
         <h1>Board</h1>
         <p>Move work through your workflow, or use each task’s status menu.</p>
       </div>
+      <div class="page-actions"><NuxtLink to="/projects" class="button secondary small">Projects</NuxtLink></div>
     </header>
     <LoadingState v-if="status === 'pending'" />
     <ErrorState v-else-if="error" @retry="refresh" />

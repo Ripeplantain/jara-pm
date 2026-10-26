@@ -16,6 +16,16 @@ const { data: goals, status, error, refresh } = await useFetch<Goal[]>('/api/goa
   query: computed(() => (showArchived.value ? { includeArchived: 'true' } : {})),
   default: () => [],
 })
+const measuredCount = computed(() => goals.value.filter(goal => goal.status === 'active' && goal.progress !== null).length)
+const activeCount = computed(() => goals.value.filter(goal => goal.status === 'active').length)
+const selectedId = ref<string | null>(null)
+const tiles = ref<Record<string, { $el: HTMLElement } | null>>({})
+const closeDrawer = async (restoreFocus = true) => {
+  const id = selectedId.value
+  selectedId.value = null
+  await nextTick()
+  if (restoreFocus && id) tiles.value[id]?.$el.focus()
+}
 const archivedCount = computed(() => goals.value.filter(goal => goal.status === 'archived').length)
 const menuItems = computed(() => [{
   label: 'Show Archived',
@@ -41,9 +51,14 @@ const create = async () => {
 </script>
 
 <template>
-  <main class="page">
+  <main class="page wide">
     <header class="page-header">
-      <div><div class="eyebrow">Your direction</div><h1>Goals</h1><p>Keep the outcomes that matter visible and connected to real work.</p></div>
+      <div>
+        <div class="eyebrow">Goals</div>
+        <h1>What you are working toward</h1>
+        <p v-if="activeCount">{{ activeCount }} active {{ activeCount === 1 ? 'goal' : 'goals' }}. {{ measuredCount }} measured by their tasks; a goal with no tasks shows as not measured rather than zero.</p>
+        <p v-else>Keep the outcomes that matter visible and connected to real work.</p>
+      </div>
       <div class="page-actions">
         <button type="button" class="button secondary" @click="open('Help me create a goal plan')"><Sparkles :size="16" /> Plan with Kobi</button>
         <button type="button" class="button" @click="isCreating = true"><Plus :size="16" /> New goal</button>
@@ -64,11 +79,17 @@ const create = async () => {
 
     <LoadingState v-if="status === 'pending'" />
     <ErrorState v-else-if="error" @retry="refresh" />
-    <div v-else-if="goals.length" class="entity-grid">
-      <GoalCard v-for="goal in goals" :key="goal.id" :goal="goal" />
-    </div>
+    <template v-else-if="goals.length">
+      <ul class="goal-tiles" aria-label="Goals">
+        <li v-for="goal in goals" :key="goal.id">
+          <GoalCard :ref="(el) => { tiles[goal.id] = el as { $el: HTMLElement } | null }" :goal="goal" :selected="selectedId === goal.id" @select="selectedId = goal.id" />
+        </li>
+      </ul>
+      <p class="goal-hint"><Sparkles class="goal-hint-icon" :size="18" aria-hidden="true" /> Select a goal to see its projects, milestones and the next step Kobi recommends.</p>
+    </template>
     <EmptyState v-else title="No goals yet" message="Create one manually or ask Kobi to turn an idea into a practical plan.">
       <button type="button" class="button small" @click="isCreating = true">Create your first goal</button>
     </EmptyState>
+    <GoalDrawer v-if="selectedId" :key="selectedId" :goal-id="selectedId" @close="closeDrawer" />
   </main>
 </template>

@@ -13,6 +13,7 @@ export type ListPreferenceKey =
   | 'upcoming.showCompleted'
   | 'today.showCompleted'
   | 'project.showCompleted'
+  | 'project.boardView'
   | 'projects.showArchived'
   | 'goals.showArchived'
 

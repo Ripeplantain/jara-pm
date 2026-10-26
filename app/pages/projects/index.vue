@@ -43,6 +43,7 @@ const create = async () => {
     <header class="page-header">
       <div><div class="eyebrow">Turn intent into action</div><h1>Projects</h1><p>Focused bodies of work, with or without a larger goal.</p></div>
       <div class="page-actions">
+        <NuxtLink to="/board" class="button secondary">Board</NuxtLink>
         <span v-if="showArchived && archivedCount" class="status-badge archived">{{ archivedCount }} archived</span>
         <button type="button" class="button" @click="isCreating = true"><Plus :size="16" /> New project</button>
         <MenuButton :items="menuItems" label="Projects view options" />

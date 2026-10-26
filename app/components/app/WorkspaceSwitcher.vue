@@ -11,6 +11,7 @@ const root = ref<HTMLElement | null>(null)
 const trigger = ref<HTMLButtonElement | null>(null)
 const nameInput = ref<HTMLInputElement | null>(null)
 const panelId = useId()
+const initial = computed(() => (activeWorkspace.value?.name.trim()[0] ?? 'W').toUpperCase())
 
 const close = (returnFocus = false) => {
   isOpen.value = false
@@ -89,8 +90,9 @@ onMounted(() => {
         <span class="workspace-trigger-label">Workspace</span>
         <strong>{{ activeWorkspace?.name ?? (status === 'pending' ? 'Loading…' : 'Workspace') }}</strong>
       </span>
+      <span class="workspace-initial" aria-hidden="true">{{ initial }}</span>
       <LoaderCircle v-if="isChanging" class="spin" :size="15" aria-hidden="true" />
-      <ChevronDown v-else :size="15" aria-hidden="true" />
+      <ChevronDown v-else class="workspace-chevron" :size="15" aria-hidden="true" />
     </button>
 
     <div v-if="isOpen" :id="panelId" class="workspace-panel" role="region" aria-label="Choose a workspace">

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Archive, ArchiveRestore, Plus, Sparkles } from '@lucide/vue'
+import { Archive, ArchiveRestore, LayoutGrid, List, Plus, Sparkles } from '@lucide/vue'
 import type { Project, Task } from '#shared/types/domain'
 
 definePageMeta({ middleware: ['authenticated'] })
@@ -26,6 +26,12 @@ const assignedTasks = computed(() => {
 const filteredTasks = computed(() =>
   showCompleted.value ? assignedTasks.value : assignedTasks.value.filter(task => task.status.category !== 'completed' && task.status.category !== 'canceled'))
 const completedCount = computed(() => assignedTasks.value.filter(task => task.status.category === 'completed').length)
+// Board | List, remembered per browser. List stays the default, so the stored flag means "board".
+const isBoardView = computed(() => isEnabled('project.boardView'))
+const setView = (board: boolean) => {
+  if (isBoardView.value !== board) toggle('project.boardView')
+}
+const visibleCount = computed(() => isBoardView.value ? assignedTasks.value.length : filteredTasks.value.length)
 const menuItems = computed(() => [{
   label: 'Show Completed',
   checked: showCompleted.value,
@@ -97,9 +103,24 @@ const unarchive = async () => {
         <EmptyState v-else title="Milestones are optional" message="Add them when the project has meaningful stages. Tasks can live directly in the project." />
       </section>
       <section class="section">
-        <div class="section-heading"><h2>Tasks</h2><div class="inline-actions"><select v-model="assigneeFilter" class="task-assignee" aria-label="Filter tasks by assignee"><option value="everyone">Everyone</option><option value="me">Assigned to me</option><option value="unassigned">Unassigned</option></select><span>{{ filteredTasks.length }}</span><span v-if="!showCompleted && completedCount" class="status-badge completed">{{ completedCount }} completed</span><MenuButton :items="menuItems" label="Task view options" /></div></div>
+        <div class="section-heading">
+          <h2>Tasks</h2>
+          <div class="inline-actions">
+            <div class="segmented" role="group" aria-label="Task view">
+              <button type="button" class="segmented-option" :aria-pressed="!isBoardView" @click="setView(false)"><List :size="15" aria-hidden="true" /> List</button>
+              <button type="button" class="segmented-option" :aria-pressed="isBoardView" @click="setView(true)"><LayoutGrid :size="15" aria-hidden="true" /> Board</button>
+            </div>
+            <select v-model="assigneeFilter" class="task-assignee" aria-label="Filter tasks by assignee"><option value="everyone">Everyone</option><option value="me">Assigned to me</option><option value="unassigned">Unassigned</option></select>
+            <span>{{ visibleCount }}</span>
+            <template v-if="!isBoardView">
+              <span v-if="!showCompleted && completedCount" class="status-badge completed">{{ completedCount }} completed</span>
+              <MenuButton :items="menuItems" label="Task view options" />
+            </template>
+          </div>
+        </div>
         <QuickCapture :default-project-id="data.project.id" @created="refresh" @ask="open" />
-        <TaskList :tasks="filteredTasks" :enable-assignees="true" empty-title="No tasks yet" empty-message="Add the first concrete next step above." @changed="refresh" />
+        <Board v-if="isBoardView" :tasks="assignedTasks" @changed="() => refresh()" />
+        <TaskList v-else :tasks="filteredTasks" :enable-assignees="true" empty-title="No tasks yet" empty-message="Add the first concrete next step above." @changed="refresh" />
       </section>
     </template>
   </main>
