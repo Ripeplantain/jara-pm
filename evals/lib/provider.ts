@@ -3,7 +3,14 @@
 // environment at run time. No key, model id or .env path is hardcoded, and
 // this file never reads a .env file.
 
-import { buildProviderRequest, MAX_REPLY_TOKENS, type HistoryTurn } from '~~/server/services/ai'
+import {
+  buildBreakdownProviderRequest,
+  buildProviderRequest,
+  buildRescheduleProviderRequest,
+  buildTriageProviderRequest,
+  MAX_REPLY_TOKENS,
+  type HistoryTurn,
+} from '~~/server/services/ai'
 import type { EvalContext } from '../cases'
 
 export type LiveConfig = {
@@ -72,6 +79,18 @@ export const callModel = async (
     context as never,
     history,
   )
+  return postChat(config, body)
+}
+
+/**
+ * Sends a request body that a product builder already produced. Shared by the goal-plan and
+ * action harnesses, so every paid call goes through the same ceiling guard and failure
+ * classification.
+ */
+export const postChat = async (
+  config: LiveConfig,
+  body: { max_tokens: number },
+): Promise<LiveSuccess | LiveFailure> => {
   // Guard against a harness-side change making the comparison invalid.
   if (body.max_tokens !== MAX_REPLY_TOKENS) {
     return { ok: false, kind: 'envelope', detail: `max_tokens was ${body.max_tokens}, expected ${MAX_REPLY_TOKENS}` }
@@ -124,4 +143,22 @@ export const callModel = async (
     hitTokenCeiling: finishReason === 'length',
     latencyMs,
   }
+}
+
+/**
+ * One triage, reschedule or breakdown call. The request body comes from the product's own
+ * builder for that kind, so the prompt, schema and ceilings are exactly what the app sends.
+ */
+export const callActionModel = (
+  config: LiveConfig,
+  kind: 'triage' | 'reschedule' | 'breakdown',
+  context: unknown,
+): Promise<LiveSuccess | LiveFailure> => {
+  const productConfig = { apiKey: config.apiKey, baseUrl: config.baseUrl, model: config.model }
+  const body = kind === 'triage'
+    ? buildTriageProviderRequest(productConfig, context)
+    : kind === 'reschedule'
+      ? buildRescheduleProviderRequest(productConfig, context)
+      : buildBreakdownProviderRequest(productConfig, context)
+  return postChat(config, body)
 }

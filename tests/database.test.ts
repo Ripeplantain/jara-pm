@@ -309,6 +309,43 @@ describe('database migrations', () => {
     expect(sqlite.pragma('foreign_key_check')).toEqual([])
   })
 
+  it('adds ai_proposal_snapshots in 0009 over 0008 data without touching existing rows', () => {
+    const sqlite = new Database(':memory:')
+    databases.push(sqlite)
+    sqlite.pragma('foreign_keys = OFF')
+    const apply = (file: string) => {
+      const sql = readFileSync(new URL(`../drizzle/${file}`, import.meta.url), 'utf8')
+      for (const statement of sql.split('--> statement-breakpoint')) {
+        const trimmed = statement.trim()
+        if (trimmed) sqlite.exec(trimmed)
+      }
+    }
+    const files = readdirSync(new URL('../drizzle', import.meta.url)).filter(file => file.endsWith('.sql')).sort()
+    for (const file of files.filter(file => file < '0009')) apply(file)
+    const at = '2026-01-01T00:00:00.000Z'
+    sqlite.exec(`
+      INSERT INTO users (id, email, name, password_hash, created_at, updated_at) VALUES ('u1', 'u@example.test', 'U', 'h', '${at}', '${at}');
+      INSERT INTO workspaces (id, name, key, owner_id, task_counter, created_at, updated_at) VALUES ('w1', 'Acme', 'ACME', 'u1', 0, '${at}', '${at}');
+      INSERT INTO ai_proposals (id, user_id, workspace_id, kind, payload_json, status, created_at) VALUES ('p1', 'u1', 'w1', 'reschedule', '{}', 'accepted', '${at}');
+    `)
+
+    sqlite.pragma('foreign_keys = OFF')
+    sqlite.exec('BEGIN')
+    apply(files.find(file => file.startsWith('0009'))!)
+    sqlite.exec('COMMIT')
+
+    expect(sqlite.prepare('SELECT count(*) AS n FROM ai_proposals').get()).toEqual({ n: 1 })
+    expect(sqlite.prepare('SELECT count(*) AS n FROM users').get()).toEqual({ n: 1 })
+    expect((sqlite.pragma('table_info(ai_proposal_snapshots)') as Array<{ name: string }>).map(column => column.name))
+      .toEqual(['proposal_id', 'user_id', 'workspace_id', 'snapshot_json', 'created_at', 'undone_at'])
+    sqlite.exec(`INSERT INTO ai_proposal_snapshots (proposal_id, user_id, workspace_id, snapshot_json, created_at) VALUES ('p1', 'u1', 'w1', '[]', '${at}')`)
+    expect(sqlite.pragma('foreign_key_check')).toEqual([])
+    // Deleting the proposal removes its snapshot; the snapshot has no link to tasks.
+    sqlite.pragma('foreign_keys = ON')
+    sqlite.exec("DELETE FROM ai_proposals WHERE id = 'p1'")
+    expect(sqlite.prepare('SELECT count(*) AS n FROM ai_proposal_snapshots').get()).toEqual({ n: 0 })
+  })
+
   it('backfills one workspace per existing user without losing linked data', () => {
     const sqlite = new Database(':memory:')
     databases.push(sqlite)

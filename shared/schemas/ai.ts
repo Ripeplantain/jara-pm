@@ -39,6 +39,7 @@ export const RESCHEDULE_BOUNDS = {
 
 export const triageRequestSchema = z.object({ taskId: idSchema })
 export const rescheduleRequestSchema = z.object({}).strict()
+export const breakdownRequestSchema = z.object({ projectId: idSchema })
 
 export const goalPlanProposalSchema = z.object({
   kind: z.literal('goal_plan'),
@@ -87,10 +88,34 @@ export const rescheduleProposalSchema = z.object({
   })).min(1).max(RESCHEDULE_BOUNDS.changes),
 })
 
+// A breakdown adds milestones (and their tasks) to an existing project. Its milestone shape is
+// goal_plan's own, derived rather than restated, so the two can never drift apart.
+export const breakdownProposalSchema = z.object({
+  kind: z.literal('breakdown'),
+  projectId: idSchema,
+  milestones: goalPlanProposalSchema.shape.projects.element.shape.milestones,
+})
+
+// The four task fields an accepted reschedule can change. Undo compares and restores exactly these.
+const rescheduleTaskStateSchema = z.object({
+  dueDate: dateSchema,
+  scheduledFor: dateSchema,
+  statusId: idSchema,
+  selectedForToday: z.boolean(),
+})
+
+// What `ai_proposal_snapshots.snapshot_json` holds for one accepted reschedule.
+export const rescheduleSnapshotSchema = z.array(z.object({
+  taskId: idSchema,
+  before: rescheduleTaskStateSchema,
+  after: rescheduleTaskStateSchema,
+})).min(1).max(RESCHEDULE_BOUNDS.changes)
+
 export const proposalSchema = z.discriminatedUnion('kind', [
   goalPlanProposalSchema,
   triageProposalSchema,
   rescheduleProposalSchema,
+  breakdownProposalSchema,
 ])
 
 // Optional user-edited plan sent on accept. Reuses the proposal schema verbatim so
@@ -116,6 +141,42 @@ export const rescheduleReplySchema = z.object({
   message: z.string().trim().min(1).max(10_000),
   proposal: rescheduleProposalSchema.nullable().default(null),
 })
+
+export const breakdownReplySchema = z.object({
+  message: z.string().trim().min(1).max(10_000),
+  proposal: breakdownProposalSchema.nullable().default(null),
+})
+
+// The milestone subtree is shared by the goal_plan and breakdown provider schemas, so a change
+// to the shape or its bounds reaches both. aiReplyJsonSchema must stay deep-equal to what it
+// was before this was extracted (tests/ai-breakdown.test.ts pins it).
+const planMilestonesJsonSchema = {
+  description: `At most ${PLAN_BOUNDS.milestonesPerProject} milestones in a project; anything beyond this is trimmed away.`,
+  type: 'array',
+  items: {
+    type: 'object',
+    additionalProperties: false,
+    required: ['title', 'targetDate', 'tasks'],
+    properties: {
+      title: { type: 'string', description: `A short title, under ${MAX_TITLE_LENGTH} characters.` },
+      targetDate: { type: ['string', 'null'] },
+      tasks: {
+        description: `At most ${PLAN_BOUNDS.tasksPerMilestone} tasks in a milestone; anything beyond this is trimmed away.`,
+        type: 'array',
+        items: {
+          type: 'object',
+          additionalProperties: false,
+          required: ['title', 'dueDate', 'priority'],
+          properties: {
+            title: { type: 'string', description: `A short title, under ${MAX_TITLE_LENGTH} characters.` },
+            dueDate: { type: ['string', 'null'] },
+            priority: { type: 'string', enum: ['none', 'low', 'medium', 'high'] },
+          },
+        },
+      },
+    },
+  },
+} as const
 
 // OpenRouter uses this schema to constrain the provider response before Zod
 // applies Kobi's business-level bounds and string validation.
@@ -155,33 +216,7 @@ export const aiReplyJsonSchema = {
                 properties: {
                   title: { type: 'string', description: `A short title, under ${MAX_TITLE_LENGTH} characters.` },
                   description: { type: 'string' },
-                  milestones: {
-                    description: `At most ${PLAN_BOUNDS.milestonesPerProject} milestones in a project; anything beyond this is trimmed away.`,
-                    type: 'array',
-                    items: {
-                      type: 'object',
-                      additionalProperties: false,
-                      required: ['title', 'targetDate', 'tasks'],
-                      properties: {
-                        title: { type: 'string', description: `A short title, under ${MAX_TITLE_LENGTH} characters.` },
-                        targetDate: { type: ['string', 'null'] },
-                        tasks: {
-                          description: `At most ${PLAN_BOUNDS.tasksPerMilestone} tasks in a milestone; anything beyond this is trimmed away.`,
-                          type: 'array',
-                          items: {
-                            type: 'object',
-                            additionalProperties: false,
-                            required: ['title', 'dueDate', 'priority'],
-                            properties: {
-                              title: { type: 'string', description: `A short title, under ${MAX_TITLE_LENGTH} characters.` },
-                              dueDate: { type: ['string', 'null'] },
-                              priority: { type: 'string', enum: ['none', 'low', 'medium', 'high'] },
-                            },
-                          },
-                        },
-                      },
-                    },
-                  },
+                  milestones: planMilestonesJsonSchema,
                 },
               },
             },
@@ -256,6 +291,31 @@ export const rescheduleReplyJsonSchema = {
                 },
               },
             },
+          },
+        },
+      ],
+    },
+  },
+} as const
+
+export const breakdownReplyJsonSchema = {
+  type: 'object',
+  additionalProperties: false,
+  required: ['message', 'proposal'],
+  properties: {
+    message: { type: 'string', description: 'A concise explanation of the proposed breakdown. Never claim anything was saved.' },
+    proposal: {
+      description: 'null when the project is already well covered or there is not enough context to break it down',
+      anyOf: [
+        { type: 'null' },
+        {
+          type: 'object',
+          additionalProperties: false,
+          required: ['kind', 'projectId', 'milestones'],
+          properties: {
+            kind: { type: 'string', enum: ['breakdown'] },
+            projectId: { type: 'string', description: 'Copy the exact project id supplied in context.' },
+            milestones: planMilestonesJsonSchema,
           },
         },
       ],

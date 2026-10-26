@@ -1,12 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import {
+  buildBreakdownProviderRequest,
   buildRescheduleProviderRequest,
   buildTriageProviderRequest,
   MAX_REPLY_TOKENS,
   PROMPT_VERSION,
 } from '~~/server/services/ai'
-import { rescheduleReplyJsonSchema, triageReplyJsonSchema } from '#shared/schemas/ai'
-import { actionCases } from './action-cases'
+import { breakdownReplyJsonSchema, rescheduleReplyJsonSchema, triageReplyJsonSchema } from '#shared/schemas/ai'
+import { actionCases, type ActionEvalCase } from './action-cases'
 import { actionFixtures } from './action-fixtures'
 import { classifyActionContent, gradeActionReply } from './lib/action-graders'
 
@@ -15,24 +16,31 @@ const config = {
   baseUrl: 'https://openrouter.ai/api/v1',
   model: 'model-under-test',
 }
+const requestFor = (evalCase: ActionEvalCase) => evalCase.kind === 'triage'
+  ? buildTriageProviderRequest(config, evalCase.context)
+  : evalCase.kind === 'reschedule'
+    ? buildRescheduleProviderRequest(config, evalCase.context)
+    : buildBreakdownProviderRequest(config, evalCase.context)
+const schemaFor = (kind: ActionEvalCase['kind']) => kind === 'triage'
+  ? triageReplyJsonSchema
+  : kind === 'reschedule' ? rescheduleReplyJsonSchema : breakdownReplyJsonSchema
 const caseById = new Map(actionCases.map(evalCase => [evalCase.id, evalCase]))
 
 describe('action proposal eval cases', () => {
   it('keeps a balanced, unique deterministic case set', () => {
-    expect(actionCases).toHaveLength(6)
+    expect(actionCases).toHaveLength(13)
     expect(new Set(actionCases.map(evalCase => evalCase.id)).size).toBe(actionCases.length)
     expect(actionCases.filter(evalCase => evalCase.kind === 'triage')).toHaveLength(3)
     expect(actionCases.filter(evalCase => evalCase.kind === 'reschedule')).toHaveLength(3)
+    expect(actionCases.filter(evalCase => evalCase.kind === 'breakdown')).toHaveLength(7)
   })
 })
 
 describe('action request builders preserve the provider contract and context fence', () => {
   it.each(actionCases.map(evalCase => evalCase.id))('builds the real request for %s', (caseId) => {
     const evalCase = caseById.get(caseId)!
-    const request = evalCase.kind === 'triage'
-      ? buildTriageProviderRequest(config, evalCase.context)
-      : buildRescheduleProviderRequest(config, evalCase.context)
-    const expectedSchema = evalCase.kind === 'triage' ? triageReplyJsonSchema : rescheduleReplyJsonSchema
+    const request = requestFor(evalCase)
+    const expectedSchema = schemaFor(evalCase.kind)
 
     expect(request.model).toBe(config.model)
     expect(request.temperature).toBe(0.2)
@@ -51,9 +59,7 @@ describe('action request builders preserve the provider contract and context fen
 
   it.each(actionCases.filter(evalCase => evalCase.forbidden?.length).map(evalCase => evalCase.id))('keeps injected text out of instructions for %s', (caseId) => {
     const evalCase = caseById.get(caseId)!
-    const request = evalCase.kind === 'triage'
-      ? buildTriageProviderRequest(config, evalCase.context)
-      : buildRescheduleProviderRequest(config, evalCase.context)
+    const request = requestFor(evalCase)
     for (const forbidden of evalCase.forbidden ?? []) {
       expect(request.messages[0]?.content).not.toContain(forbidden)
       expect(request.messages[1]?.content).toContain(forbidden)
@@ -73,7 +79,8 @@ describe('action graders classify deterministic fixtures', () => {
     const failing = grade.checks.filter(check => !check.passed).map(check => check.id).sort()
     expect(failing, grade.checks.map(check => `${check.id}=${check.passed ? 'ok' : 'FAIL'}: ${check.detail}`).join('\n'))
       .toEqual([...fixture.failing].sort())
-    expect(grade.passed).toBe(fixture.failing.length === 0)
+    // A minor failure is reported but does not fail the case.
+    expect(grade.passed).toBe(fixture.failing.every(id => grade.checks.find(check => check.id === id)?.severity === 'minor'))
   })
 
   it('covers every action failure class and load-bearing grader', () => {
@@ -89,6 +96,7 @@ describe('action graders classify deterministic fixtures', () => {
       'pending_contract',
       'injection_resisted',
       'horizon_respected',
+      'no_duplicate_milestones',
     ]))
   })
 })

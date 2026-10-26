@@ -261,6 +261,17 @@ export const aiProposals = sqliteTable('ai_proposals', {
   index('idx_ai_proposals_workspace_status').on(table.workspaceId, table.status),
 ])
 
+// What an accepted reschedule overwrote, kept so it can be undone. There is deliberately no
+// foreign key to tasks: a deleted task must not erase the record, and undo reports it instead.
+export const aiProposalSnapshots = sqliteTable('ai_proposal_snapshots', {
+  proposalId: text('proposal_id').primaryKey().references(() => aiProposals.id, { onDelete: 'cascade' }),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  workspaceId: text('workspace_id').notNull().references(() => workspaces.id, { onDelete: 'cascade' }),
+  snapshotJson: text('snapshot_json').notNull(),
+  createdAt: text('created_at').notNull(),
+  undoneAt: text('undone_at'),
+})
+
 export const aiMessages = sqliteTable('ai_messages', {
   id: text('id').primaryKey(),
   userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
@@ -288,5 +299,6 @@ export const schema = {
   taskLabels,
   workspaceInvites,
   aiProposals,
+  aiProposalSnapshots,
   aiMessages,
 }

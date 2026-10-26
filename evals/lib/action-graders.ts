@@ -1,6 +1,13 @@
-import { AiReplyContractError, validateRescheduleReply, validateTriageReply } from '~~/server/services/ai'
-import { RESCHEDULE_BOUNDS, TRIAGE_BOUNDS } from '#shared/schemas/ai'
-import type { ActionEvalCase, RescheduleEvalContext, TriageEvalContext } from '../action-cases'
+import {
+  AiReplyContractError,
+  clampBreakdownReply,
+  validateBreakdownReply,
+  validateRescheduleReply,
+  validateTriageReply,
+} from '~~/server/services/ai'
+import { PLAN_BOUNDS, RESCHEDULE_BOUNDS, TRIAGE_BOUNDS } from '#shared/schemas/ai'
+import { MAX_TITLE_LENGTH } from '#shared/schemas/common'
+import type { ActionEvalCase, BreakdownEvalContext, RescheduleEvalContext, TriageEvalContext } from '../action-cases'
 import { findSaveClaim, type Check } from './graders'
 
 export type ActionClassification =
@@ -18,6 +25,10 @@ export const classifyActionContent = (kind: ActionEvalCase['kind'], content: str
       : { kind: 'prose_not_json', detail }
   }
   try {
+    if (kind === 'breakdown') {
+      // Mirrors callProviderRequest: an overrun is trimmed to the stored bounds before validating.
+      return { kind: 'valid', reply: validateBreakdownReply(clampBreakdownReply(json).reply) }
+    }
     const reply = kind === 'triage' ? validateTriageReply(json) : validateRescheduleReply(json)
     return { kind: 'valid', reply }
   } catch (error) {
@@ -85,5 +96,34 @@ export const gradeActionReply = (evalCase: ActionEvalCase, classification: Actio
     add('bounded', bounded, `${value.changes.length}/${RESCHEDULE_BOUNDS.changes} changes, ${value.note.length}/${RESCHEDULE_BOUNDS.noteLength} note chars`)
   }
 
-  return { checks, passed: checks.every(check => check.passed) }
+  if (proposal && evalCase.kind === 'breakdown') {
+    const value = proposal as {
+      projectId: string
+      milestones: Array<{ title: string, tasks: Array<{ title: string }> }>
+    }
+    const context = evalCase.context as BreakdownEvalContext
+    add('references_only_supplied_ids', value.projectId === context.project.id, value.projectId === context.project.id ? 'projectId is the supplied project' : 'reply named a project that was not supplied')
+    const bounded = value.milestones.length <= PLAN_BOUNDS.milestonesPerProject
+      && value.milestones.every(milestone => milestone.tasks.length <= PLAN_BOUNDS.tasksPerMilestone
+        && milestone.title.length <= MAX_TITLE_LENGTH
+        && milestone.tasks.every(task => task.title.length <= MAX_TITLE_LENGTH))
+    add('bounded', bounded, `${value.milestones.length}/${PLAN_BOUNDS.milestonesPerProject} milestones after the product trim`)
+    const normalize = (title: string) => title.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()
+    const seen = new Set(context.existingMilestones.map(milestone => normalize(milestone.title)))
+    const duplicates: string[] = []
+    for (const milestone of value.milestones) {
+      const key = normalize(milestone.title)
+      if (seen.has(key)) duplicates.push(milestone.title)
+      seen.add(key)
+    }
+    checks.push({
+      id: 'no_duplicate_milestones',
+      severity: 'minor',
+      passed: duplicates.length === 0,
+      detail: duplicates.length ? `repeats: ${duplicates.join(', ')}` : 'no milestone repeats an existing or earlier one',
+    })
+  }
+
+  // A minor check is reported but does not fail the case, as in the goal-plan graders.
+  return { checks, passed: checks.every(check => check.passed || check.severity === 'minor') }
 }

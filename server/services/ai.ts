@@ -1,14 +1,18 @@
-import { and, desc, eq, gte, isNotNull, ne, or, sql } from 'drizzle-orm'
+import { and, desc, eq, gte, isNotNull, isNull, ne, or, sql } from 'drizzle-orm'
 import { z } from 'zod'
 import {
   aiProviderResponseSchema,
   aiReplyJsonSchema,
+  breakdownReplyJsonSchema,
+  breakdownReplySchema,
   goalPlanProposalSchema,
   PLAN_BOUNDS,
   proposalSchema,
   RESCHEDULE_BOUNDS,
+  rescheduleProposalSchema,
   rescheduleReplyJsonSchema,
   rescheduleReplySchema,
+  rescheduleSnapshotSchema,
   TRIAGE_BOUNDS,
   triageReplyJsonSchema,
   triageReplySchema,
@@ -18,6 +22,7 @@ import type {
   AiKindReply,
   AiReply,
   AiReplySource,
+  BreakdownProposal,
   GoalPlanProposal,
   Proposal,
   RescheduleProposal,
@@ -27,11 +32,11 @@ import { estimateOptions } from '#shared/utils/estimates'
 import { withTransaction } from '~~/server/db'
 import { createGoal } from '~~/server/services/goals'
 import { listLabels } from '~~/server/services/labels'
-import { createMilestone, createProject } from '~~/server/services/projects'
+import { createMilestone, createProject, getProject } from '~~/server/services/projects'
 import { listStatuses, statusForCategory } from '~~/server/services/statuses'
 import { createTask, getTask, listTasks, updateTask } from '~~/server/services/tasks'
 import type { KobiDatabase, KobiDb } from '~~/server/db'
-import { aiMessages, aiProposals, goals, projects, statuses, tasks, workspaces } from '~~/server/db/schema'
+import { aiMessages, aiProposals, aiProposalSnapshots, goals, projects, statuses, tasks, workspaces } from '~~/server/db/schema'
 import { nowIso, todayIso } from '~~/server/utils/time'
 import { workspaceIdForUser } from '~~/server/utils/workspace'
 
@@ -41,7 +46,7 @@ type AiConfig = {
   model: string
 }
 
-export const PROMPT_VERSION = '2026-10-26-proposal-kinds-v1'
+export const PROMPT_VERSION = '2026-10-26-proposal-kinds-v2'
 
 export const OFFLINE_NOTICE = 'I could not reach my AI model, so this is a basic draft built from your own data rather than a tailored answer.'
 
@@ -326,6 +331,8 @@ const TRIAGE_INSTRUCTION = `Organize the supplied task only when the available w
 
 const RESCHEDULE_INSTRUCTION = `Replan the supplied overdue tasks across the date window in application context. Copy only exact candidate task ids. Dates must be real YYYY-MM-DD values between today and horizonDate, inclusive. statusCategory may be backlog to park work, canceled to abandon work, or null to keep status; never mark work started or completed. Propose at most ${RESCHEDULE_BOUNDS.changes} changes and set proposal to null when there are no applicable candidates. Never say or imply that a change was saved.`
 
+const BREAKDOWN_INSTRUCTION = `Break the supplied project into new milestones, each with concrete tasks. Copy the exact project id from application context. Propose only work the project does not already cover: do not repeat existing milestones or open tasks. Aim for at most ${PLAN_TARGET.milestonesPerProject} milestones and ${PLAN_TARGET.tasksPerMilestone} tasks per milestone. Use null for dates you do not know; dates must be real YYYY-MM-DD values. Set proposal to null when the project is already well covered or too vague to break down. Never say or imply that anything was saved.`
+
 type BuildRequestOptions = {
   config: AiConfig
   instruction: string
@@ -400,6 +407,15 @@ export const buildRescheduleProviderRequest = (config: AiConfig, context: unknow
   message: 'Propose a realistic replan for the overdue work.',
 })
 
+export const buildBreakdownProviderRequest = (config: AiConfig, context: unknown) => buildRequest({
+  config,
+  instruction: BREAKDOWN_INSTRUCTION,
+  jsonSchema: breakdownReplyJsonSchema,
+  schemaName: 'kobi_breakdown_reply',
+  context,
+  message: 'Propose milestones and tasks that break this project down.',
+})
+
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value)
 
@@ -414,35 +430,53 @@ const clampTitle = (value: unknown) =>
 // priority, a missing field) reaches Zod unchanged and still fails closed.
 // Dropping the tail is safe because a proposal stays inert until the user
 // accepts it, and the trim is logged so overrun stays visible.
+type Trim = <T>(items: T[], max: number, label: string) => T[]
+
+const makeTrim = (dropped: string[]): Trim => (items, max, label) => {
+  if (items.length > max) dropped.push(`${label}: ${items.length} -> ${max}`)
+  return items.slice(0, max)
+}
+
+// The milestone/task half of the clamp, shared by goal_plan (per project) and breakdown.
+// `path` names the milestone array in the dropped-items log.
+const clampMilestones = (milestones: unknown, path: string, trim: Trim) =>
+  Array.isArray(milestones)
+    ? trim(milestones, PLAN_BOUNDS.milestonesPerProject, path)
+      .map((milestone, milestoneIndex) => {
+        if (!isRecord(milestone)) return milestone
+        const tasks = Array.isArray(milestone.tasks)
+          ? trim(milestone.tasks, PLAN_BOUNDS.tasksPerMilestone, `${path}[${milestoneIndex}].tasks`)
+            .map(task => (isRecord(task) ? { ...task, title: clampTitle(task.title) } : task))
+          : milestone.tasks
+        return { ...milestone, title: clampTitle(milestone.title), tasks }
+      })
+    : milestones
+
 export const clampReply = (reply: unknown) => {
   const dropped: string[] = []
   if (!isRecord(reply) || !isRecord(reply.proposal)) return { reply, dropped }
   const proposal = reply.proposal
   if (!Array.isArray(proposal.projects)) return { reply, dropped }
 
-  const trim = <T>(items: T[], max: number, label: string) => {
-    if (items.length > max) dropped.push(`${label}: ${items.length} -> ${max}`)
-    return items.slice(0, max)
-  }
+  const trim = makeTrim(dropped)
 
   const projects = trim(proposal.projects, PLAN_BOUNDS.projects, 'projects').map((project, index) => {
     if (!isRecord(project)) return project
-    const milestones = Array.isArray(project.milestones)
-      ? trim(project.milestones, PLAN_BOUNDS.milestonesPerProject, `projects[${index}].milestones`)
-        .map((milestone, milestoneIndex) => {
-          if (!isRecord(milestone)) return milestone
-          const tasks = Array.isArray(milestone.tasks)
-            ? trim(milestone.tasks, PLAN_BOUNDS.tasksPerMilestone, `projects[${index}].milestones[${milestoneIndex}].tasks`)
-              .map(task => (isRecord(task) ? { ...task, title: clampTitle(task.title) } : task))
-            : milestone.tasks
-          return { ...milestone, title: clampTitle(milestone.title), tasks }
-        })
-      : project.milestones
+    const milestones = clampMilestones(project.milestones, `projects[${index}].milestones`, trim)
     return { ...project, title: clampTitle(project.title), milestones }
   })
 
   const goal = isRecord(proposal.goal) ? { ...proposal.goal, title: clampTitle(proposal.goal.title) } : proposal.goal
   return { reply: { ...reply, proposal: { ...proposal, goal, projects } }, dropped }
+}
+
+export const clampBreakdownReply = (reply: unknown) => {
+  const dropped: string[] = []
+  if (!isRecord(reply) || !isRecord(reply.proposal)) return { reply, dropped }
+  const proposal = reply.proposal
+  if (!Array.isArray(proposal.milestones)) return { reply, dropped }
+  const milestones = clampMilestones(proposal.milestones, 'milestones', makeTrim(dropped))
+  return { reply: { ...reply, proposal: { ...proposal, milestones } }, dropped }
 }
 
 export const validateProviderReply = (value: unknown) => {
@@ -591,6 +625,37 @@ export const rescheduleContextFor = (db: KobiDb, userId: string, workspaceId: st
   }
 }
 
+// Bounds on what a breakdown prompt carries, so a large project cannot bloat the request.
+const BREAKDOWN_CONTEXT = { descriptionChars: 4_000, openTasks: 40 } as const
+
+export const breakdownContextFor = (db: KobiDb, userId: string, workspaceId: string, projectId: string) => {
+  const project = getProject(db, userId, workspaceId, projectId)
+  if (project.status === 'archived') {
+    throw createError({ status: 422, statusText: 'Archived projects cannot be broken down' })
+  }
+  const openTasks = listTasks(db, userId, workspaceId, {
+    scope: 'all',
+    projectId: project.id,
+    labelIds: [],
+    includeCompleted: false,
+  }).slice(0, BREAKDOWN_CONTEXT.openTasks)
+  return {
+    today: todayIso(),
+    project: {
+      id: project.id,
+      title: project.title,
+      description: project.description.slice(0, BREAKDOWN_CONTEXT.descriptionChars),
+      targetDate: project.targetDate,
+    },
+    existingMilestones: project.milestones.map(milestone => ({
+      title: milestone.title,
+      targetDate: milestone.targetDate,
+      taskCount: milestone.taskCount,
+    })),
+    openTaskTitles: openTasks.map(task => task.title),
+  }
+}
+
 const clampTriageReply = (reply: unknown) => {
   const dropped: string[] = []
   if (!isRecord(reply) || !isRecord(reply.proposal)) return { reply, dropped }
@@ -632,6 +697,12 @@ const clampRescheduleReply = (reply: unknown) => {
 
 export const validateTriageReply = (value: unknown) => {
   const parsed = triageReplySchema.safeParse(value)
+  if (!parsed.success) throw new AiReplyContractError(`Reply failed validation: ${excerpt(parsed.error.issues)}`)
+  return parsed.data
+}
+
+export const validateBreakdownReply = (value: unknown) => {
+  const parsed = breakdownReplySchema.safeParse(value)
   if (!parsed.success) throw new AiReplyContractError(`Reply failed validation: ${excerpt(parsed.error.issues)}`)
   return parsed.data
 }
@@ -697,6 +768,16 @@ const resolveRescheduleReply = (
     : { ...answer, message: 'None of the suggested changes still apply to the overdue tasks.', proposal: null }
 }
 
+const resolveBreakdownReply = (
+  answer: ReturnType<typeof validateBreakdownReply>,
+  context: ReturnType<typeof breakdownContextFor>,
+) => {
+  if (answer.proposal && answer.proposal.projectId !== context.project.id) {
+    return { ...answer, message: 'I could not match that suggestion to the project anymore.', proposal: null }
+  }
+  return answer
+}
+
 const actionFailureReply = <P extends Proposal>(source: Exclude<AiReplySource, 'model'>): AiKindReply<P> => ({
   message: source === 'invalid' ? INVALID_REPLY_NOTICE : OFFLINE_NOTICE,
   proposalId: null,
@@ -704,11 +785,63 @@ const actionFailureReply = <P extends Proposal>(source: Exclude<AiReplySource, '
   source,
 })
 
-const persistActionProposal = <P extends TriageProposal | RescheduleProposal>(
+// Offline reschedule: at most this many tasks land on any one day, and today's
+// share is reduced by what is already selected for Today.
+export const OFFLINE_RESCHEDULE_PER_DAY = 3
+
+const PRIORITY_RANK: Record<string, number> = { high: 0, medium: 1, low: 2, none: 3 }
+
+// Deterministic redistribution of overdue work when no model answered. It uses
+// only the supplied context, never the clock or randomness, so the same data
+// always yields the same draft. Weekends are deliberately not skipped.
+export const localReschedule = (
+  context: ReturnType<typeof rescheduleContextFor>,
+): { message: string, proposal: RescheduleProposal | null } => {
+  if (!context.candidates.length) return { message: 'There is no overdue work to replan.', proposal: null }
+  const ordered = [...context.candidates].sort((a, b) =>
+    (PRIORITY_RANK[a.priority] ?? 3) - (PRIORITY_RANK[b.priority] ?? 3)
+    || b.daysOverdue - a.daysOverdue
+    || a.key.localeCompare(b.key)
+    || a.id.localeCompare(b.id))
+  const chosen = ordered.slice(0, RESCHEDULE_BOUNDS.changes)
+  const left = ordered.length - chosen.length
+  let offset = 0
+  let used = 0
+  const capacity = (day: number) => (day === 0
+    ? Math.max(0, OFFLINE_RESCHEDULE_PER_DAY - context.selectedForTodayCount)
+    : OFFLINE_RESCHEDULE_PER_DAY)
+  const changes = chosen.map((task) => {
+    while (used >= capacity(offset)) {
+      offset += 1
+      used = 0
+    }
+    used += 1
+    const slot = addDaysIso(context.today, offset)
+    return {
+      taskId: task.id,
+      dueDate: slot,
+      scheduledFor: slot,
+      selectedForToday: slot === context.today,
+      statusCategory: null,
+      reason: `Overdue by ${task.daysOverdue} ${task.daysOverdue === 1 ? 'day' : 'days'}; moved to ${slot}.`,
+    }
+  })
+  const note = left > 0
+    ? `${left} more overdue ${left === 1 ? 'task was' : 'tasks were'} left out of this draft. Replan again after these are done.`
+    : ''
+  const proposal = rescheduleProposalSchema.parse({ kind: 'reschedule', note, changes })
+  return {
+    message: `I spread ${changes.length} overdue ${changes.length === 1 ? 'task' : 'tasks'} across the next days, at most ${OFFLINE_RESCHEDULE_PER_DAY} a day, highest priority first. Nothing changes until you accept.`,
+    proposal,
+  }
+}
+
+const persistActionProposal = <P extends TriageProposal | RescheduleProposal | BreakdownProposal>(
   db: KobiDb,
   userId: string,
   workspaceId: string,
   answer: { message: string, proposal: P | null },
+  source: AiReplySource = 'model',
 ): AiKindReply<P> => {
   let proposalId: string | null = null
   if (answer.proposal) {
@@ -723,7 +856,7 @@ const persistActionProposal = <P extends TriageProposal | RescheduleProposal>(
       createdAt: nowIso(),
     }).run()
   }
-  return { ...answer, proposalId, source: 'model' }
+  return { ...answer, proposalId, source }
 }
 
 export const triageTask = async (
@@ -757,7 +890,12 @@ export const rescheduleOverdue = async (
 ): Promise<AiKindReply<RescheduleProposal>> => {
   checkRateLimit(userId)
   const context = rescheduleContextFor(db, userId, workspaceId)
-  if (!config.apiKey) return actionFailureReply('offline')
+  const offlineDraft = (): AiKindReply<RescheduleProposal> => {
+    const local = localReschedule(context)
+    if (!local.proposal) return actionFailureReply('offline')
+    return persistActionProposal(db, userId, workspaceId, { message: `${OFFLINE_NOTICE}\n\n${local.message}`, proposal: local.proposal }, 'offline')
+  }
+  if (!config.apiKey) return offlineDraft()
   if (!context.candidates.length) return { message: 'There is no overdue work to replan.', proposalId: null, proposal: null, source: 'model' }
   let answer: ReturnType<typeof resolveRescheduleReply>
   try {
@@ -767,6 +905,29 @@ export const rescheduleOverdue = async (
     if (!(error instanceof AiReplyContractError) && !(error instanceof AiProviderUnreachableError)) throw error
     const source = error instanceof AiReplyContractError ? 'invalid' : 'offline'
     console.warn('Ask Kobi reschedule failed.', { source, error: error instanceof Error ? error.message : 'Unknown error' })
+    return source === 'offline' ? offlineDraft() : actionFailureReply(source)
+  }
+  return persistActionProposal(db, userId, workspaceId, answer)
+}
+
+export const breakdownProject = async (
+  db: KobiDb,
+  userId: string,
+  workspaceId: string,
+  input: { projectId: string },
+  config: AiConfig,
+): Promise<AiKindReply<BreakdownProposal>> => {
+  checkRateLimit(userId)
+  const context = breakdownContextFor(db, userId, workspaceId, input.projectId)
+  if (!config.apiKey) return actionFailureReply('offline')
+  let answer: ReturnType<typeof resolveBreakdownReply>
+  try {
+    const raw = await callProviderRequest(config, buildBreakdownProviderRequest(config, context), clampBreakdownReply, validateBreakdownReply)
+    answer = resolveBreakdownReply(raw, context)
+  } catch (error: unknown) {
+    if (!(error instanceof AiReplyContractError) && !(error instanceof AiProviderUnreachableError)) throw error
+    const source = error instanceof AiReplyContractError ? 'invalid' : 'offline'
+    console.warn('Ask Kobi breakdown failed.', { source, error: error instanceof Error ? error.message : 'Unknown error' })
     return actionFailureReply(source)
   }
   return persistActionProposal(db, userId, workspaceId, answer)
@@ -863,6 +1024,46 @@ export const askKobi = async (
   return { message: answer.message, proposalId, proposal: answer.proposal, source, historyTurns: history.length }
 }
 
+// Creates milestones and their tasks inside an existing project. Shared by goal_plan (for each
+// new project) and breakdown (for an existing one); tasks are assigned to the requester.
+const createMilestonesWithTasks = (
+  tx: KobiDb,
+  userId: string,
+  workspaceId: string,
+  projectId: string,
+  milestoneInputs: BreakdownProposal['milestones'],
+) => {
+  const milestoneIds: string[] = []
+  for (const milestoneInput of milestoneInputs) {
+    const withMilestone = createMilestone(tx, userId, workspaceId, projectId, {
+      title: milestoneInput.title,
+      description: '',
+      targetDate: milestoneInput.targetDate,
+    })
+    const milestone = withMilestone.milestones.at(-1)
+    if (!milestone) throw new Error('Milestone creation did not return the created milestone')
+    milestoneIds.push(milestone.id)
+    for (const taskInput of milestoneInput.tasks) {
+      createTask(tx, userId, workspaceId, {
+        title: taskInput.title,
+        description: '',
+        priority: taskInput.priority,
+        dueDate: taskInput.dueDate,
+        scheduledFor: null,
+        recurrence: 'none',
+        selectedForToday: false,
+        estimate: null,
+        labelIds: [],
+        assigneeId: userId,
+        projectId,
+        milestoneId: milestone.id,
+        parentId: null,
+      })
+    }
+  }
+  return milestoneIds
+}
+
 export const acceptProposal = (
   db: KobiDatabase,
   userId: string,
@@ -923,34 +1124,23 @@ export const acceptProposal = (
           targetDate: null,
         })
         projectIds.push(project.id)
-        for (const milestoneInput of projectInput.milestones) {
-          const withMilestone = createMilestone(tx, userId, workspaceId, project.id, {
-            title: milestoneInput.title,
-            description: '',
-            targetDate: milestoneInput.targetDate,
-          })
-          const milestone = withMilestone.milestones.at(-1)
-          if (!milestone) throw new Error('Milestone creation did not return the created milestone')
-          for (const taskInput of milestoneInput.tasks) {
-            createTask(tx, userId, workspaceId, {
-              title: taskInput.title,
-              description: '',
-              priority: taskInput.priority,
-              dueDate: taskInput.dueDate,
-              scheduledFor: null,
-              recurrence: 'none',
-              selectedForToday: false,
-              estimate: null,
-              labelIds: [],
-              assigneeId: userId,
-              projectId: project.id,
-              milestoneId: milestone.id,
-              parentId: null,
-            })
-          }
-        }
+        createMilestonesWithTasks(tx, userId, workspaceId, project.id, projectInput.milestones)
       }
-      return { goalId: goal.id, projectIds }
+      return { kind: 'goal_plan' as const, goalId: goal.id, projectIds }
+    }
+
+    if (effective.kind === 'breakdown') {
+      if (stored.kind === 'breakdown' && effective.projectId !== stored.projectId) {
+        throw createError({ status: 422, statusText: 'Edited breakdown must target the original project' })
+      }
+      // Re-read inside the transaction: the project may have been archived or removed since
+      // the proposal was drafted.
+      const project = getProject(tx, userId, workspaceId, effective.projectId)
+      if (project.status === 'archived') {
+        throw createError({ status: 422, statusText: 'Archived projects cannot be broken down' })
+      }
+      const milestoneIds = createMilestonesWithTasks(tx, userId, workspaceId, project.id, effective.milestones)
+      return { kind: 'breakdown' as const, projectId: project.id, milestoneIds }
     }
 
     if (effective.kind === 'triage') {
@@ -981,33 +1171,108 @@ export const acceptProposal = (
           : null,
         labelIds: effective.labelIds,
       })
-      return { taskId: effective.taskId }
+      return { kind: 'triage' as const, taskId: effective.taskId }
     }
 
     const taskIds: string[] = []
+    const snapshot: z.infer<typeof rescheduleSnapshotSchema> = []
     const today = todayIso()
     const horizonDate = addDaysIso(today, RESCHEDULE_BOUNDS.horizonDays)
+    const stateOf = (task: ReturnType<typeof getTask>) => ({
+      dueDate: task.dueDate,
+      scheduledFor: task.scheduledFor,
+      statusId: task.status.id,
+      selectedForToday: task.selectedForToday,
+    })
     for (const change of effective.changes) {
       for (const date of [change.dueDate, change.scheduledFor]) {
         if (date && (date < today || date > horizonDate)) {
           throw createError({ status: 422, statusText: 'Rescheduled dates must stay inside the two-week horizon' })
         }
       }
-      getTask(tx, userId, workspaceId, change.taskId)
+      const before = getTask(tx, userId, workspaceId, change.taskId)
       const status = change.statusCategory
         ? statusForCategory(tx, workspaceId, change.statusCategory)
         : null
-      updateTask(tx, userId, workspaceId, change.taskId, {
+      const after = updateTask(tx, userId, workspaceId, change.taskId, {
         dueDate: change.dueDate,
         scheduledFor: change.scheduledFor,
         selectedForToday: change.selectedForToday,
         ...(status ? { statusId: status.id } : {}),
       })
+      const earlier = snapshot.find(entry => entry.taskId === change.taskId)
+      if (earlier) earlier.after = stateOf(after)
+      else snapshot.push({ taskId: change.taskId, before: stateOf(before), after: stateOf(after) })
       taskIds.push(change.taskId)
     }
-    return { taskIds }
+    tx.insert(aiProposalSnapshots).values({
+      proposalId,
+      userId,
+      workspaceId,
+      snapshotJson: JSON.stringify(rescheduleSnapshotSchema.parse(snapshot)),
+      createdAt: nowIso(),
+    }).run()
+    return { kind: 'reschedule' as const, taskIds }
   })
 }
+
+// Reverses an accepted reschedule, but only while every touched task still matches what the
+// reschedule left behind. Anything edited since is the person's newer intent, so the whole undo
+// is refused rather than partly applied.
+export const undoReschedule = (
+  db: KobiDatabase,
+  userId: string,
+  workspaceId: string,
+  proposalId: string,
+) => withTransaction(db, (tx) => {
+  const row = tx.select({
+    snapshotJson: aiProposalSnapshots.snapshotJson,
+    undoneAt: aiProposalSnapshots.undoneAt,
+  }).from(aiProposalSnapshots)
+    .innerJoin(aiProposals, eq(aiProposals.id, aiProposalSnapshots.proposalId))
+    .where(and(
+      eq(aiProposalSnapshots.proposalId, proposalId),
+      eq(aiProposalSnapshots.userId, userId),
+      eq(aiProposalSnapshots.workspaceId, workspaceId),
+      eq(aiProposals.userId, userId),
+      eq(aiProposals.workspaceId, workspaceId),
+      eq(aiProposals.kind, 'reschedule'),
+      eq(aiProposals.status, 'accepted'),
+    ))
+    .get()
+  if (!row) throw createError({ status: 404, statusText: 'Nothing to undo for this proposal' })
+  if (row.undoneAt) throw createError({ status: 409, statusText: 'This replan was already undone' })
+  const snapshot = rescheduleSnapshotSchema.parse(JSON.parse(row.snapshotJson) as unknown)
+
+  const changedSince = () => createError({ status: 409, statusText: 'Some of these tasks changed after the replan, so it cannot be undone' })
+  for (const entry of snapshot) {
+    let current: ReturnType<typeof getTask>
+    try {
+      current = getTask(tx, userId, workspaceId, entry.taskId)
+    } catch {
+      throw createError({ status: 409, statusText: 'A task from this replan no longer exists, so it cannot be undone' })
+    }
+    if (
+      current.dueDate !== entry.after.dueDate
+      || current.scheduledFor !== entry.after.scheduledFor
+      || current.status.id !== entry.after.statusId
+      || current.selectedForToday !== entry.after.selectedForToday
+    ) throw changedSince()
+  }
+  for (const entry of snapshot) updateTask(tx, userId, workspaceId, entry.taskId, entry.before)
+
+  const claimed = tx.update(aiProposalSnapshots)
+    .set({ undoneAt: nowIso() })
+    .where(and(
+      eq(aiProposalSnapshots.proposalId, proposalId),
+      eq(aiProposalSnapshots.userId, userId),
+      eq(aiProposalSnapshots.workspaceId, workspaceId),
+      isNull(aiProposalSnapshots.undoneAt),
+    ))
+    .run()
+  if (!claimed.changes) throw createError({ status: 409, statusText: 'This replan was already undone' })
+  return { undone: true as const, taskIds: snapshot.map(entry => entry.taskId) }
+})
 
 export const rejectProposal = (
   db: KobiDatabase,

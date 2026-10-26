@@ -226,7 +226,14 @@ export type RescheduleProposal = {
   }>
 }
 
-export type Proposal = GoalPlanProposal | TriageProposal | RescheduleProposal
+// New milestones (with tasks) for an existing project; the shape is goal_plan's own.
+export type BreakdownProposal = {
+  kind: 'breakdown'
+  projectId: string
+  milestones: GoalPlanProposal['projects'][number]['milestones']
+}
+
+export type Proposal = GoalPlanProposal | TriageProposal | RescheduleProposal | BreakdownProposal
 
 // 'offline' marks a reply produced by the local fallback because no provider key
 // is configured or the provider call failed. It must stay visible to the client:
@@ -245,3 +252,4 @@ export type AiKindReply<P extends Proposal> = {
 export type AiReply = AiKindReply<GoalPlanProposal>
 export type TriageReply = AiKindReply<TriageProposal>
 export type RescheduleReply = AiKindReply<RescheduleProposal>
+export type BreakdownReply = AiKindReply<BreakdownProposal>

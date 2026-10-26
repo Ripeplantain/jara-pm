@@ -1127,7 +1127,8 @@
     @apply ml-auto;
   }
 
-  .reschedule-action .ai-proposal-card {
+  .reschedule-action .ai-proposal-card,
+  .breakdown-action .ai-proposal-card {
     @apply fixed inset-x-4 top-[10vh] z-50 mx-auto max-h-[80vh] max-w-4xl overflow-y-auto bg-surface p-5;
   }
 

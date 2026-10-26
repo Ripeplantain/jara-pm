@@ -1,0 +1,144 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "message",
+    "proposal"
+  ],
+  "properties": {
+    "message": {
+      "type": "string",
+      "description": "The reply shown to the user. When proposal is null, answer the question asked, or ask one short question if the message names nothing to answer or plan."
+    },
+    "proposal": {
+      "description": "null when the message names no plannable outcome; `message` then answers the question asked or asks one short question",
+      "anyOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "goal",
+            "projects"
+          ],
+          "properties": {
+            "kind": {
+              "type": "string",
+              "enum": [
+                "goal_plan"
+              ]
+            },
+            "goal": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "title",
+                "description",
+                "targetDate"
+              ],
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "description": "A short title, under 200 characters."
+                },
+                "description": {
+                  "type": "string"
+                },
+                "targetDate": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "projects": {
+              "description": "At most 8 projects. Merge related areas into one project rather than adding another; anything beyond this is trimmed away.",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "title",
+                  "description",
+                  "milestones"
+                ],
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "description": "A short title, under 200 characters."
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "milestones": {
+                    "description": "At most 12 milestones in a project; anything beyond this is trimmed away.",
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "title",
+                        "targetDate",
+                        "tasks"
+                      ],
+                      "properties": {
+                        "title": {
+                          "type": "string",
+                          "description": "A short title, under 200 characters."
+                        },
+                        "targetDate": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "tasks": {
+                          "description": "At most 20 tasks in a milestone; anything beyond this is trimmed away.",
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": [
+                              "title",
+                              "dueDate",
+                              "priority"
+                            ],
+                            "properties": {
+                              "title": {
+                                "type": "string",
+                                "description": "A short title, under 200 characters."
+                              },
+                              "dueDate": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "priority": {
+                                "type": "string",
+                                "enum": [
+                                  "none",
+                                  "low",
+                                  "medium",
+                                  "high"
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

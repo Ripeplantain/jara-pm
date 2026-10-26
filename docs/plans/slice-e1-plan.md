@@ -352,18 +352,20 @@ meanings, and both previews render the same two badges ("Offline draft" / "Reply
 
 | Situation | `source` | Message | Rows written |
 |---|---|---|---|
-| No API key configured | `offline` | `OFFLINE_NOTICE` prefix | none |
-| `AiProviderUnreachableError` (transport, timeout, 401/402/5xx, unusable envelope) | `offline` | `OFFLINE_NOTICE` prefix | none |
+| No API key configured | `offline` | `OFFLINE_NOTICE` prefix | none for triage and breakdown; for reschedule, one pending row when overdue work exists (see below) |
+| `AiProviderUnreachableError` (transport, timeout, 401/402/5xx, unusable envelope) | `offline` | `OFFLINE_NOTICE` prefix | same as above |
 | `AiReplyContractError` (bad JSON, Zod failure, bound violation) | `invalid` | `INVALID_REPLY_NOTICE`, **no** offline prefix | none |
 | Clean reply with a proposal | `model` | model's own | one pending `ai_proposals` row |
 | Clean reply, nothing worth proposing | `model` | model's own | none |
 
 Two things to get right that the goal-plan path never had to:
 
-1. **Offline for the new kinds yields `proposal: null`.** There is no `localPlan` equivalent for
-   triage, and a locally-invented reschedule would be a date shuffle the user can already do by hand.
-   The honest degraded answer is "I could not reach my model" with nothing drafted. (§10.6 records the
-   alternative.)
+1. **Offline for triage and breakdown yields `proposal: null`.** There is no `localPlan` equivalent
+   for them. The honest degraded answer is "I could not reach my model" with nothing drafted.
+   **Reschedule is the exception (decided 2026-10-26, §10.6):** with overdue work it returns a
+   deterministic local draft with `source: 'offline'`, the `OFFLINE_NOTICE` prefix and one normal
+   pending proposal; with no overdue work it still returns `proposal: null`. A reply that breaks the
+   contract stays `invalid` and never falls back.
 2. **A resolve step that drops every proposed change is NOT `invalid`.** If the model replies on
    contract but every id it named has since been deleted, the model did nothing wrong. That surfaces
    as `source: 'model'`, `proposal: null`, and a message saying nothing was applicable. Calling it
@@ -585,6 +587,13 @@ short per-request refs (`L1`, `P3`) with the mapping stored in `payload_json`. T
 `references_only_supplied_ids` grader is the decider. *(Natural keys were considered and rejected:
 label names are unique per workspace, but project titles are not.)*
 
+**Decision, 2026-10-26: undo is built.** Accepting a reschedule stores what it overwrote in a new
+`ai_proposal_snapshots` table (migration `0009`, no foreign key to `tasks`, no new `ai_proposals`
+status) and `POST /api/ai/proposals/:id/undo` reverses it. Undo compares only the four rescheduled
+fields (`dueDate`, `scheduledFor`, `statusId`, `selectedForToday`); if any task changed, was deleted,
+or its original status is gone, the whole undo is refused with a 409/422 and nothing is written. There is no
+time limit, and the entry points are the post-accept toast and an inline button only.
+
 **10.2 `reschedule` is the first proposal that MUTATES user data.** Every proposal to date only
 created rows. Accepting a reschedule overwrites dates the user chose, and D2 (activity log) was
 cancelled, so there is no history to recover them from. Recommendation: the editable diff plus
@@ -605,11 +614,16 @@ untouched, and action context never pollutes the conversation transcript.
 implementation list does not ask for the endpoint, and none exists today. Recommendation: include it
 (~20 lines) so the criterion is testable as written. Cuttable.
 
-**10.6 Offline behaviour for the new kinds.** Recommendation: `proposal: null` with
-`OFFLINE_NOTICE`. The alternative — a deterministic local reschedule that redistributes overdue work
-across the next N days by priority — is genuinely useful and ~40 lines, but it is a product decision
-about whether Kobi should replan without a model, and `localPlan` is already the precedent for
-answering yes.
+**10.6 Offline behaviour for the new kinds.** Original recommendation: `proposal: null` with
+`OFFLINE_NOTICE`. **Decision, 2026-10-26: reschedule gets the deterministic local replan instead**
+(`localReschedule` in `server/services/ai.ts`); triage stays `proposal: null`. The algorithm: sort
+candidates by priority (high, medium, low, none), then days overdue (most first), then key, then id; take
+at most `RESCHEDULE_BOUNDS.changes`; fill days from today at 3 tasks a day (today's share is 3 minus
+what is already selected for Today; weekends are not skipped); set `dueDate` and `scheduledFor` to the
+day, `selectedForToday` only for today, and leave status alone. Reasons are a fixed template, the note
+says how many candidates were left out, and the result is parsed through `rescheduleProposalSchema`
+before it is saved as a normal pending proposal, so accept, edit, reject and undo behave as for a
+model draft. The preview shows an "Offline draft" badge.
 
 **10.7 One shared `PROMPT_VERSION` or one per kind?** Recommendation: one shared constant, bumped to
 something like `'2026-10-25-proposal-kinds-v1'`, because `.agent/PROJECT.md` describes a single

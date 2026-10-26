@@ -76,6 +76,7 @@ const unarchive = async () => {
         <div><div class="eyebrow">{{ data.project.goalTitle || 'Independent project' }}</div><h1>{{ data.project.title }}</h1><span v-if="data.project.status === 'archived'" class="status-badge archived">Archived</span><p>{{ data.project.description || 'Keep the work simple and visible.' }}</p></div>
         <div class="page-actions">
           <button type="button" class="button secondary" @click="open(`Help me break down ${data.project.title}`)"><Sparkles :size="16" /> Ask Kobi</button>
+          <BreakdownAction v-if="data.project.status !== 'archived'" :project-id="data.project.id" @accepted="refresh" />
           <button v-if="data.project.status === 'archived'" type="button" class="button secondary" @click="unarchive"><ArchiveRestore :size="16" /> Unarchive</button>
           <button v-else type="button" class="button ghost" @click="archive"><Archive :size="16" /> Archive</button>
         </div>

@@ -136,8 +136,11 @@ describe('additional AI proposal kinds', () => {
 
     vi.stubGlobal('$fetch', vi.fn().mockRejectedValue(new Error('network down')))
     const unavailable = await rescheduleOverdue(db, userId, workspaceId, config)
-    expect(unavailable).toEqual({ message: OFFLINE_NOTICE, proposalId: null, proposal: null, source: 'offline' })
-    expect(db.select().from(aiProposals).all()).toHaveLength(0)
+    // An unreachable provider now yields the deterministic local draft, saved as a normal pending proposal.
+    expect(unavailable).toMatchObject({ source: 'offline', proposal: { kind: 'reschedule' } })
+    expect(unavailable.message.startsWith(OFFLINE_NOTICE)).toBe(true)
+    expect(unavailable.proposalId).not.toBeNull()
+    expect(db.select().from(aiProposals).all()).toHaveLength(1)
     expect(db.select().from(aiMessages).all()).toHaveLength(0)
   })
 
