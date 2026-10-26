@@ -14,9 +14,11 @@ export const notifyWorkspaceChanged = (workspaceId: string) => {
 }
 
 export const useWorkspaces = () => {
+  const route = useRoute()
   const request = useFetch<WorkspaceListItem[]>('/api/workspaces', {
     key: 'workspace-list',
     default: emptyWorkspaceList,
+    dedupe: 'defer',
   })
   const isChanging = useState<boolean>('workspace-changing', () => false)
   const actionError = useState<string>('workspace-action-error', () => '')
@@ -25,13 +27,23 @@ export const useWorkspaces = () => {
   const { resetOverlay } = useOptimisticTask()
 
   const reloadWorkspaceContext = async () => {
+    const startedOnHome = route.path === '/'
+    const needsNavigation = route.fullPath !== '/'
     resetAskKobi()
     // Pending optimistic changes belong to the workspace being left. `clearNuxtData` does not
     // touch `useState`, so without this they would be merged onto the new workspace's lists.
     resetOverlay()
     await clearNuxtData()
-    await navigateTo('/', { replace: true })
-    await refreshNuxtData()
+    if (needsNavigation) {
+      await navigateTo('/', { replace: true })
+      // Let scopes from the previous route finish unmounting before starting replacement fetches.
+      await nextTick()
+    }
+    // On Today those scopes stay mounted, so refresh them all. After a cross-route navigation the
+    // new page has already started its own fetches; only the persistent workspace list needs an
+    // explicit refresh, and it should join any request already in flight.
+    if (startedOnHome) await refreshNuxtData()
+    else await request.refresh({ dedupe: 'defer' })
   }
 
   onMounted(() => {

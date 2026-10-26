@@ -27,7 +27,14 @@ export const workspaceInviteSchema = z.object({
   email: z.string().trim().toLowerCase().pipe(z.email()),
 })
 
-export const workspaceParamsSchema = z.object({ workspaceId: idSchema })
+// Migration 0002 created personal workspace ids with lower(hex(randomblob(16))). Keep those
+// persisted ids addressable while all newly generated workspace ids continue to use UUIDs.
+export const workspaceIdSchema = z.union([
+  idSchema,
+  z.string().regex(/^[0-9a-f]{32}$/),
+])
+
+export const workspaceParamsSchema = z.object({ workspaceId: workspaceIdSchema })
 export const workspaceInviteParamsSchema = workspaceParamsSchema.extend({ id: idSchema })
 export const workspaceMemberParamsSchema = workspaceParamsSchema.extend({ userId: idSchema })
 

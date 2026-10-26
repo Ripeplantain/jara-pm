@@ -1090,6 +1090,71 @@
     @apply cursor-not-allowed opacity-40;
   }
 
+  .ai-action {
+    @apply min-w-0;
+  }
+
+  .triage-action {
+    @apply col-start-2 mt-1;
+  }
+
+  .ai-proposal-card {
+    @apply mt-2 grid gap-3 rounded-lg border border-border-strong bg-background p-3.5 text-sm shadow-sm;
+  }
+
+  .ai-proposal-heading,
+  .reschedule-change-heading {
+    @apply flex items-center justify-between gap-3;
+  }
+
+  .ai-form-grid {
+    @apply grid grid-cols-3 gap-3;
+  }
+
+  .proposal-label-options {
+    @apply flex flex-wrap gap-1.5;
+  }
+
+  .proposal-label-options .button {
+    @apply px-1.5;
+  }
+
+  .proposal-label-options .button.active {
+    @apply border-primary bg-surface-active;
+  }
+
+  .reschedule-action {
+    @apply ml-auto;
+  }
+
+  .reschedule-action .ai-proposal-card {
+    @apply fixed inset-x-4 top-[10vh] z-50 mx-auto max-h-[80vh] max-w-4xl overflow-y-auto bg-surface p-5;
+  }
+
+  .reschedule-overlay {
+    @apply fixed inset-0 z-40 bg-black/30;
+  }
+
+  .reschedule-preview {
+    @apply grid gap-3;
+  }
+
+  .reschedule-change {
+    @apply grid gap-2 rounded-md border border-border bg-background p-3;
+  }
+
+  .reschedule-diff {
+    @apply grid grid-cols-[auto_auto_repeat(3,minmax(0,1fr))] items-end gap-3;
+  }
+
+  .old-value {
+    @apply self-center text-xs text-text-muted line-through;
+  }
+
+  .check-field {
+    @apply flex min-h-10 items-center gap-2 text-sm;
+  }
+
   .ask-composer {
     @apply border-t border-border bg-surface p-3.5;
   }
@@ -1566,6 +1631,11 @@
 
   .task-actions {
     @apply col-start-2 justify-start;
+  }
+
+  .ai-form-grid,
+  .reschedule-diff {
+    @apply grid-cols-1;
   }
 
   .date-input {

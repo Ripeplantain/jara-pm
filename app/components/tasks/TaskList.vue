@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import type { Task, WorkspaceMember } from '#shared/types/domain'
+import type { Task } from '#shared/types/domain'
 
-const props = withDefaults(defineProps<{ tasks: Task[], showReschedule?: boolean, emptyTitle?: string, emptyMessage?: string, enableAssignees?: boolean }>(), {
+const props = withDefaults(defineProps<{ tasks: Task[], showReschedule?: boolean, enableTriage?: boolean, emptyTitle?: string, emptyMessage?: string, enableAssignees?: boolean }>(), {
   showReschedule: false,
+  enableTriage: false,
   emptyTitle: 'Nothing here',
   emptyMessage: 'You are all caught up.',
   enableAssignees: false,
@@ -13,16 +14,12 @@ const { pendingTaskIds } = useToasts()
 // is filtered here rather than in each page. Pending edits are not merged here: every `TaskRow`
 // decorates its own task, so doing it again would be the same work twice per row.
 const visibleTasks = computed(() => props.tasks.filter(task => !pendingTaskIds.value.includes(task.id)))
-const { data: members } = await useFetch<WorkspaceMember[]>('/api/workspace/members', {
-  key: 'workspace-members-task-list',
-  default: () => [],
-  lazy: true,
-})
+const { data: members } = await useWorkspaceMembers()
 </script>
 
 <template>
   <div v-if="visibleTasks.length" class="task-list">
-    <TaskRow v-for="task in visibleTasks" :key="task.id" :task="task" :show-reschedule="props.showReschedule" :members="props.enableAssignees ? members : []" @updated="emit('changed')" @deleted="emit('changed')" />
+    <TaskRow v-for="task in visibleTasks" :key="task.id" :task="task" :show-reschedule="props.showReschedule" :enable-triage="props.enableTriage" :members="props.enableAssignees ? members : []" @updated="emit('changed')" @deleted="emit('changed')" />
   </div>
   <EmptyState v-else :title="props.emptyTitle" :message="props.emptyMessage" />
 </template>

@@ -12,7 +12,7 @@ import {
   Target,
   UserRound,
 } from '@lucide/vue'
-import type { Goal, Label, LabelCollection, Project, Task, TaskPriority, WorkspaceMember } from '#shared/types/domain'
+import type { Goal, Label, Project, Task, TaskPriority } from '#shared/types/domain'
 import { estimateLabel, estimateOptions } from '#shared/utils/estimates'
 import { parseTaskKey } from '#shared/utils/task-key'
 import type { CommandAction } from '~/composables/useCommandPalette'
@@ -53,6 +53,7 @@ export const useGlobalCommands = () => {
   const { open: openAskKobi } = useAskKobi()
   const { activeWorkspace, data: workspaces, activateWorkspace } = useWorkspaces()
   const { statuses } = useStatuses()
+  const { labels } = useLabels()
   const { refreshTaskViews } = useTaskViews()
   const { show } = useToasts()
   const { capture, captureException } = useProductAnalytics()
@@ -67,16 +68,7 @@ export const useGlobalCommands = () => {
     default: () => [],
     lazy: true,
   })
-  const { data: members } = useFetch<WorkspaceMember[]>('/api/workspace/members', {
-    key: 'workspace-members-task-list',
-    default: () => [],
-    lazy: true,
-  })
-  const { data: labelCollection } = useFetch<LabelCollection>('/api/labels', {
-    key: 'label-collection',
-    default: (): LabelCollection => ({ groups: [], labels: [] }),
-    lazy: true,
-  })
+  const { data: members } = useWorkspaceMembers()
 
   const go = (to: string) => async () => {
     close()
@@ -384,7 +376,7 @@ export const useGlobalCommands = () => {
     }
 
     const attachedIds = new Set(task.labels.map(label => label.id))
-    const labelActions: CommandAction[] = labelCollection.value.labels.map((label: Label) => ({
+    const labelActions: CommandAction[] = labels.value.map((label: Label) => ({
       id: `task-label-${label.id}`,
       label: attachedIds.has(label.id) ? `Remove label: ${label.name}` : `Add label: ${label.name}`,
       group: 'Task',

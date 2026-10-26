@@ -1,6 +1,7 @@
 import { z } from 'zod'
-import { dateSchema, MAX_TITLE_LENGTH, titleSchema } from '#shared/schemas/common'
+import { dateSchema, idSchema, MAX_TITLE_LENGTH, titleSchema } from '#shared/schemas/common'
 import { TASK_PRIORITIES } from '#shared/types/domain'
+import { MAX_ESTIMATE } from '#shared/utils/estimates'
 
 export const MAX_AI_MESSAGE_LENGTH = 16_000
 // Plan descriptions are bounded below descriptionSchema's 10_000, so the editor shares
@@ -22,6 +23,22 @@ export const PLAN_BOUNDS = {
   milestonesPerProject: 12,
   tasksPerMilestone: 20,
 } as const
+
+export const TRIAGE_BOUNDS = {
+  labelIds: 6,
+  reasonLength: 240,
+} as const
+
+export const RESCHEDULE_BOUNDS = {
+  changes: 20,
+  candidates: 30,
+  horizonDays: 14,
+  reasonLength: 200,
+  noteLength: 500,
+} as const
+
+export const triageRequestSchema = z.object({ taskId: idSchema })
+export const rescheduleRequestSchema = z.object({}).strict()
 
 export const goalPlanProposalSchema = z.object({
   kind: z.literal('goal_plan'),
@@ -45,15 +62,59 @@ export const goalPlanProposalSchema = z.object({
   })).min(1).max(PLAN_BOUNDS.projects),
 })
 
+export const triageProposalSchema = z.object({
+  kind: z.literal('triage'),
+  taskId: idSchema,
+  labelIds: z.array(idSchema).max(TRIAGE_BOUNDS.labelIds),
+  priority: z.enum(TASK_PRIORITIES),
+  projectId: idSchema.nullable(),
+  estimate: z.number().int().min(1).max(MAX_ESTIMATE).nullable(),
+  reason: z.string().trim().max(TRIAGE_BOUNDS.reasonLength),
+})
+
+export const rescheduleProposalSchema = z.object({
+  kind: z.literal('reschedule'),
+  note: z.string().trim().max(RESCHEDULE_BOUNDS.noteLength),
+  changes: z.array(z.object({
+    taskId: idSchema,
+    dueDate: dateSchema,
+    scheduledFor: dateSchema,
+    selectedForToday: z.boolean(),
+    // Rescheduling may leave status alone, park work, or abandon it. It may never
+    // claim that work was started or completed on the user's behalf.
+    statusCategory: z.enum(['backlog', 'canceled']).nullable(),
+    reason: z.string().trim().max(RESCHEDULE_BOUNDS.reasonLength),
+  })).min(1).max(RESCHEDULE_BOUNDS.changes),
+})
+
+export const proposalSchema = z.discriminatedUnion('kind', [
+  goalPlanProposalSchema,
+  triageProposalSchema,
+  rescheduleProposalSchema,
+])
+
 // Optional user-edited plan sent on accept. Reuses the proposal schema verbatim so
 // the client and server share one set of bounds.
 export const acceptProposalSchema = z.object({
   plan: goalPlanProposalSchema.optional(),
+  proposal: proposalSchema.optional(),
+}).refine(value => !(value.plan && value.proposal), {
+  message: 'Send either plan or proposal, not both',
 })
 
 export const aiProviderResponseSchema = z.object({
   message: z.string().trim().min(1).max(10_000),
   proposal: goalPlanProposalSchema.nullable().default(null),
+})
+
+export const triageReplySchema = z.object({
+  message: z.string().trim().min(1).max(10_000),
+  proposal: triageProposalSchema.nullable().default(null),
+})
+
+export const rescheduleReplySchema = z.object({
+  message: z.string().trim().min(1).max(10_000),
+  proposal: rescheduleProposalSchema.nullable().default(null),
 })
 
 // OpenRouter uses this schema to constrain the provider response before Zod
@@ -121,6 +182,77 @@ export const aiReplyJsonSchema = {
                       },
                     },
                   },
+                },
+              },
+            },
+          },
+        },
+      ],
+    },
+  },
+} as const
+
+export const triageReplyJsonSchema = {
+  type: 'object',
+  additionalProperties: false,
+  required: ['message', 'proposal'],
+  properties: {
+    message: { type: 'string', description: 'A concise explanation of the suggested organization. Never claim anything was saved.' },
+    proposal: {
+      description: 'null when the task is already well organized or there is not enough context to improve it',
+      anyOf: [
+        { type: 'null' },
+        {
+          type: 'object',
+          additionalProperties: false,
+          required: ['kind', 'taskId', 'labelIds', 'priority', 'projectId', 'estimate', 'reason'],
+          properties: {
+            kind: { type: 'string', enum: ['triage'] },
+            taskId: { type: 'string', description: 'Copy the exact task id supplied in context.' },
+            labelIds: { type: 'array', maxItems: TRIAGE_BOUNDS.labelIds, items: { type: 'string' }, description: `At most ${TRIAGE_BOUNDS.labelIds} exact label ids supplied in context.` },
+            priority: { type: 'string', enum: [...TASK_PRIORITIES] },
+            projectId: { type: ['string', 'null'], description: 'An exact candidate project id supplied in context, or null.' },
+            estimate: { type: ['integer', 'null'], minimum: 1, maximum: MAX_ESTIMATE, description: 'One of the estimate values supplied in context, or null.' },
+            reason: { type: 'string', maxLength: TRIAGE_BOUNDS.reasonLength },
+          },
+        },
+      ],
+    },
+  },
+} as const
+
+export const rescheduleReplyJsonSchema = {
+  type: 'object',
+  additionalProperties: false,
+  required: ['message', 'proposal'],
+  properties: {
+    message: { type: 'string', description: 'A concise explanation of the proposed replan. Never claim anything was saved.' },
+    proposal: {
+      description: 'null when there are no applicable overdue tasks',
+      anyOf: [
+        { type: 'null' },
+        {
+          type: 'object',
+          additionalProperties: false,
+          required: ['kind', 'note', 'changes'],
+          properties: {
+            kind: { type: 'string', enum: ['reschedule'] },
+            note: { type: 'string', maxLength: RESCHEDULE_BOUNDS.noteLength },
+            changes: {
+              type: 'array',
+              minItems: 1,
+              maxItems: RESCHEDULE_BOUNDS.changes,
+              items: {
+                type: 'object',
+                additionalProperties: false,
+                required: ['taskId', 'dueDate', 'scheduledFor', 'selectedForToday', 'statusCategory', 'reason'],
+                properties: {
+                  taskId: { type: 'string', description: 'Copy an exact candidate task id supplied in context.' },
+                  dueDate: { type: ['string', 'null'], description: 'A real YYYY-MM-DD date inside the supplied horizon, or null.' },
+                  scheduledFor: { type: ['string', 'null'], description: 'A real YYYY-MM-DD date inside the supplied horizon, or null.' },
+                  selectedForToday: { type: 'boolean' },
+                  statusCategory: { type: ['string', 'null'], enum: ['backlog', 'canceled', null], description: 'Use null to keep status, backlog to park, or canceled to abandon.' },
+                  reason: { type: 'string', maxLength: RESCHEDULE_BOUNDS.reasonLength },
                 },
               },
             },

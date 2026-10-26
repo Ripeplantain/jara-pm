@@ -3,7 +3,7 @@ import { Check, Trash2 } from '@lucide/vue'
 import type { Status, Task, TaskPriority, WorkspaceMember } from '#shared/types/domain'
 import { estimateLabel, estimateOptions } from '#shared/utils/estimates'
 
-const props = withDefaults(defineProps<{ task: Task, showReschedule?: boolean, members?: WorkspaceMember[] }>(), { showReschedule: false, members: () => [] })
+const props = withDefaults(defineProps<{ task: Task, showReschedule?: boolean, enableTriage?: boolean, members?: WorkspaceMember[] }>(), { showReschedule: false, enableTriage: false, members: () => [] })
 const emit = defineEmits<{ updated: [task: Task], deleted: [id: string] }>()
 const { capture, captureException } = useProductAnalytics()
 const { showUndo, hideTask, revealTask } = useToasts()
@@ -258,5 +258,6 @@ const onKeydown = (event: KeyboardEvent) => {
         <Trash2 :size="15" aria-hidden="true" />
       </button>
     </div>
+    <AiTriageProposalCard v-if="props.enableTriage" :task="current" @accepted="emit('updated', current)" />
   </div>
 </template>

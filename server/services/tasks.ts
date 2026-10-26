@@ -2,7 +2,7 @@ import { and, asc, eq, gt, isNotNull, isNull, ne, notInArray, or, sql } from 'dr
 import { createError } from 'h3'
 import type { CreateTaskInput, TaskQuery, UpdateTaskInput } from '#shared/schemas/task'
 import type { Label, Status, Task } from '#shared/types/domain'
-import type { KobiDatabase, KobiDb } from '~~/server/db'
+import type { KobiDb } from '~~/server/db'
 import { withTransaction } from '~~/server/db'
 import { milestones, projects, statuses, taskDaySelections, taskLabels, tasks, users, workspaceMembers, workspaces } from '~~/server/db/schema'
 import { labelsForTasks, setTaskLabels } from '~~/server/services/labels'
@@ -388,7 +388,7 @@ export const createTask = (
 }
 
 export const updateTask = (
-  db: KobiDatabase,
+  db: KobiDb,
   userId: string,
   workspaceIdOrTaskId: string,
   taskIdOrInput: string | UpdateTaskInput,
@@ -472,7 +472,7 @@ export const updateTask = (
     && values.dueDate !== null
 
   if (shouldSchedule) {
-    db.transaction((tx) => {
+    withTransaction(db, (tx) => {
       const latest = getTask(tx, userId, workspaceId, taskId)
       const latestValues = valuesFor(latest)
       assertProject(tx, workspaceId, latestValues.projectId)

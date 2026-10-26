@@ -89,7 +89,7 @@ describe('Ask Kobi prompt', () => {
     expect(system).toContain('under about 120 words')
     expect(system).not.toContain('requested mode')
     expect(system).toContain(PROMPT_VERSION)
-    expect(PROMPT_VERSION).toBe('2026-10-20-bounded-plan-shape-v1')
+    expect(PROMPT_VERSION).toBe('2026-10-26-proposal-kinds-v1')
   })
 
   it('keeps messages[0] identical whatever the input or history', () => {

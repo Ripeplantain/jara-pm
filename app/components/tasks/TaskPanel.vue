@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { X } from '@lucide/vue'
-import type { Task, TaskPriority, WorkspaceMember } from '#shared/types/domain'
+import type { Task, TaskPriority } from '#shared/types/domain'
 import { estimateOptions } from '#shared/utils/estimates'
 
 const { openKey, close } = useTaskPanel()
@@ -33,11 +33,7 @@ registerTaskView(() => refresh())
 // screen without the person having to hover a row first.
 watch(task, (value) => { if (value) focusTask(value) }, { immediate: true })
 
-const { data: members } = useFetch<WorkspaceMember[]>('/api/workspace/members', {
-  key: 'workspace-members-task-list',
-  default: (): WorkspaceMember[] => [],
-  lazy: true,
-})
+const { data: members } = useWorkspaceMembers()
 
 const taskId = computed(() => fetched.value?.id ?? null)
 const parentId = computed(() => fetched.value?.parentId ?? null)
@@ -301,6 +297,8 @@ onMounted(() => {
           <LabelPicker :task="task" @updated="adopt" />
         </div>
       </div>
+
+      <AiTriageProposalCard :task="task" @accepted="refresh" />
 
       <section v-if="subtasks.length" class="task-panel-section">
         <h3>Subtasks <span class="form-hint">{{ subtasks.filter(item => item.status.category === 'completed').length }} of {{ subtasks.length }} done</span></h3>

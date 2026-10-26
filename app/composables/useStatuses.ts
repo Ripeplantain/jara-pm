@@ -1,5 +1,7 @@
 import type { Status, StatusCategory } from '#shared/types/domain'
 
+const emptyStatuses = (): Status[] => []
+
 /**
  * The workspace's workflow, fetched once under a shared key so every row, board and command
  * reads the same cache entry. The server returns it ordered by position.
@@ -10,7 +12,8 @@ import type { Status, StatusCategory } from '#shared/types/domain'
 export const useStatuses = () => {
   const request = useFetch<Status[]>('/api/statuses', {
     key: 'workspace-statuses',
-    default: () => [],
+    default: emptyStatuses,
+    dedupe: 'defer',
   })
 
   const statuses = computed(() => request.data.value)

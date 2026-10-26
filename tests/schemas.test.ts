@@ -36,6 +36,21 @@ describe('workspace input', () => {
     expect(workspaceMemberParamsSchema.parse({ workspaceId, userId: id })).toEqual({ workspaceId, userId: id })
     expect(() => workspaceParamsSchema.parse({ workspaceId: 'not-an-id' })).toThrow()
   })
+
+  it('accepts legacy migrated workspace ids without relaxing related identifiers', () => {
+    const workspaceId = 'cc11f28cbb821f695b002b474836ff1f'
+    const id = '68e9ef85-4804-47b9-8656-a296a05f3ff9'
+
+    expect(workspaceParamsSchema.parse({ workspaceId })).toEqual({ workspaceId })
+    expect(workspaceInviteParamsSchema.parse({ workspaceId, id })).toEqual({ workspaceId, id })
+    expect(workspaceMemberParamsSchema.parse({ workspaceId, userId: id })).toEqual({ workspaceId, userId: id })
+
+    expect(() => workspaceParamsSchema.parse({ workspaceId: 'cc11f28cbb821f695b002b474836ff1' })).toThrow()
+    expect(() => workspaceParamsSchema.parse({ workspaceId: 'gc11f28cbb821f695b002b474836ff1f' })).toThrow()
+    expect(() => workspaceParamsSchema.parse({ workspaceId: workspaceId.toUpperCase() })).toThrow()
+    expect(() => workspaceInviteParamsSchema.parse({ workspaceId, id: workspaceId })).toThrow()
+    expect(() => workspaceMemberParamsSchema.parse({ workspaceId, userId: workspaceId })).toThrow()
+  })
 })
 
 describe('task input', () => {

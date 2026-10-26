@@ -1,10 +1,11 @@
-# Ask Kobi goal-plan evals
+# Ask Kobi evals
 
 Owner: the `evaluator` role. Rules: `.agent/rules/evals.md`, `.agent/rules/checkpoints.md`.
 
-Measures whether a plan model produces goal plans that satisfy Kobi's contract. It exercises the
-product's own `buildProviderRequest` and `validateProviderReply` from `server/services/ai.ts`;
-no prompt, `PROMPT_VERSION`, bound or grader is restated or relaxed here.
+Measures whether the model produces proposals that satisfy Kobi's contract. The goal-plan harness
+exercises the product's own `buildProviderRequest` and `validateProviderReply`; the E1 action harness
+exercises the real triage/reschedule request builders and validators. No product prompt is restated
+or relaxed here.
 
 ## Layout
 
@@ -19,6 +20,7 @@ no prompt, `PROMPT_VERSION`, bound or grader is restated or relaxed here.
 | `graders.eval.ts` | phase 1, free: grades every fixture and checks the request shape |
 | `provider.eval.ts` | phase 1, free: the paid path with `fetch` stubbed |
 | `goal-plan.eval.ts` | phase 2, paid: 18 live calls, skipped unless `KOBI_EVAL_LIVE=1` |
+| `action-proposals.eval.ts` | phase 1, free: triage/reschedule request shape, schema, supplied-id, horizon, pending-contract, and injection checks |
 | `results/` | run records, gitignored |
 
 Runner is the project's existing Vitest, under its own config. The product suite

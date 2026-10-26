@@ -14,6 +14,7 @@ export const useLabels = () => {
   const request = useFetch<LabelCollection>('/api/labels', {
     key: 'label-collection',
     default: emptyCollection,
+    dedupe: 'defer',
   })
 
   const groups = computed(() => request.data.value.groups)

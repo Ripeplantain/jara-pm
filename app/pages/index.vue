@@ -44,7 +44,7 @@ const menuItems = computed(() => [{
         <TaskList :tasks="data.priorities" empty-title="A clear day" empty-message="Add a task above or choose something from your inbox." />
       </section>
       <section v-if="data.overdue.length" class="section" aria-labelledby="overdue-heading">
-        <div class="section-heading"><h2 id="overdue-heading">Overdue</h2><span>{{ data.overdue.length }}</span></div>
+        <div class="section-heading"><h2 id="overdue-heading">Overdue</h2><span>{{ data.overdue.length }}</span><AiRescheduleAction :tasks="data.overdue" @accepted="refresh" /></div>
         <TaskList :tasks="data.overdue" show-reschedule />
       </section>
       <section v-if="showCompleted && data.completedToday.length" class="section" aria-labelledby="completed-heading">

@@ -9,15 +9,24 @@ export default defineEventHandler(async (event) => {
   const { user, workspaceId } = await requireMember(event)
   const { id } = await getValidatedRouterParams(event, idParamsSchema.parse)
   // h3 hands the validator `undefined` for an empty body, so default it to {}.
-  const { plan } = await readValidatedBody(event, body => acceptProposalSchema.parse(body ?? {}))
-  const result = acceptProposal(useDatabase(event), user.id, workspaceId, id, { plan })
-  captureServerEvent(event, user.id, 'ask_kobi_plan_accepted', {
-    edited: Boolean(plan),
+  const { plan, proposal } = await readValidatedBody(event, body => acceptProposalSchema.parse(body ?? {}))
+  const result = acceptProposal(useDatabase(event), user.id, workspaceId, id, { plan, proposal })
+  const effective = proposal ?? plan
+  const kind = effective?.kind
+    ?? ('taskId' in result ? 'triage' : 'taskIds' in result ? 'reschedule' : 'goal_plan')
+  captureServerEvent(event, user.id, kind === 'triage'
+    ? 'ask_kobi_triage_accepted'
+    : kind === 'reschedule'
+      ? 'ask_kobi_reschedule_accepted'
+      : 'ask_kobi_plan_accepted', {
+    edited: Boolean(effective),
     ...(plan && {
       projects: plan.projects.length,
       milestones: plan.projects.reduce((sum, project) => sum + project.milestones.length, 0),
       tasks: plan.projects.reduce((sum, project) => sum + project.milestones.reduce((count, milestone) => count + milestone.tasks.length, 0), 0),
     }),
+    ...(proposal?.kind === 'triage' && { label_count: proposal.labelIds.length }),
+    ...(proposal?.kind === 'reschedule' && { change_count: proposal.changes.length }),
   })
   return result
 })

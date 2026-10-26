@@ -203,6 +203,31 @@ export type GoalPlanProposal = {
   }>
 }
 
+export type TriageProposal = {
+  kind: 'triage'
+  taskId: string
+  labelIds: string[]
+  priority: TaskPriority
+  projectId: string | null
+  estimate: number | null
+  reason: string
+}
+
+export type RescheduleProposal = {
+  kind: 'reschedule'
+  note: string
+  changes: Array<{
+    taskId: string
+    dueDate: string | null
+    scheduledFor: string | null
+    selectedForToday: boolean
+    statusCategory: 'backlog' | 'canceled' | null
+    reason: string
+  }>
+}
+
+export type Proposal = GoalPlanProposal | TriageProposal | RescheduleProposal
+
 // 'offline' marks a reply produced by the local fallback because no provider key
 // is configured or the provider call failed. It must stay visible to the client:
 // a fallback that looks like a model reply hides provider outages completely.
@@ -210,9 +235,13 @@ export type GoalPlanProposal = {
 // nothing was drafted; it is not an outage and carries no proposal.
 export type AiReplySource = 'model' | 'offline' | 'invalid'
 
-export type AiReply = {
+export type AiKindReply<P extends Proposal> = {
   message: string
   proposalId: string | null
-  proposal: GoalPlanProposal | null
+  proposal: P | null
   source: AiReplySource
 }
+
+export type AiReply = AiKindReply<GoalPlanProposal>
+export type TriageReply = AiKindReply<TriageProposal>
+export type RescheduleReply = AiKindReply<RescheduleProposal>

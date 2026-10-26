@@ -739,6 +739,46 @@ Concretely, before reporting a slice complete:
 
 ---
 
+## 8a. Programme stopped after C1 (decided 2026-10-25)
+
+Slices A, B and C1 shipped. **C2, D1, D2, D3 and E2 are cancelled**, and the
+programme jumps to E1. The reason is the one this document argues for itself in
+§4.1 -- "opinionated defaults over configurability... do not make everything
+user-definable" -- and §9's rejection of team apparatus. The back half of the
+plan contradicts both:
+
+- **C2 cycles are sprints.** Kobi's native cadence is Today plus
+  `task_day_selections`: a daily rhythm for one person. A weekly sprint layer
+  with velocity and a capacity dial is team ceremony, and this plan has it
+  feeding the Today view, the most personal screen in the app.
+- **D2 comments and activity** only mean something with a second person.
+- **D3 insights** -- cycle time, lead time and triage time as scatter plots with
+  p50/p90 markers -- is engineering analytics. There is no story in which it
+  helps one person finish their week.
+- **D1 relations** is defensible for tracking blocked work, but not worth the
+  schema and UI surface on its own.
+- **E2 MCP server** is developer tooling, not productivity.
+
+What shipped and is kept: labels; `backlog` and `canceled` as real categories
+(parking and abandoning are genuinely different from "not done yet"); the
+command palette, optimistic updates and the side panel, which are interaction
+quality that belongs in any personal tool.
+
+Carrying an acknowledged tension: **C1's status editor** makes the workflow
+user-definable, which is what §4.1 argues against. The five seeded defaults are
+sensible; the editor is the part to revisit if the app starts feeling like Jira.
+Task identifiers were justified in §6 A3 as referenceable "in a commit message,
+a Slack thread" -- an engineering-collaboration rationale -- and now take space
+on every row of a personal list. Both were left in place rather than reverted.
+
+**E1 is where the programme ends up** because `reschedule` is the one idea here
+that Linear does not have and cannot have: replanning overdue work around a real
+personal day. Scoped to the two kinds that serve one person -- `triage` and
+`reschedule`. `cycle_plan` dies with C2; `project_update` is a team status
+artifact.
+
+---
+
 ## 9. Explicitly out of scope
 
 Do not implement these. Each was considered and rejected for a stated reason.
@@ -1042,17 +1082,20 @@ given.
 
 #### E1 — Additional AI proposal kinds
 
-- [ ] Add discriminated proposal schemas and per-kind bounds without changing
+- [x] Add discriminated proposal schemas and per-kind bounds without changing
       `goalPlanProposalSchema`.
-- [ ] Extend the provider JSON schema and bump the AI prompt version.
-- [ ] Implement transactional acceptance dispatch for every new kind.
-- [ ] Add proposal round-trip, rejection, malformed-reply, and regression tests.
-- [ ] Add eval cases for every kind and run the evaluator before the reviewer.
-- [ ] Confirm `offline` and `invalid` sources remain visible to clients.
-- [ ] Obtain approval before any command that could make more than 50 paid
-      provider calls.
-- [ ] Run the tester, evaluator, and reviewer roles.
-- [ ] Run `./scripts/verify.sh`; record the exact result.
+- [x] Extend the provider JSON schema and bump the AI prompt version.
+- [x] Implement transactional acceptance dispatch for every new kind.
+- [x] Add proposal round-trip, rejection, malformed-reply, and regression tests.
+- [x] Add eval cases for every kind and run the evaluator before the reviewer.
+- [x] Confirm `offline` and `invalid` sources remain visible to clients.
+- [x] Obtain approval before any command that could make more than 50 paid
+      provider calls. **Not needed:** no command exceeded the threshold; 0 paid
+      calls were made.
+- [x] Run the tester, evaluator, and reviewer roles. Reviewer found two blocking
+      defects; both were fixed and sent through regression coverage.
+- [x] Run `./scripts/verify.sh`; record the exact result. **VERIFY: PASS** — image
+      build, Biome lint, Nuxt typecheck, 363 tests and the production build.
 - [ ] Stop at the commit checkpoint.
 
 #### E2 — MCP server
