@@ -13,6 +13,7 @@ const { patch, decorate, adopt } = useOptimisticTask()
 const { focus: focusTask, isFocused } = useFocusedTask()
 const { openTask } = useTaskPanel()
 const { statuses, defaultStatus, completedStatus } = useStatuses()
+const { confirm: confirmAction } = useConfirmation()
 
 // Everything the row renders comes from the decorated task, so a pending change shows here the
 // moment it is made and rolls back on its own if the request fails. There are no local mirrors
@@ -102,9 +103,16 @@ const pauseRecurrence = async () => {
   emit('updated', task)
 }
 
-// A reversible action in place of a confirmation prompt: the row leaves immediately and the
-// DELETE only runs once the undo window closes, so taking it back costs no request at all.
-const remove = () => {
+// The confirmation protects against an accidental click; Undo remains available afterward so a
+// deliberate deletion can still be reversed before the request is committed.
+const remove = async () => {
+  const accepted = await confirmAction({
+    title: 'Delete this task?',
+    message: `“${current.value.title}” will be removed from your task list. You can still undo immediately afterward.`,
+    confirmLabel: 'Delete task',
+  })
+  if (!accepted) return
+
   hideTask(props.task.id)
   capture('task_action_deleted')
   showUndo({

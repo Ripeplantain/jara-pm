@@ -7,6 +7,7 @@ import { getUserFacingErrorMessage } from '#shared/utils/error-message'
 // Rendered for workspace owners only: the endpoints enforce it, this just avoids offering
 // controls that would answer 403.
 const { statuses, createStatus, renameStatus, setDefaultStatus, reorderStatuses, deleteStatus } = useStatuses()
+const { confirm: confirmAction } = useConfirmation()
 
 const names = reactive<Record<string, string>>({})
 const newName = ref('')
@@ -71,10 +72,22 @@ const startDelete = (status: Status) => {
   replacementId.value = replacements(status)[0]?.id ?? ''
 }
 
-const confirmDelete = (status: Status) => run(async () => {
-  await deleteStatus(status.id, replacementId.value || undefined)
-  deletingId.value = null
-}, 'Status deleted; its tasks were moved.', 'Could not delete that status.')
+const confirmDelete = async (status: Status) => {
+  const replacement = statuses.value.find(item => item.id === replacementId.value)
+  const accepted = await confirmAction({
+    title: `Delete “${status.name}”?`,
+    message: replacement
+      ? `This status will be permanently deleted. Its tasks will be moved to “${replacement.name}”.`
+      : 'This status will be permanently deleted.',
+    confirmLabel: 'Delete status',
+  })
+  if (!accepted) return
+
+  return run(async () => {
+    await deleteStatus(status.id, replacementId.value || undefined)
+    deletingId.value = null
+  }, 'Status deleted; its tasks were moved.', 'Could not delete that status.')
+}
 </script>
 
 <template>

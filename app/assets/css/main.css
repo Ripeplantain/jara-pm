@@ -457,6 +457,10 @@
     @apply bg-danger;
   }
 
+  .button.danger:hover:not(:disabled) {
+    @apply bg-danger brightness-90;
+  }
+
   .button.small {
     @apply min-h-8 rounded-lg px-2.5 py-1 text-xs;
   }
@@ -670,7 +674,7 @@
   }
 
   .task-assignee {
-    @apply min-h-[30px] max-w-[150px] rounded-md border border-border bg-surface px-2 text-xs text-text-secondary;
+    @apply min-h-[30px] max-w-[150px] rounded-md border border-border bg-surface pl-2 pr-7 text-xs text-text-secondary;
   }
 
   .team-list {
@@ -1180,6 +1184,22 @@
 
   .now-timer-icon {
     @apply text-text-secondary;
+  }
+
+  .now-timer-duration {
+    @apply inline-flex items-center gap-1.5 text-xs font-medium text-text-secondary;
+  }
+
+  .now-timer-duration input {
+    @apply min-h-11 w-16 rounded-md border border-border bg-surface px-2 text-sm text-text-primary outline-none;
+  }
+
+  .now-timer-duration input:focus {
+    @apply border-primary ring-2 ring-primary/20;
+  }
+
+  .now-timer-duration input:disabled {
+    @apply cursor-not-allowed opacity-55;
   }
 
   .now-timer-time {
@@ -1976,6 +1996,37 @@
     @apply flex justify-center gap-2;
   }
 
+  /* Confirmation dialog -------------------------------------------------------------------- */
+
+  .confirmation-layer {
+    @apply fixed inset-0 z-[140] flex items-center justify-center bg-overlay p-4 backdrop-blur-[2px];
+  }
+
+  .confirmation-dialog {
+    @apply grid w-[min(420px,100%)] gap-6 rounded-xl border border-border bg-background p-5 shadow-lg;
+  }
+
+  .confirmation-copy {
+    @apply grid gap-2;
+  }
+
+  .confirmation-title,
+  .confirmation-message {
+    @apply m-0;
+  }
+
+  .confirmation-title {
+    @apply text-xl font-semibold leading-snug;
+  }
+
+  .confirmation-message {
+    @apply text-sm leading-6 text-text-secondary;
+  }
+
+  .confirmation-actions {
+    @apply flex justify-end gap-2;
+  }
+
   /* Command palette ------------------------------------------------------------------------ */
 
   .command-overlay {
@@ -2097,7 +2148,7 @@
 
   /* A task title opens the panel, so it has to read as a control without looking like a button. */
   .task-title-button {
-    @apply cursor-pointer border-0 bg-transparent p-0 text-left text-inherit;
+    @apply block min-w-0 w-full cursor-pointer border-0 bg-transparent p-0 text-left text-inherit;
   }
 
   .task-title-button:hover .task-title,
@@ -2378,7 +2429,7 @@
   }
 
   .task-actions {
-    @apply col-start-2 justify-start;
+    @apply col-start-2 flex-wrap justify-start;
   }
 
   .ai-form-grid,

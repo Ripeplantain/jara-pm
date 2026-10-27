@@ -20,4 +20,5 @@ onMounted(() => {
   <NuxtLayout>
     <NuxtPage />
   </NuxtLayout>
+  <ConfirmationHost />
 </template>

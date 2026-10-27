@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { LogOut, Moon, Sun, Trash2 } from '@lucide/vue'
-import type { EstimateScale, LabelColor, WorkspaceMember } from '#shared/types/domain'
+import type { EstimateScale, Label, LabelColor, WorkspaceMember } from '#shared/types/domain'
 import { ESTIMATE_SCALES, LABEL_COLORS } from '#shared/types/domain'
 import { estimateOptions } from '#shared/utils/estimates'
 import { getUserFacingErrorMessage } from '#shared/utils/error-message'
@@ -12,6 +12,7 @@ const { activeWorkspace } = useWorkspaces()
 type PendingInvite = { id: string, email: string, expiresAt: string, lastSentAt: string | null }
 const { theme, toggle } = useTheme()
 const { capture, reset } = useProductAnalytics()
+const { confirm: confirmAction } = useConfirmation()
 const members = ref<WorkspaceMember[]>([])
 const invites = ref<PendingInvite[]>([])
 const inviteEmail = ref('')
@@ -21,7 +22,9 @@ const teamError = ref('')
 const isTeamBusy = ref(false)
 const isTeamLoading = ref(true)
 const removingUserId = ref<string | null>(null)
+const revokingInviteId = ref<string | null>(null)
 const deletingLabelId = ref<string | null>(null)
+const isLoggingOut = ref(false)
 const isOwner = computed(() => activeWorkspace.value?.role === 'owner')
 const workspaceId = computed(() => activeWorkspace.value?.id ?? '')
 
@@ -84,36 +87,63 @@ const resend = async (id: string) => {
   }
 }
 
-const revoke = async (id: string) => {
+const revoke = async (pending: PendingInvite) => {
+  const accepted = await confirmAction({
+    title: 'Revoke this invitation?',
+    message: `${pending.email} will no longer be able to join this workspace with the current invitation.`,
+    confirmLabel: 'Revoke invitation',
+  })
+  if (!accepted) return
+
+  revokingInviteId.value = pending.id
   try {
-    await $fetch(`/api/workspaces/${workspaceId.value}/invites/${id}`, { method: 'DELETE' })
+    await $fetch(`/api/workspaces/${workspaceId.value}/invites/${pending.id}`, { method: 'DELETE' })
     await loadTeam()
     capture('invite_revoked')
   } catch (error: unknown) {
     teamError.value = getUserFacingErrorMessage(error, 'Could not revoke the invite.')
+  } finally {
+    revokingInviteId.value = null
   }
 }
 
-const removeMember = async (userId: string) => {
-  if (removingUserId.value !== userId) {
-    removingUserId.value = userId
-    return
-  }
+const removeMember = async (member: WorkspaceMember) => {
+  const accepted = await confirmAction({
+    title: 'Remove this workspace member?',
+    message: `${member.name} (${member.email}) will lose access to this workspace.`,
+    confirmLabel: 'Remove member',
+  })
+  if (!accepted) return
+
+  removingUserId.value = member.userId
   try {
-    await $fetch(`/api/workspaces/${workspaceId.value}/members/${userId}`, { method: 'DELETE' })
-    removingUserId.value = null
+    await $fetch(`/api/workspaces/${workspaceId.value}/members/${member.userId}`, { method: 'DELETE' })
     await loadTeam()
     capture('member_removed')
   } catch (error: unknown) {
     teamError.value = getUserFacingErrorMessage(error, 'Could not remove the member.')
+  } finally {
+    removingUserId.value = null
   }
 }
 
 const logout = async () => {
-  capture('user_logged_out')
-  reset()
-  await clear()
-  await navigateTo('/welcome')
+  const accepted = await confirmAction({
+    title: 'Sign out of Kobi?',
+    message: 'You will need to sign in again to access your workspace.',
+    confirmLabel: 'Sign out',
+  })
+  if (!accepted) return
+
+  isLoggingOut.value = true
+  try {
+    capture('user_logged_out')
+    reset()
+    await clear()
+    await navigateTo('/welcome')
+  } finally {
+    isLoggingOut.value = false
+  }
 }
 
 const chooseTheme = (value: 'light' | 'dark') => {
@@ -244,23 +274,24 @@ const restoreLabel = async (id: string) => {
   }
 }
 
-const deleteLabel = async (id: string) => {
+const deleteLabel = async (label: Label) => {
   labelError.value = ''
-  // Deleting cascades through task_labels and cannot be undone, so the first click only arms
-  // the button. Archiving is the reversible alternative, and it sits right beside it.
-  if (deletingLabelId.value !== id) {
-    deletingLabelId.value = id
-    labelMessage.value = 'Deleting removes the label from every task. Click again to confirm.'
-    return
-  }
+  const accepted = await confirmAction({
+    title: `Delete “${label.name}”?`,
+    message: 'This label will be permanently removed from every task. Archiving is the reversible alternative.',
+    confirmLabel: 'Delete label',
+  })
+  if (!accepted) return
+
+  deletingLabelId.value = label.id
   try {
-    await removeLabel(id)
-    deletingLabelId.value = null
+    await removeLabel(label.id)
     labelMessage.value = 'Label deleted and removed from every task.'
     if (showArchivedLabels.value) await loadArchived()
   } catch (error: unknown) {
-    deletingLabelId.value = null
     labelError.value = getUserFacingErrorMessage(error, 'Could not delete that label.')
+  } finally {
+    deletingLabelId.value = null
   }
 }
 
@@ -288,8 +319,8 @@ const toggleArchivedLabels = async () => {
       <p v-if="teamError" class="form-error" role="alert">{{ teamError }}</p>
       <p v-if="isTeamLoading" class="form-hint" aria-live="polite">Loading workspace members…</p>
       <div v-else class="team-list">
-        <div v-for="member in members" :key="member.userId" class="team-row"><div><strong>{{ member.name }}</strong><span class="form-hint">{{ member.email }} · {{ member.role }}</span></div><button v-if="isOwner && member.role !== 'owner'" type="button" class="button ghost small" @click="removeMember(member.userId)">{{ removingUserId === member.userId ? 'Remove now?' : 'Remove' }}</button></div>
-        <div v-for="pending in invites" :key="pending.id" class="team-row"><div><strong>{{ pending.email }}</strong><span class="form-hint">Pending invite · expires {{ pending.expiresAt.slice(0, 10) }}</span></div><div class="inline-actions"><button type="button" class="button ghost small" @click="resend(pending.id)">Resend</button><button type="button" class="button ghost small" @click="revoke(pending.id)">Revoke</button></div></div>
+        <div v-for="member in members" :key="member.userId" class="team-row"><div><strong>{{ member.name }}</strong><span class="form-hint">{{ member.email }} · {{ member.role }}</span></div><button v-if="isOwner && member.role !== 'owner'" type="button" class="button ghost small" :disabled="removingUserId === member.userId" @click="removeMember(member)">{{ removingUserId === member.userId ? 'Removing…' : 'Remove' }}</button></div>
+        <div v-for="pending in invites" :key="pending.id" class="team-row"><div><strong>{{ pending.email }}</strong><span class="form-hint">Pending invite · expires {{ pending.expiresAt.slice(0, 10) }}</span></div><div class="inline-actions"><button type="button" class="button ghost small" @click="resend(pending.id)">Resend</button><button type="button" class="button ghost small" :disabled="revokingInviteId === pending.id" @click="revoke(pending)">{{ revokingInviteId === pending.id ? 'Revoking…' : 'Revoke' }}</button></div></div>
       </div>
     </section>
     <section v-if="activeWorkspace && isOwner" class="card card-pad section">
@@ -348,7 +379,7 @@ const toggleArchivedLabels = async () => {
             <span v-for="label in inGroup(group.id)" :key="label.id" class="inline-actions">
               <LabelChip :label="label" />
               <button type="button" class="button ghost small" :aria-label="`Archive ${label.name}`" @click="archiveLabel(label.id)">Archive</button>
-              <button v-if="isOwner" type="button" class="button ghost small" :aria-label="`Delete ${label.name}`" @click="deleteLabel(label.id)"><span v-if="deletingLabelId === label.id">Delete now?</span><Trash2 v-else :size="14" aria-hidden="true" /></button>
+              <button v-if="isOwner" type="button" class="button ghost small" :disabled="deletingLabelId === label.id" :aria-label="`Delete ${label.name}`" @click="deleteLabel(label)"><span v-if="deletingLabelId === label.id">Deleting…</span><Trash2 v-else :size="14" aria-hidden="true" /></button>
             </span>
           </div>
         </div>
@@ -359,7 +390,7 @@ const toggleArchivedLabels = async () => {
             <span v-for="label in ungrouped" :key="label.id" class="inline-actions">
               <LabelChip :label="label" />
               <button type="button" class="button ghost small" :aria-label="`Archive ${label.name}`" @click="archiveLabel(label.id)">Archive</button>
-              <button v-if="isOwner" type="button" class="button ghost small" :aria-label="`Delete ${label.name}`" @click="deleteLabel(label.id)"><span v-if="deletingLabelId === label.id">Delete now?</span><Trash2 v-else :size="14" aria-hidden="true" /></button>
+              <button v-if="isOwner" type="button" class="button ghost small" :disabled="deletingLabelId === label.id" :aria-label="`Delete ${label.name}`" @click="deleteLabel(label)"><span v-if="deletingLabelId === label.id">Deleting…</span><Trash2 v-else :size="14" aria-hidden="true" /></button>
             </span>
           </div>
         </div>
@@ -389,7 +420,7 @@ const toggleArchivedLabels = async () => {
     </section>
     <section class="card card-pad section">
       <div class="section-heading"><h2>Account</h2></div>
-      <button type="button" class="button secondary" @click="logout"><LogOut :size="16" /> Sign out</button>
+      <button type="button" class="button secondary" :disabled="isLoggingOut" @click="logout"><LogOut :size="16" /> {{ isLoggingOut ? 'Signing out…' : 'Sign out' }}</button>
     </section>
   </main>
 </template>

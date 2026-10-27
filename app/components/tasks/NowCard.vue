@@ -1,7 +1,13 @@
 <script setup lang="ts">
 import { Check, PanelRight, Pause, Play, RotateCcw, Timer, Undo2 } from '@lucide/vue'
 import type { Task } from '#shared/types/domain'
-import { FOCUS_SESSION_SECONDS, formatTimer, secondsRemaining } from '#shared/utils/focus-timer'
+import {
+  focusDurationSeconds,
+  formatTimer,
+  MAX_FOCUS_MINUTES,
+  MIN_FOCUS_MINUTES,
+  secondsRemaining,
+} from '#shared/utils/focus-timer'
 
 const props = defineProps<{ task: Task }>()
 const emit = defineEmits<{ updated: [task: Task] }>()
@@ -10,6 +16,7 @@ const { patch, decorate } = useOptimisticTask()
 const { openTask } = useTaskPanel()
 const { focus: focusTask } = useFocusedTask()
 const { defaultStatus, completedStatus } = useStatuses()
+const { minutes: durationMinutes, initialize: initializeFocusDuration, setMinutes } = useFocusDuration()
 
 const current = computed(() => decorate(props.task))
 const isDone = computed(() => current.value.status.category === 'completed')
@@ -30,8 +37,10 @@ const toggle = async () => {
   emit('updated', task)
 }
 
-// Focus timer: browser-only, in memory. Nothing is saved or sent, and it resets with the task.
-const remaining = ref(FOCUS_SESSION_SECONDS)
+// Countdown progress is browser-only and in memory. Only the preferred duration is remembered
+// locally; no timer or task data is sent anywhere.
+const sessionSeconds = computed(() => focusDurationSeconds(durationMinutes.value))
+const remaining = ref(sessionSeconds.value)
 const isRunning = ref(false)
 const isFinished = ref(false)
 let endsAt = 0
@@ -52,7 +61,7 @@ const tick = () => {
 
 const startTimer = () => {
   if (!import.meta.client || isRunning.value) return
-  if (remaining.value <= 0) remaining.value = FOCUS_SESSION_SECONDS
+  if (remaining.value <= 0) remaining.value = sessionSeconds.value
   isFinished.value = false
   endsAt = Date.now() + remaining.value * 1000
   isRunning.value = true
@@ -66,13 +75,24 @@ const pauseTimer = () => {
 
 const resetTimer = () => {
   stopTicking()
-  remaining.value = FOCUS_SESSION_SECONDS
+  remaining.value = sessionSeconds.value
   isFinished.value = false
 }
 
-const isUntouched = computed(() => !isRunning.value && !isFinished.value && remaining.value === FOCUS_SESSION_SECONDS)
+const changeDuration = (event: Event) => {
+  const input = event.target as HTMLInputElement
+  const selected = setMinutes(input.value)
+  input.value = String(selected)
+  resetTimer()
+}
+
+const isUntouched = computed(() => !isRunning.value && !isFinished.value && remaining.value === sessionSeconds.value)
 
 watch(() => props.task.id, resetTimer)
+onMounted(() => {
+  initializeFocusDuration()
+  resetTimer()
+})
 onBeforeUnmount(stopTicking)
 </script>
 
@@ -102,6 +122,19 @@ onBeforeUnmount(stopTicking)
     </div>
     <div class="now-timer" role="group" aria-label="Focus timer">
       <Timer :size="16" aria-hidden="true" class="now-timer-icon" />
+      <label class="now-timer-duration">
+        <span>Minutes</span>
+        <input
+          type="number"
+          inputmode="numeric"
+          :min="MIN_FOCUS_MINUTES"
+          :max="MAX_FOCUS_MINUTES"
+          step="1"
+          :value="durationMinutes"
+          :disabled="isRunning"
+          @change="changeDuration"
+        >
+      </label>
       <span class="now-timer-time" role="timer" :aria-label="`Time remaining ${formatTimer(remaining)}`">{{ formatTimer(remaining) }}</span>
       <button v-if="isRunning" type="button" class="button secondary" aria-label="Pause focus timer" @click="pauseTimer">
         <Pause :size="16" aria-hidden="true" /> Pause
