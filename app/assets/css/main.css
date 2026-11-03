@@ -2109,6 +2109,32 @@
     @apply m-0 text-lg font-semibold leading-snug;
   }
 
+  .task-panel-header-actions {
+    @apply flex items-center gap-1;
+  }
+
+  .task-panel-title.editable,
+  .task-panel-description.editable {
+    @apply cursor-text rounded-md;
+  }
+
+  .task-panel-title.editable:hover,
+  .task-panel-description.editable:hover {
+    @apply bg-surface-hover;
+  }
+
+  .task-panel-add-description {
+    @apply m-0 cursor-text border-0 bg-transparent p-0 text-left text-sm text-text-muted hover:text-text-secondary;
+  }
+
+  .task-panel-edit {
+    @apply flex flex-col gap-2;
+  }
+
+  .task-panel-edit-actions {
+    @apply flex gap-2;
+  }
+
   .task-panel-title.done {
     @apply text-text-muted line-through;
   }

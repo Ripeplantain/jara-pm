@@ -14,7 +14,7 @@ export type TaskPatch = Partial<Task>
  */
 export type TaskMutation = Pick<
   Partial<Task>,
-  'status' | 'priority' | 'dueDate' | 'scheduledFor' | 'assigneeId' | 'estimate' | 'recurrence' | 'selectedForToday' | 'title'
+  'status' | 'priority' | 'dueDate' | 'scheduledFor' | 'assigneeId' | 'estimate' | 'recurrence' | 'selectedForToday' | 'title' | 'description'
 >
 
 /**
@@ -32,6 +32,7 @@ export type TaskMutation = Pick<
 const WIRE_FIELD: { [K in keyof Required<TaskMutation>]: keyof UpdateTaskInput | null } = {
   status: 'statusId',
   title: 'title',
+  description: 'description',
   priority: 'priority',
   dueDate: 'dueDate',
   scheduledFor: 'scheduledFor',

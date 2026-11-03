@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Check, Trash2 } from '@lucide/vue'
+import { Check, Pencil, Trash2 } from '@lucide/vue'
 import type { Status, Task, TaskPriority, WorkspaceMember } from '#shared/types/domain'
 import { estimateLabel, estimateOptions } from '#shared/utils/estimates'
 
@@ -259,6 +259,9 @@ const onKeydown = (event: KeyboardEvent) => {
       <input v-if="showReschedule" ref="dueInput" :value="current.dueDate ?? ''" type="date" class="date-input" :aria-label="`Reschedule ${current.title}`" @change="reschedule">
       <button v-if="current.recurrence !== 'none' && !isDone" type="button" class="button ghost small" :aria-label="`Pause repeating ${current.title}`" @click="pauseRecurrence">
         Pause
+      </button>
+      <button type="button" class="button ghost small" :aria-label="`Edit ${current.title}`" @click="openTask(current.key)">
+        <Pencil :size="15" aria-hidden="true" />
       </button>
       <button type="button" class="button ghost small" :aria-label="`Delete ${current.title}`" @click="remove">
         <Trash2 :size="15" aria-hidden="true" />

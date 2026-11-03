@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { X } from '@lucide/vue'
+import { Pencil, X } from '@lucide/vue'
 import type { Task, TaskPriority } from '#shared/types/domain'
 import { estimateOptions } from '#shared/utils/estimates'
 
@@ -120,6 +120,53 @@ const onScheduledFor = (event: Event) => {
   void apply({ scheduledFor: (event.target as HTMLInputElement).value || null }, 'panel_task_scheduledFor')
 }
 
+// Title and description are edited together: one Edit button (or a click on either) opens both,
+// Enter or Save commits, Escape or Cancel discards. Nothing is sent unless something changed.
+const isEditing = ref(false)
+const draftTitle = ref('')
+const draftDescription = ref('')
+const titleInput = ref<HTMLInputElement | null>(null)
+
+const startEditing = async () => {
+  if (!task.value || isEditing.value) return
+  draftTitle.value = task.value.title
+  draftDescription.value = task.value.description
+  isEditing.value = true
+  await nextTick()
+  titleInput.value?.focus()
+  titleInput.value?.select()
+}
+
+const cancelEditing = () => { isEditing.value = false }
+
+const saveEditing = async () => {
+  if (!task.value) return
+  const title = draftTitle.value.trim()
+  const description = draftDescription.value.trim()
+  const changes: Parameters<typeof patch>[1] = {}
+  if (title && title !== task.value.title) changes.title = title
+  if (description !== task.value.description) changes.description = description
+  isEditing.value = false
+  if (Object.keys(changes).length) await apply(changes, 'panel_task_edit')
+}
+
+// A different task replaces the one being edited, so an unsaved draft must not follow it.
+watch(taskId, () => { isEditing.value = false })
+
+const onEditKeydown = (event: KeyboardEvent) => {
+  if (event.key === 'Escape') {
+    // Closes the edit, not the panel.
+    event.stopPropagation()
+    cancelEditing()
+  } else if (event.key === 'Enter' && (event.target as HTMLElement).tagName === 'INPUT') {
+    event.preventDefault()
+    void saveEditing()
+  } else if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
+    event.preventDefault()
+    void saveEditing()
+  }
+}
+
 const openParent = async () => {
   const key = parent.value?.key
   if (!key) return
@@ -211,9 +258,14 @@ onMounted(() => {
   >
     <header class="task-panel-header">
       <span class="task-key">{{ task?.key ?? openKey }}</span>
-      <button type="button" class="button ghost small" aria-label="Close task detail" @click="close()">
-        <X :size="16" aria-hidden="true" />
-      </button>
+      <div class="task-panel-header-actions">
+        <button v-if="task && !isEditing" type="button" class="button ghost small" @click="startEditing">
+          <Pencil :size="14" aria-hidden="true" /> Edit
+        </button>
+        <button type="button" class="button ghost small" aria-label="Close task detail" @click="close()">
+          <X :size="16" aria-hidden="true" />
+        </button>
+      </div>
     </header>
 
     <LoadingState v-if="status === 'pending' && !task" />
@@ -224,8 +276,21 @@ onMounted(() => {
     />
 
     <div v-else-if="task" class="task-panel-body">
-      <h2 class="task-panel-title" :class="{ done: task.status.category === 'completed' }">{{ task.title }}</h2>
-      <p v-if="task.description" class="task-panel-description"><TaskText :text="task.description" /></p>
+      <form v-if="isEditing" class="task-panel-edit" @submit.prevent="saveEditing" @keydown="onEditKeydown">
+        <label class="field-label" :for="`panel-title-${task.id}`">Title</label>
+        <input :id="`panel-title-${task.id}`" ref="titleInput" v-model="draftTitle" class="input" maxlength="200" required>
+        <label class="field-label" :for="`panel-description-${task.id}`">Description</label>
+        <textarea :id="`panel-description-${task.id}`" v-model="draftDescription" class="input" rows="5" maxlength="10000" placeholder="Add details…" />
+        <div class="task-panel-edit-actions">
+          <button type="submit" class="button small" :disabled="!draftTitle.trim()">Save</button>
+          <button type="button" class="button ghost small" @click="cancelEditing">Cancel</button>
+        </div>
+      </form>
+      <template v-else>
+        <h2 class="task-panel-title editable" :class="{ done: task.status.category === 'completed' }" title="Click to edit" @click="startEditing">{{ task.title }}</h2>
+        <p v-if="task.description" class="task-panel-description editable" title="Click to edit" @click="startEditing"><TaskText :text="task.description" /></p>
+        <button v-else type="button" class="task-panel-add-description" @click="startEditing">Add description…</button>
+      </template>
 
       <div v-if="parent" class="task-panel-relation">
         <span class="field-label">Parent</span>
