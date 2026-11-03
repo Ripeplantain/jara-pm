@@ -1,10 +1,11 @@
-import { and, desc, eq, ne, sql } from 'drizzle-orm'
+import { and, desc, eq, inArray, ne, sql } from 'drizzle-orm'
 import { createError } from 'h3'
 import type { CreateGoalInput, UpdateGoalInput } from '#shared/schemas/goal'
 import type { Goal } from '#shared/types/domain'
 import { calculateProgress } from '#shared/utils/progress'
 import { goals, projects, statuses, tasks } from '~~/server/db/schema'
 import type { KobiDb } from '~~/server/db'
+import { withTransaction } from '~~/server/db'
 import type { GoalRow } from '~~/server/types/database'
 import { taskRollupColumns, workspaceWeighsEstimates } from '~~/server/utils/task-points'
 import { nowIso } from '~~/server/utils/time'
@@ -114,4 +115,26 @@ export const updateGoal = (
     .where(and(eq(goals.id, goalId), eq(goals.workspaceId, workspaceId)))
     .run()
   return getGoal(db, userId, workspaceId, goalId)
+}
+
+/** Deletes a goal together with all of its projects (archived included), their milestones and tasks. */
+export const deleteGoal = (db: KobiDb, userId: string, workspaceId: string, goalId: string) => {
+  getGoal(db, userId, workspaceId, goalId)
+  return withTransaction(db, (tx) => {
+    const projectIds = tx.select({ id: projects.id })
+      .from(projects)
+      .where(and(eq(projects.goalId, goalId), eq(projects.workspaceId, workspaceId)))
+      .all()
+      .map(row => row.id)
+    if (projectIds.length) {
+      tx.delete(tasks)
+        .where(and(inArray(tasks.projectId, projectIds), eq(tasks.workspaceId, workspaceId)))
+        .run()
+      tx.delete(projects)
+        .where(and(inArray(projects.id, projectIds), eq(projects.workspaceId, workspaceId)))
+        .run()
+    }
+    tx.delete(goals).where(and(eq(goals.id, goalId), eq(goals.workspaceId, workspaceId))).run()
+    return { deletedProjectCount: projectIds.length }
+  })
 }

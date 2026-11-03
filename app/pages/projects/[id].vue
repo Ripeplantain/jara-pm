@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Archive, ArchiveRestore, LayoutGrid, List, Plus, Sparkles } from '@lucide/vue'
+import { Archive, ArchiveRestore, LayoutGrid, List, Plus, Sparkles, Trash2 } from '@lucide/vue'
 import type { Project, Task } from '#shared/types/domain'
 
 definePageMeta({ middleware: ['authenticated'] })
@@ -15,6 +15,7 @@ const { data, status, error, refresh } = await useFetch<{ project: Project, task
 const assigneeFilter = ref<'everyone' | 'me' | 'unassigned'>('everyone')
 const { isEnabled, toggle } = useListPreferences()
 const { showUndo } = useToasts()
+const { confirm: confirmAction } = useConfirmation()
 // This endpoint already returns completed tasks, so the toggle filters here. Hidden by default,
 // so every task list in the app behaves the same way.
 const showCompleted = computed(() => isEnabled('project.showCompleted'))
@@ -66,6 +67,22 @@ const archive = async () => {
   })
 }
 
+// Permanent: tasks and milestones go with the project, and so does its goal when nothing else uses it.
+const remove = async () => {
+  if (!data.value) return
+  const { project } = data.value
+  const parts = [`${project.taskCount} ${project.taskCount === 1 ? 'task' : 'tasks'}`, `${project.milestones.length} ${project.milestones.length === 1 ? 'milestone' : 'milestones'}`]
+  const accepted = await confirmAction({
+    title: 'Delete this project?',
+    message: `“${project.title}” will be permanently deleted with its ${parts.join(' and ')}.${project.goalId ? ' Its goal is deleted too if no other project uses it.' : ''} This cannot be undone.`,
+    confirmLabel: 'Delete project',
+  })
+  if (!accepted) return
+  await $fetch(`/api/projects/${id.value}`, { method: 'DELETE' })
+  await navigateTo('/projects')
+  await Promise.all([refreshNuxtData('projects-list'), refreshNuxtData('goals-list')])
+}
+
 const unarchive = async () => {
   await setStatus('active')
   await refresh()
@@ -85,6 +102,7 @@ const unarchive = async () => {
           <BreakdownAction v-if="data.project.status !== 'archived'" :project-id="data.project.id" @accepted="refresh" />
           <button v-if="data.project.status === 'archived'" type="button" class="button secondary" @click="unarchive"><ArchiveRestore :size="16" /> Unarchive</button>
           <button v-else type="button" class="button ghost" @click="archive"><Archive :size="16" /> Archive</button>
+          <button type="button" class="button ghost" @click="remove"><Trash2 :size="16" /> Delete</button>
         </div>
       </header>
       <section class="card card-pad"><ProgressBar :value="data.project.progress" label="Project progress" /></section>

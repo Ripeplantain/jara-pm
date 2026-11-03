@@ -9,6 +9,7 @@ import type {
 import type { Milestone, Project } from '#shared/types/domain'
 import { calculateProgress } from '#shared/utils/progress'
 import type { KobiDb } from '~~/server/db'
+import { withTransaction } from '~~/server/db'
 import { goals, milestones, projects, statuses, tasks } from '~~/server/db/schema'
 import type { MilestoneRow, ProjectRow } from '~~/server/types/database'
 import { taskRollupColumns, workspaceWeighsEstimates } from '~~/server/utils/task-points'
@@ -240,4 +241,39 @@ export const updateMilestone = (
     .where(and(eq(milestones.id, milestoneId), eq(milestones.workspaceId, workspaceId)))
     .run()
   return getProject(db, userId, workspaceId, row.project_id)
+}
+
+/**
+ * Deletes a project with its milestones (cascade) and its tasks. The `tasks.project_id` foreign
+ * key only nulls on delete, which would drop the work into the Inbox, so tasks go explicitly.
+ * The parent goal is removed too when no other project, archived or not, still references it.
+ */
+export const deleteProject = (db: KobiDb, userId: string, workspaceId: string, projectId: string) => {
+  const project = getProject(db, userId, workspaceId, projectId)
+  return withTransaction(db, (tx) => {
+    tx.delete(tasks)
+      .where(and(eq(tasks.projectId, projectId), eq(tasks.workspaceId, workspaceId)))
+      .run()
+    tx.delete(projects)
+      .where(and(eq(projects.id, projectId), eq(projects.workspaceId, workspaceId)))
+      .run()
+    let deletedGoalId: string | null = null
+    if (project.goalId) {
+      const sibling = tx.select({ id: projects.id })
+        .from(projects)
+        .where(and(eq(projects.goalId, project.goalId), eq(projects.workspaceId, workspaceId)))
+        .get()
+      if (!sibling) {
+        tx.delete(goals)
+          .where(and(eq(goals.id, project.goalId), eq(goals.workspaceId, workspaceId)))
+          .run()
+        deletedGoalId = project.goalId
+      }
+    }
+    return {
+      deletedTaskCount: project.taskCount,
+      deletedMilestoneCount: project.milestones.length,
+      deletedGoalId,
+    }
+  })
 }

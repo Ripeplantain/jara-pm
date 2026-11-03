@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Archive, ArchiveRestore, CheckCircle2, Sparkles } from '@lucide/vue'
+import { Archive, ArchiveRestore, CheckCircle2, Sparkles, Trash2 } from '@lucide/vue'
 import type { Goal, Project } from '#shared/types/domain'
 
 definePageMeta({ middleware: ['authenticated'] })
@@ -13,6 +13,21 @@ const { data, status, error, refresh } = await useFetch<{ goal: Goal, projects: 
 useSeoMeta({ title: computed(() => data.value ? `${data.value.goal.title} · Kobi` : 'Goal · Kobi') })
 
 const { showUndo } = useToasts()
+const { confirm: confirmAction } = useConfirmation()
+
+// Permanent: every project under the goal goes too, with its milestones and tasks.
+const remove = async () => {
+  if (!data.value) return
+  const accepted = await confirmAction({
+    title: 'Delete this goal?',
+    message: `“${data.value.goal.title}” will be permanently deleted with all of its projects (archived ones included) and their milestones and tasks. This cannot be undone.`,
+    confirmLabel: 'Delete goal',
+  })
+  if (!accepted) return
+  await $fetch(`/api/goals/${id.value}`, { method: 'DELETE' })
+  await navigateTo('/goals')
+  await Promise.all([refreshNuxtData('goals-list'), refreshNuxtData('projects-list')])
+}
 
 const patchStatus = (statusValue: Goal['status']) =>
   $fetch(`/api/goals/${id.value}`, { method: 'PATCH', body: { status: statusValue } })
@@ -56,6 +71,7 @@ const setStatus = async (statusValue: Goal['status']) => {
           <button v-else type="button" class="button secondary" @click="setStatus('active')">Reopen</button>
           <button v-if="data.goal.status === 'archived'" type="button" class="button secondary" @click="setStatus('active')"><ArchiveRestore :size="16" /> Unarchive</button>
           <button v-else type="button" class="button ghost" @click="setStatus('archived')"><Archive :size="16" /> Archive</button>
+          <button type="button" class="button ghost" @click="remove"><Trash2 :size="16" /> Delete</button>
         </div>
       </header>
       <section class="card card-pad goal-summary">

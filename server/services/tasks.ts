@@ -243,6 +243,10 @@ export const listTasks = (
 
   if (query.projectId) {
     conditions.push(eq(tasks.projectId, query.projectId))
+  } else {
+    // An archived project is shelved work: its tasks stay on its own page but leave every
+    // cross-project view (Today, Upcoming, the board).
+    conditions.push(or(isNull(projects.status), ne(projects.status, 'archived'))!)
   }
   if (query.parentId) {
     conditions.push(eq(tasks.parentId, query.parentId))
