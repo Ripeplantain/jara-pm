@@ -2127,6 +2127,10 @@
     @apply m-0 cursor-text border-0 bg-transparent p-0 text-left text-sm text-text-muted hover:text-text-secondary;
   }
 
+  .task-panel-danger {
+    @apply flex border-t border-border pt-3;
+  }
+
   .task-panel-edit {
     @apply flex flex-col gap-2;
   }

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Pencil, X } from '@lucide/vue'
+import { Pencil, Trash2, X } from '@lucide/vue'
 import type { Task, TaskPriority } from '#shared/types/domain'
 import { estimateOptions } from '#shared/utils/estimates'
 
@@ -10,6 +10,10 @@ const { focus: focusTask, blur: blurTask } = useFocusedTask()
 const { activeWorkspace } = useWorkspaces()
 const { capture } = useProductAnalytics()
 const { isCompact } = useCompactViewport()
+const { showUndo, hideTask, revealTask } = useToasts()
+const { refreshTaskViews } = useTaskViews()
+const { confirm: confirmAction } = useConfirmation()
+const { captureException } = useProductAnalytics()
 
 // Keyed by the task key, so opening a different task refetches while the panel stays mounted.
 const { data: fetched, status, error, refresh } = useFetch<Task>(
@@ -165,6 +169,35 @@ const onEditKeydown = (event: KeyboardEvent) => {
     event.preventDefault()
     void saveEditing()
   }
+}
+
+// Same flow as the list row: confirm, hide at once, and commit only when the undo toast expires.
+const remove = async () => {
+  const current = task.value
+  if (!current) return
+  const accepted = await confirmAction({
+    title: 'Delete this task?',
+    message: `“${current.title}” will be removed from your task list. You can still undo immediately afterward.`,
+    confirmLabel: 'Delete task',
+  })
+  if (!accepted) return
+
+  hideTask(current.id)
+  capture('task_action_deleted')
+  showUndo({
+    message: `Deleted “${current.title}”`,
+    flushOnNavigate: true,
+    onCommit: async () => {
+      await $fetch(`/api/tasks/${current.id}`, { method: 'DELETE' })
+      await refreshTaskViews()
+    },
+    onCommitError: (error: unknown) => {
+      captureException(error, { flow: 'task_delete' })
+      revealTask(current.id)
+    },
+    onUndo: () => revealTask(current.id),
+  })
+  await close()
 }
 
 const openParent = async () => {
@@ -364,6 +397,12 @@ onMounted(() => {
       </div>
 
       <AiTriageProposalCard :task="task" @accepted="refresh" />
+
+      <div class="task-panel-danger">
+        <button type="button" class="button ghost small" @click="remove">
+          <Trash2 :size="14" aria-hidden="true" /> Delete task
+        </button>
+      </div>
 
       <section v-if="subtasks.length" class="task-panel-section">
         <h3>Subtasks <span class="form-hint">{{ subtasks.filter(item => item.status.category === 'completed').length }} of {{ subtasks.length }} done</span></h3>
